@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 @loader.tds
 class ExecutorMod(loader.Module):
     """Stores global notes (aka snips)"""
-    strings = {"name": "Notexec",
+    strings = {"name": "Button Notes",
                "what_note": "<b>What notexec should be executed?</b>",
                "no_note": "<b>Notexec not found</b>",
                "execute_fail": ("<b>Failed to execute expression:</b>\n<code>{}</code>")
                }
 
-    async def notexeccmd(self, message):
+    async def btnccmd(self, message):
         """Gets the note specified"""
         args = utils.get_args(message)
         if not args:
