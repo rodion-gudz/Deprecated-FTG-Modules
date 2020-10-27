@@ -1,2 +1,2 @@
 # Friendly Telegram Modules
-FTG-Modules, modify by fast-geek
+FTG-Modules repo, from Official repository, Telegram-channels @memeframe @dekftgmodules @ftgmodulesbyfl1yd @ClownRepo @govnocodules @FTGModules @atiksftgmodules, modify by fast-geek
