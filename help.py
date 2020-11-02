@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @loader.tds
 class HelpMod(loader.Module):
     """Provides this help message"""
-    strings = {"name": "Help",
+    strings = {"name": "Modules",
                "bad_module": "<b>Invalid module name specified</b>",
                "single_mod_header": ("<b>Help for</b> <u>{}</u>:\nNote that the monospace text are the commands "
                                      "and they can be run with <code>{}&lt;command&gt;</code>"),
