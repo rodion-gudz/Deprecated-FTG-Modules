@@ -13,4 +13,4 @@ async def _(event):
     end = datetime.now()
     ms = (end - start).microseconds / 1000
     sleep(0.5)
-    await event.edit("**Ping:**`{}ms`".format(ms))
+    await event.edit("**Ping:** `{}ms`".format(ms))
