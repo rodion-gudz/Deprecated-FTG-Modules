@@ -48,7 +48,7 @@ class StickersDistortMod(loader.Module):
         os.remove("json.json")
         await message.delete()
 
-    async def distortcmd(self, message):
+    async def dcmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data, mime = await check_media(reply_message)

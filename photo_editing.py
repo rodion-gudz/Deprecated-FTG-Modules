@@ -2,13 +2,19 @@ import io, random, glob, os
 from PIL import Image
 from telethon.tl.types import DocumentAttributeFilename
 from .. import loader, utils
+from .. import loader, utils  # pylint: disable=relative-beyond-top-level
+import io
+from PIL import Image, ImageOps
+from telethon.tl.types import DocumentAttributeFilename
+import logging
+import random
 
 # Author: https://t.me/GovnoCodules
 
 @loader.tds
 class DistortMod(loader.Module):
-    strings = {"name": "Photo distort"}
-    async def dcmd(self, message):
+    strings = {"name": "Photo editing"}
+    async def distortcmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data = await check_media(reply_message)
@@ -42,6 +48,33 @@ class DistortMod(loader.Module):
         await message.client.send_file(message.chat_id, buf, reply_to=reply_message.id)
         await message.delete()
 
+    async def soapcmd(self, message):
+        """.soap <reply to photo>"""
+        soap = 3
+        a = utils.get_args(message)
+        if a:
+            if a[0].isdigit():
+                soap = int(a[0])
+                if soap <= 0:
+                    soap = 3
+
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await utils.answer(message, "<code>Reply to pic or stick!</code>")
+                return
+        else:
+            await utils.answer(message, "<code>Reply to pic or stick!</code>")
+            return
+
+        await message.edit("Soaping...")
+        file = await self.client.download_media(data, bytes)
+        media = await Soaping(file, soap)
+        await message.delete()
+
+        await message.client.send_file(message.to_id, media)
+
 
 async def check_media(reply_message):
     if reply_message and reply_message.media:
@@ -62,4 +95,17 @@ async def check_media(reply_message):
         return False
     else:
         return data
+
+
+async def Soaping(file, soap):
+    img = Image.open(io.BytesIO(file))
+    (x, y) = img.size
+    img = img.resize((x // soap, y // soap), Image.ANTIALIAS)
+    img = img.resize((x, y))
+    soap_io = io.BytesIO()
+    soap_io.name = "image.jpeg"
+    img = img.convert("RGB")
+    img.save(soap_io, "JPEG", quality=100)
+    soap_io.seek(0)
+    return soap_io
 
