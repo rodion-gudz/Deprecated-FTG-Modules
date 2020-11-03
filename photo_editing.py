@@ -17,16 +17,18 @@ from time import sleep
 
 import logging
 import random
-_C='png'
-_B='name'
-_A='image'
-_R='отражает'
-_P='часть.'
-from ..  import loader as _L,utils as U
-import logging,asyncio
+
+_C = 'png'
+_B = 'name'
+_A = 'image'
+_R = 'отражает'
+_P = 'часть.'
+from .. import loader as _L, utils as U
+import logging, asyncio
 from telethon.tl.types import DocumentAttributeFilename as DAF
-from PIL import Image,ImageOps as IO
+from PIL import Image, ImageOps as IO
 from io import BytesIO as ist
+
 
 # Author: https://t.me/GovnoCodules
 
@@ -175,6 +177,43 @@ class DistortMod(loader.Module):
         image_stream.seek(0)
         await message.client.send_file(message.chat_id, image_stream)
 
+    async def gridcmd(self, message):
+        """.gird <reply to photo>"""
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await utils.answer(message, "<code>Реплай на пикчу или стикер блять!</code>")
+                return
+        else:
+            await utils.answer(message, "`Реплай на пикчу или стикер блять`")
+            return
+
+        await message.edit("Режу ебать")
+        file = await self.client.download_media(data, bytes)
+        media = await griding(file)
+        await message.delete()
+        await message.client.send_file(message.to_id, media)
+
+    async def revgridcmd(self, message):
+        """.gird <reply to photo>"""
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await utils.answer(message, "<code>Реплай на пикчу или стикер блять!</code>")
+                return
+        else:
+            await utils.answer(message, "`Реплай на пикчу или стикер блять`")
+            return
+
+        await message.edit("Режу ебать")
+        file = await self.client.download_media(data, bytes)
+        media = await griding(file)
+        media = media[::-1]
+        await message.delete()
+        await message.client.send_file(message.to_id, media)
+
     async def opscmd(self, message):
         way = utils.get_args(message)
         if not way:
@@ -213,7 +252,6 @@ class DistortMod(loader.Module):
         image.save(image_stream, "PNG")
         image_stream.seek(0)
         await message.client.send_file(message.chat_id, image_stream)
-
 
     async def resizecmd(self, message):
         if message.is_reply:
@@ -349,7 +387,8 @@ async def CM(R):
     A = R
     if A and A.media:
         if A.photo:
-            B = A.photo;E = _C
+            B = A.photo;
+            E = _C
         elif A.document:
             if DAF(file_name='AnimatedSticker.tgs') in A.media.document.attributes: return D, C
             if A.gif or A.video or A.audio or A.voice: return D, C
@@ -399,6 +438,7 @@ async def Soaping(file, soap):
     soap_io.seek(0)
     return soap_io
 
+
 async def deepfry(img: Image) -> Image:
     colours = (
         (randint(50, 200), randint(40, 170), randint(40, 190)),
@@ -429,4 +469,26 @@ async def deepfry(img: Image) -> Image:
 
     return img
 
-    await event.edit("`↓↓Забирай↓↓`")
+
+async def griding(file):
+    img = Image.open(io.BytesIO(file))
+    (x, y) = img.size
+    cy = 3
+    cx = 3
+    sx = x // cx
+    sy = y // cy
+    if (sx * cx, sy * cy) != (x, y):
+        img = img.resize((sx * cx, sy * cy))
+    (lx, ly) = (0, 0)
+    media = []
+    for i in range(1, cy + 1):
+        for o in range(1, cx + 1):
+            mimg = img.crop((lx, ly, lx + sx, ly + sy))
+            bio = io.BytesIO()
+            bio.name = 'image.png'
+            mimg.save(bio, 'PNG')
+            media.append(bio.getvalue())
+            lx = lx + sx
+        lx = 0
+        ly = ly + sy
+    return media
