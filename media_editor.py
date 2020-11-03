@@ -5,12 +5,14 @@ from pydub import AudioSegment
 from pydub import effects
 from telethon import types
 from .. import loader, utils
+from pydub import AudioSegment
 import io
 import os
 import requests
 import numpy as np
 import math
 
+# Author: https://t.me/dekftgmodules and https://t.me/ftgmodulesbyfl1yd
 
 def register(cb):
     cb(AudioEditorMod())
@@ -523,3 +525,55 @@ class AudioEditorMod(loader.Module):
                     return await event.edit('No arguments')
             else:
                 return await event.edit('No arguments')
+
+    async def fvcmd(self, message):
+        reply = await message.get_reply_message()
+        lvl = 0
+        if not reply:
+            await message.edit("Reply to media")
+            return
+        if utils.get_args_raw(message):
+            ar = utils.get_args_raw(message)
+            try:
+                int(ar)
+                if int(ar) >= 10 and int(ar) <= 100:
+                    lvl = int(ar)
+                else:
+                    await message.edit("No Argument")
+                    return
+            except Exception as exx:
+                await message.edit("No Argument" + str(exx))
+                return
+        else:
+            lvl = 100
+        await message.edit("<b>Distorting...</b>")
+        sa = False
+        m = io.BytesIO()
+        fname = await message.client.download_media(message=reply.media)
+        if (fname.endswith(".oga") or fname.endswith(".ogg")):
+            audio = AudioSegment.from_file(fname, "ogg")
+        elif fname.endswith(".mp3") or fname.endswith(".m4a") or fname.endswith(".3gp") or fname.endswith(
+                ".mpeg") or fname.endswith(".wav"):
+            sa = True
+            audio = AudioSegment.from_file(fname, "mp3")
+        else:
+            await message.edit("No file</b>")
+            os.remove(fname)
+            return
+        audio = audio + lvl
+        if (sa):
+            m.name = "Distorted.mp3"
+            audio.export(m, format="mp3")
+        else:
+            m.name = "voice.ogg"
+            audio.split_to_mono()
+            audio.export(m, format="ogg", codec="libopus", bitrate="64k")
+        m.seek(0)
+        if (sa):
+            await message.client.send_file(message.to_id, m, reply_to=reply.id, attributes=[
+                types.DocumentAttributeAudio(duration=reply.document.attributes[0].duration, title=f"Distorted",
+                                             performer="Distort")])
+        else:
+            await message.client.send_file(message.to_id, m, reply_to=reply.id, voice_note=True)
+        await message.delete()
+        os.remove(fname)
