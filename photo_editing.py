@@ -1,21 +1,9 @@
 import io, random, glob, os
-from PIL import Image
-from telethon.tl.types import DocumentAttributeFilename
 from .. import loader, utils
-from .. import loader, utils  # pylint: disable=relative-beyond-top-level
 import io
-from PIL import Image, ImageOps
-from telethon.tl.types import DocumentAttributeFilename
 from random import randint, uniform
-
 from PIL import Image, ImageEnhance, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
-
-from uniborg.util import admin_cmd
-from telethon import events
-from time import sleep
-
-import logging
 import random
 
 _C = 'png'
@@ -24,13 +12,12 @@ _A = 'image'
 _R = 'отражает'
 _P = 'часть.'
 from .. import loader as _L, utils as U
-import logging, asyncio
 from telethon.tl.types import DocumentAttributeFilename as DAF
 from PIL import Image, ImageOps as IO
 from io import BytesIO as ist
 
 
-# Author: https://t.me/GovnoCodules
+# Author: https://t.me/GovnoCodules and https://t.me/memeframe
 
 @loader.tds
 class DistortMod(loader.Module):
@@ -253,6 +240,101 @@ class DistortMod(loader.Module):
         image_stream.seek(0)
         await message.client.send_file(message.chat_id, image_stream)
 
+    async def spincmd(self, message):
+        args = utils.get_args(message)
+
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await utils.answer(message, "Reply to picture")
+                return
+        else:
+            await utils.answer(message, "Reply to picture")
+            return
+
+        image = io.BytesIO()
+        await self.client.download_media(data, image)
+        image = Image.open(image)
+        image.thumbnail((512, 512), Image.ANTIALIAS)
+        img = Image.new("RGB", (512, 512), "black")
+        img.paste(image, ((512 - image.width) // 2, (512 - image.height) // 2))
+        image = img
+        way = random.choice([1, -1])
+        frames = []
+        for i in range(1, 60):
+            im = image.rotate(i * 6 * way)
+            frames.append(im)
+        frames.remove(im)
+
+        image_stream = io.BytesIO()
+        image_stream.name = "new.gif"
+        im.save(image_stream, "GIF", save_all=True, append_images=frames, duration=10)
+        image_stream.seek(0)
+        await utils.answer(message, image_stream)
+
+    async def wtpcmd(self, message):
+        reply_message = await message.get_reply_message()
+        image = io.BytesIO()
+        await self.client.download_media(reply_message.media.document, image)
+        image = Image.open(image)
+        image_stream = io.BytesIO()
+        image_stream.name = "png.png"
+        image.save(image_stream, "PNG")
+        image_stream.seek(0)
+        await self.client.delete_messages(message.to_id, message.id)
+        await self.client.send_file(message.to_id, image_stream, force_document=True)
+
+    @loader.sudo
+    async def ptwcmd(self, message):
+        reply_message = await message.get_reply_message()
+        image = io.BytesIO()
+        await self.client.download_media(reply_message.media, image)
+        image = Image.open(image)
+        image_stream = io.BytesIO()
+        image_stream.name = "webp.webp"
+        image.save(image_stream, "WEBP")
+        image_stream.seek(0)
+        await self.client.delete_messages(message.to_id, message.id)
+        await self.client.send_file(message.to_id, image_stream, force_document=False)
+
+    @loader.sudo
+    async def jtpcmd(self, message):
+        """JPG to PNG"""
+        reply_message = await message.get_reply_message()
+        image = io.BytesIO()
+        await self.client.download_media(reply_message.media, image)
+        image = Image.open(image).convert("RGB")
+        image_stream = io.BytesIO()
+        image_stream.name = "10_из_10шакалов.png"
+        image.save(image_stream, "PNG")
+        image_stream.seek(0)
+        await self.client.delete_messages(message.to_id, message.id)
+        await self.client.send_file(message.to_id, image_stream, force_document=True)
+
+    async def epilepsycmd(self, message):
+        args = utils.get_args(message)
+
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await utils.answer(message, "Reply to picture")
+                return
+        else:
+            await utils.answer(message, "Reply to picture")
+            return
+
+        image = io.BytesIO()
+        await self.client.download_media(data, image)
+        image = Image.open(image).convert("RGB")
+        invert = ImageOps.invert(image)
+
+        image_stream = io.BytesIO()
+        image_stream.name = "new.gif"
+        image.save(image_stream, "GIF", save_all=True, append_images=[invert], duration=1)
+        image_stream.seek(0)
+        await utils.answer(message, image_stream)
     async def resizecmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
