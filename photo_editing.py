@@ -6,6 +6,15 @@ from .. import loader, utils  # pylint: disable=relative-beyond-top-level
 import io
 from PIL import Image, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
+from random import randint, uniform
+
+from PIL import Image, ImageEnhance, ImageOps
+from telethon.tl.types import DocumentAttributeFilename
+
+from uniborg.util import admin_cmd
+from telethon import events
+from time import sleep
+
 import logging
 import random
 _C='png'
@@ -40,6 +49,41 @@ class DistortMod(loader.Module):
 
     async def ddcmd(A, message):
         await KZD(message, 4)
+
+    async def deepcmd(self, message):
+        try:
+            frycount = int(utils.get_args(message)[0])
+            if frycount < 1:
+                raise ValueError
+        except:
+            frycount = 1
+
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+
+            if isinstance(data, bool):
+                await message.edit("Reply to photo please")
+                return
+        else:
+            await message.edit("Reply to photo please")
+            return
+
+        await message.edit("Downloading...")
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+
+        await message.edit("Distorting...")
+        for _ in range(frycount):
+            image = await deepfry(image)
+
+        fried_io = io.BytesIO()
+        fried_io.name = "image.jpeg"
+        image.save(fried_io, "JPEG")
+        fried_io.seek(0)
+
+        await message.reply(file=fried_io)
 
     async def distortcmd(self, message):
         if message.is_reply:
@@ -101,8 +145,8 @@ class DistortMod(loader.Module):
         global angle
         try:
             angle = int(utils.get_args(message)[0])
-        except ValueError:
-            await message.edit("ERROR INPUT=> ANGLE")
+        except:
+            angle = 180
 
         if message.is_reply:
             reply_message = await message.get_reply_message()
@@ -354,3 +398,35 @@ async def Soaping(file, soap):
     img.save(soap_io, "JPEG", quality=100)
     soap_io.seek(0)
     return soap_io
+
+async def deepfry(img: Image) -> Image:
+    colours = (
+        (randint(50, 200), randint(40, 170), randint(40, 190)),
+        (randint(190, 255), randint(170, 240), randint(180, 250))
+    )
+
+    img = img.copy().convert("RGB")
+
+    # Crush image to hell and back
+    img = img.convert("RGB")
+    width, height = img.width, img.height
+    img = img.resize((int(width ** uniform(0.8, 0.9)), int(height ** uniform(0.8, 0.9))), resample=Image.LANCZOS)
+    img = img.resize((int(width ** uniform(0.85, 0.95)), int(height ** uniform(0.85, 0.95))), resample=Image.BILINEAR)
+    img = img.resize((int(width ** uniform(0.89, 0.98)), int(height ** uniform(0.89, 0.98))), resample=Image.BICUBIC)
+    img = img.resize((width, height), resample=Image.BICUBIC)
+    img = ImageOps.posterize(img, randint(3, 7))
+
+    # Generate colour overlay
+    overlay = img.split()[0]
+    overlay = ImageEnhance.Contrast(overlay).enhance(uniform(1.0, 2.0))
+    overlay = ImageEnhance.Brightness(overlay).enhance(uniform(1.0, 2.0))
+
+    overlay = ImageOps.colorize(overlay, colours[0], colours[1])
+
+    # Overlay red and yellow onto main image and sharpen the hell out of it
+    img = Image.blend(img, overlay, uniform(0.1, 0.4))
+    img = ImageEnhance.Sharpness(img).enhance(randint(5, 300))
+
+    return img
+
+    await event.edit("`↓↓Забирай↓↓`")
