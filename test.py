@@ -38,7 +38,7 @@ class TestMod(loader.Module):
                "uploading_logs": "<b>Uploading logs...</b>",
                "no_logs": "<b>You don't have any logs at verbosity {}.</b>",
                "logs_filename": "ftg-logs.txt",
-               "logs_caption": "friendly-telegram logs with verbosity {}",
+               "logs_caption": "Friendly-Telegram logs with verbosity {}",
                "logs_unsafe": ("<b>Warning: running this command may reveal personal or dangerous information. "
                                "You can write</b> <code>{}</code> <b>at the end to accept the risks</b>"),
                "logs_force": "FORCE_INSECURE",
@@ -49,11 +49,11 @@ class TestMod(loader.Module):
     async def pingcmd(self, message):
         """Does nothing"""
         start = datetime.now()
-        await utils.answer(message, self.strings("`Ping checking...`", message))
+        await utils.answer(message, "<code>Ping checking...</code>")
         end = datetime.now()
         ms = (end - start).microseconds / 1000
         sleep(0.5)
-        await utils.answer(message, self.strings("**Ping:** `{}ms`".format(ms), message))
+        await utils.answer(message, "<b>Ping:</b> <code>{}ms</code>".format(ms))
 
     @loader.test(func=dumptest)
     async def dumpcmd(self, message):
