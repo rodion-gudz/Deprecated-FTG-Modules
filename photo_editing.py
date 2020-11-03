@@ -75,6 +75,168 @@ class DistortMod(loader.Module):
         await message.client.send_file(message.chat_id, buf, reply_to=reply_message.id)
         await message.delete()
 
+    async def jpegcmd(self, message):
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await message.delete()
+                return
+        else:
+            await message.delete()
+            return
+
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+        fried_io = io.BytesIO()
+        fried_io.name = "image.jpeg"
+        image = image.convert("RGB")
+        image.save(fried_io, "JPEG", quality=0)
+        fried_io.seek(0)
+        await message.delete()
+        await message.client.send_file(message.chat_id, fried_io, reply_to=reply_message.id)
+
+    async def rotatecmd(self, message):
+        global angle
+        try:
+            angle = int(utils.get_args(message)[0])
+        except ValueError:
+            await message.edit("ERROR INPUT=> ANGLE")
+
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+
+            if isinstance(data, bool):
+                await message.edit("`I can't rotate that!".upper())
+                return
+        else:
+            await message.edit("Reply to an image or sticker to rotate it!".upper())
+            return
+
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+
+        try:
+            image = image.rotate(angle, expand=True)
+        except Exception as e:
+            await message.edit("ERROR IN ROTATE\n" + str(e))
+            return
+        await message.delete()
+        image_stream = io.BytesIO()
+        image_stream.name = "pilrotate.png"
+        image.save(image_stream, "PNG")
+        image_stream.seek(0)
+        await message.client.send_file(message.chat_id, image_stream)
+
+    async def opscmd(self, message):
+        way = utils.get_args(message)
+        if not way:
+            return
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+
+            if isinstance(data, bool):
+                await message.edit("`I can't ops that!".upper())
+                return
+        else:
+            await message.edit("Reply to an image or sticker to ops it!".upper())
+            return
+
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+
+        if "m" in way:
+            try:
+                image = ImageOps.mirror(image)
+            except Exception as e:
+                await message.edit("ERROR IN MIRROR\n" + str(e))
+                return
+        if "f" in way:
+            try:
+                image = ImageOps.flip(image)
+            except Exception as e:
+                await message.edit("ERROR IN FLIP\n" + str(e))
+                return
+
+        await message.delete()
+        image_stream = io.BytesIO()
+        image_stream.name = "pilops.png"
+        image.save(image_stream, "PNG")
+        image_stream.seek(0)
+        await message.client.send_file(message.chat_id, image_stream)
+
+
+    async def resizecmd(self, message):
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+
+            if isinstance(data, bool):
+                await message.edit("`I can't resize that!".upper())
+                return
+        else:
+            await message.edit("Reply to an image or sticker to resize it!".upper())
+            return
+        uinp = utils.get_args(message)
+
+        if not uinp:
+            await message.edit("What's about input".upper())
+            return
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+        x, y = image.size
+        rx, ry = None, None
+        if len(uinp) == 1:
+            try:
+                rx, ry = int(uinp[0]), int(uinp[0])
+            except ValueError:
+                if uinp[0] == "x":
+                    rx, ry = x, x
+                if uinp[0] == "y":
+                    rx, ry = y, y
+                else:
+                    await message.edit("INPUT MUST BE STING")
+                    return
+        else:
+            if uinp[0] == "x":
+                rx = x
+            if uinp[0] == "y":
+                rx = y
+            if uinp[1] == "x":
+                ry = x
+            if uinp[1] == "y":
+                ry = y
+            if not rx:
+                try:
+                    rx = int(uinp[0])
+                except:
+                    await message.edit("ERROR IN INPUT")
+                    return
+            if not ry:
+                try:
+                    ry = int(uinp[1])
+                except:
+                    await message.edit("ERROR IN INPUT")
+                    return
+
+        try:
+            image = image.resize((rx, ry))
+        except Exception as e:
+            await message.edit("ERROR IN RESIZE\n" + str(e))
+            return
+        await message.delete()
+        image_stream = io.BytesIO()
+        image_stream.name = "pilresize.png"
+        image.save(image_stream, "PNG")
+        image_stream.seek(0)
+        await message.client.send_file(message.chat_id, image_stream)
+
     async def soapcmd(self, message):
         soap = 3
         a = utils.get_args(message)
@@ -95,7 +257,7 @@ class DistortMod(loader.Module):
             return
 
         await message.edit("Soaping...")
-        file = await self.client.download_media(data, bytes)
+        file = await message.client.download_media(data, bytes)
         media = await Soaping(file, soap)
         await message.delete()
 
