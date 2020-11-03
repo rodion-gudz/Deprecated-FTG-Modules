@@ -17,10 +17,10 @@ def chunks(lst, n):
 
 class TagAllMod(loader.Module):
     """Тэгает всех в чате."""
-    strings = {"name":"TagAll"}
+    strings = {"name": "Chat utils"}
 
     def __init__(self):
-        self.config = loader.ModuleConfig("DEFAULT_MENTION_MESSAGE", "говно залупное\n                пашет.", "Default message of mentions")
+        self.config = loader.ModuleConfig("DEFAULT_MENTION_MESSAGE", "Hey", "Default message of mentions")
         self.name = self.strings["name"]
 
     async def client_ready(self, client, db):
