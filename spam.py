@@ -16,18 +16,24 @@ class SpamMod(loader.Module):
         use_reply = False
         args = utils.get_args(message)
         logger.debug(args)
+        count = int(args[0].strip())
         reply = await message.get_reply_message()
         if reply:
             if reply.media:
                 media = reply.media
-                count = int(args[0].strip())
                 await message.delete()
                 for _ in range(count):
                     await message.client.send_file(message.to_id, media)
                 return
             else:
                 text = reply
-                count = int(args[0].strip())
+                await message.delete()
                 for _ in range(count):
                     await message.client.send_message(message.to_id, text)
+        else:
+            spam = message
+            spam.message = " ".join(args[1:])
+            await message.delete()
+            for i in range(count):
+                await asyncio.gather(*[message.respond(spam)])
 
