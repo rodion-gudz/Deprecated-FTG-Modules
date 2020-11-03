@@ -49,7 +49,7 @@ class TestMod(loader.Module):
     async def pingcmd(self, message):
         """Does nothing"""
         start = datetime.now()
-        await self.edit("`Ping checking...`")
+        await utils.answer(message, self.strings("`Ping checking...`", message))
         end = datetime.now()
         ms = (end - start).microseconds / 1000
         sleep(0.5)
