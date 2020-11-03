@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @loader.tds
 class GGdotGGMod(loader.Module):
     strings = {
-        "name": "URL shortener",
+        "name": "URL utils",
         "some_rong": "<b>Ты делаешь что-то не так!\nНапиши</b> <code>.help gg.gg</code> <b>для информации.</b>",
         "result": "<a href='{}'>{}</a>",
         "default": "How to use Google?"
