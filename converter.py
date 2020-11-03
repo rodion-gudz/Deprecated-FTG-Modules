@@ -3,7 +3,7 @@ import io
 from PIL import Image, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
 import logging
-
+import os
 logger = logging.getLogger(__name__)
 
 
@@ -57,5 +57,29 @@ class WEBPtoPNGMod(loader.Module):
         await self.client.delete_messages(message.to_id, message.id)
         await self.client.send_file(message.to_id, image_stream, force_document=True)
 
+    async def togifcmd(self, message):
+        try:
+            await message.edit("Downloading...")
+            reply = await message.get_reply_message()
+            if reply:
+                await message.edit("Converting...")
+                await message.client.download_media(reply.media, "tgs.tgs")
+                os.system("lottie_convert.py tgs.tgs tgs.gif")
+                await message.edit("Sending...")
+                await message.client.send_file(message.to_id, "tgs.gif")
+                await message.delete()
+                try:
+                    os.remove("tgs*")
+                except FileNotFoundError:
+                    pass
+            else:
+                return await message.edit("Reply to media")
+        except:
+            await message.edit("Reply to media")
+            try:
+                os.remove("tgs*")
+            except FileNotFoundError:
+                pass
+            return
 
 
