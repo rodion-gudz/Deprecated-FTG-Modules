@@ -49,7 +49,6 @@ class DistortMod(loader.Module):
         await message.delete()
 
     async def soapcmd(self, message):
-        """.soap <reply to photo>"""
         soap = 3
         a = utils.get_args(message)
         if a:
