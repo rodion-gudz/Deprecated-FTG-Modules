@@ -8,6 +8,8 @@ from wand.image import Image
 from PIL import Image as IM
 from .. import loader, utils
 
+# Author: https://t.me/GovnoCodules
+
 logger = logging.getLogger(__name__)
 
 @loader.tds

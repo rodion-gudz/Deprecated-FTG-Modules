@@ -3,6 +3,8 @@ import logging
 from requests import post
 import io
 
+# Author: https://t.me/GovnoCodules
+
 logger = logging.getLogger(__name__)
 
 

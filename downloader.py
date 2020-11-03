@@ -2,6 +2,7 @@ import os
 from .. import loader, utils
 from asyncio import sleep
 
+# Author: https://t.me/ftgmodulesbyfl1yd
 
 def register(cb):
     cb(ReplyDownloaderMod())

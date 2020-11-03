@@ -3,6 +3,7 @@ from .. import loader, utils
 import re
 import io
 
+# Author: https://t.me/dekftgmodules
 
 def register(cb):
     cb(BackupManMod())

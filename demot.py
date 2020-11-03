@@ -5,6 +5,8 @@ from textwrap import wrap
 import io
 import requests
 
+# Author: https://t.me/GovnoCodules
+
 logger = logging.getLogger(__name__)
 
 

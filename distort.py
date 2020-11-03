@@ -3,6 +3,8 @@ from PIL import Image
 from telethon.tl.types import DocumentAttributeFilename
 from .. import loader, utils
 
+# Author: https://t.me/GovnoCodules
+
 @loader.tds
 class DistortMod(loader.Module):
     strings = {"name": "Photo distort"}
