@@ -1,10 +1,11 @@
 import io, random, glob, os
 from .. import loader, utils
-import io
 from random import randint, uniform
 from PIL import Image, ImageEnhance, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
 import random
+import logging
+
 
 _C = 'png'
 _B = 'name'
@@ -177,7 +178,7 @@ class DistortMod(loader.Module):
             return
 
         await message.edit("Режу ебать")
-        file = await self.client.download_media(data, bytes)
+        file = await message.client.download_media(data, bytes)
         media = await griding(file)
         await message.delete()
         await message.client.send_file(message.to_id, media)
@@ -195,7 +196,7 @@ class DistortMod(loader.Module):
             return
 
         await message.edit("Режу ебать")
-        file = await self.client.download_media(data, bytes)
+        file = await message.client.download_media(data, bytes)
         media = await griding(file)
         media = media[::-1]
         await message.delete()
@@ -240,6 +241,7 @@ class DistortMod(loader.Module):
         image_stream.seek(0)
         await message.client.send_file(message.chat_id, image_stream)
 
+    @loader.sudo
     async def spincmd(self, message):
         args = utils.get_args(message)
 
@@ -254,7 +256,7 @@ class DistortMod(loader.Module):
             return
 
         image = io.BytesIO()
-        await self.client.download_media(data, image)
+        await message.client.download_media(data, image)
         image = Image.open(image)
         image.thumbnail((512, 512), Image.ANTIALIAS)
         img = Image.new("RGB", (512, 512), "black")
@@ -273,7 +275,7 @@ class DistortMod(loader.Module):
         image_stream.seek(0)
         await utils.answer(message, image_stream)
 
-
+    @loader.sudo
     async def epilepsycmd(self, message):
         args = utils.get_args(message)
 
@@ -288,7 +290,7 @@ class DistortMod(loader.Module):
             return
 
         image = io.BytesIO()
-        await self.client.download_media(data, image)
+        await message.client.download_media(data, image)
         image = Image.open(image).convert("RGB")
         invert = ImageOps.invert(image)
 
