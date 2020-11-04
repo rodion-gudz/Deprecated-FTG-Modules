@@ -54,6 +54,20 @@ class TyperMod(loader.Module):
                 await message.edit(out + "\u2060")
                 await sleep(0.3)
 
+    async def codecmd(self, message):
+        if message.is_reply:
+            reply = await message.get_reply_message()
+            code = reply.raw_text
+            code = code.replace("<", "&lt;").replace(">", "&gt;")
+            await message.edit(f"<code>{code}</code>")
+        else:
+            code = message.raw_text[5:]
+            code = code.replace("<", "&lt;").replace(">", "&gt;")
+            try:
+                await message.edit(f"<code>{code}</code>")
+            except:
+                await message.edit(self.strings["msg_is_emp"])
+
 async def update_message(message, m, entities):
     try:
         return await utils.answer(message, m, parse_mode=lambda t: (t, entities))
