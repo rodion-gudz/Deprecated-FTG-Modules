@@ -1,8 +1,11 @@
 import logging
 import inspect
-
+import io
 from telethon.tl.functions.channels import JoinChannelRequest
-
+from telethon import functions, types, events
+from .. import loader, utils
+import re
+import io
 from .. import loader, utils, main, security
 
 logger = logging.getLogger(__name__)
@@ -24,9 +27,18 @@ class HelpMod(loader.Module):
                "joined": "<b>Joined to</b> <a href='https://t.me/friendlytgbot'>support channel</a>",
                "join": "<b>Join the</b> <a href='https://t.me/friendlytgbot'>support channel</a>"}
 
+    def __init__(self):
+        self.name = self.strings['name']
+        self._me = None
+        self._ratelimit = []
+
+    async def client_ready(self, client, db):
+        self._db = db
+        self._client = client
+        self.me = await client.get_me()
+
     @loader.unrestricted
     async def helpcmd(self, message):
-        """.help [module]"""
         args = utils.get_args_raw(message)
         if args:
             module = None
@@ -66,23 +78,22 @@ class HelpMod(loader.Module):
                     name = mod.strings("name", message)
                 except KeyError:
                     name = getattr(mod, "name", "ERROR")
-                reply += self.strings("mod_tmpl", message).format(name)
-                first = True
-                commands = [name for name, func in mod.commands.items()
-                            if await self.allmodules.check_security(message, func)]
-                for cmd in commands:
-                    if first:
-                        reply += self.strings("first_cmd_tmpl", message).format(cmd)
-                        first = False
-                    else:
-                        reply += self.strings("cmd_tmpl", message).format(cmd)
-                reply += "</code>"
+                if name != "Logger" and name != "Raphielgang Configuration Placeholder" \
+                        and name != "Uniborg configuration placeholder":
+                    reply += self.strings("mod_tmpl", message).format(name)
+                    first = True
+                    commands = [name for name, func in mod.commands.items()
+                                if await self.allmodules.check_security(message, func)]
+                    for cmd in commands:
+                        if first:
+                            reply += self.strings("first_cmd_tmpl", message).format(cmd)
+                            first = False
+                        else:
+                            reply += self.strings("cmd_tmpl", message).format(cmd)
+                    reply += "</code>"
         await utils.answer(message, reply)
 
     async def restorecmd(self, m):
-        """
-        Установить все модули из txt файла
-        """
         reply = await m.get_reply_message()
         if not reply:
             await m.edit("REPLY_TO_TXT")
@@ -111,19 +122,10 @@ class HelpMod(loader.Module):
             "Please restart!\n<code>.restart</code>" if valid != 0 else "Nothing loaded"))
 
     async def backupcmd(self, m):
-        """
-        Сделать бэкап модулей в txt файл
-        """
         modules = self._db.get("friendly-telegram.modules.loader", "loaded_modules", [])
         txt = io.BytesIO("\n".join(modules).encode())
         txt.name = "Modules Backup-{}.txt".format(str((await m.client.get_me()).id))
-        await m.client.send_file(m.to_id, txt, caption=f"Modules backup completed\nSaved modlues: {len(modules)}")
+        await m.client.send_file(m.to_id, txt, caption=f"Modules backup completed\nSaved modules: {len(modules)}")
         await m.delete()
         await m.client.send_file(m.to_id, txt, caption=f"Modules backup completed\nSaved modules: {len(modules)}")
         await m.delete()
-    @loader.unrestricted
-
-    async def client_ready(self, client, db):
-        self.client = client
-        self.is_bot = await client.is_bot()
-        self.db = db

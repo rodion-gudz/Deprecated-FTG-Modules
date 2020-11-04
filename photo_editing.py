@@ -110,7 +110,7 @@ class DistortMod(loader.Module):
         await message.client.send_file(message.chat_id, buf, reply_to=reply_message.id)
         await message.delete()
 
-    async def jpegcmd(self, message):
+    async def jpegdcmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data = await check_media(reply_message)
