@@ -6,7 +6,6 @@ from telethon.tl.types import DocumentAttributeFilename
 import random
 import logging
 
-
 _C = 'png'
 _B = 'name'
 _A = 'image'
@@ -365,6 +364,24 @@ class DistortMod(loader.Module):
         image_stream.seek(0)
         await message.client.send_file(message.chat_id, image_stream)
 
+    async def sl2rcmd(self, message):
+        """swipe left to right"""
+        await presser(message, 0)
+
+    @loader.owner
+    async def sr2lcmd(self, message):
+        """swipe right to left"""
+        await presser(message, 1)
+
+    @loader.owner
+    async def su2dcmd(self, message):
+        """swipe up to down"""
+        await presser(message, 2)
+
+    @loader.owner
+    async def sd2ucmd(self, message):
+        """swipe down to up"""
+        await presser(message, 3)
     async def resizedoccmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
@@ -604,3 +621,64 @@ async def griding(file):
         lx = 0
         ly = ly + sy
     return media
+
+
+async def presser(message, way):
+    reply = await check_media(message)
+    if not reply:
+        await message.edit("<b>Senpai... please reply to image or not animated sticker!</b>")
+        return
+    im = io.BytesIO()
+    await reply.download_media(im)
+    im = Image.open(im)
+    w, h = im.size
+    out = []
+    await message.edit("<b>Working hard...</b>")
+    if way == 0:
+        for x in range(1, w, w // 30):
+            im1 = im2 = im.copy()
+            temp = Image.new("RGB", (w, h))
+            im1 = im1.resize((x, h))
+            im2 = im2.resize((w - x, h))
+            temp.paste(im1, (0, 0))
+            temp.paste(im2, (x, 0))
+            out.append(temp)
+
+    if way == 1:
+        for x in range(1, w, w // 30):
+            im1 = im2 = im.copy()
+            temp = Image.new("RGB", (w, h))
+            im1 = ImageOps.mirror(im1.resize((x, h)))
+            im2 = ImageOps.mirror(im2.resize((w - x, h)))
+            temp.paste(im1, (0, 0))
+            temp.paste(im2, (x, 0))
+            temp = ImageOps.mirror(temp)
+            out.append(temp)
+
+    if way == 2:
+        for y in range(1, h, h // 30):
+            im1 = im2 = im.copy()
+            temp = Image.new("RGB", (w, h))
+            im1 = im1.resize((w, y))
+            im2 = im2.resize((w, h - y))
+            temp.paste(im1, (0, 0))
+            temp.paste(im2, (0, y))
+            out.append(temp)
+
+    if way == 3:
+        for y in range(1, h, h // 30):
+            im1 = im2 = im.copy()
+            temp = Image.new("RGB", (w, h))
+            im1 = ImageOps.flip(im1.resize((w, y)))
+            im2 = ImageOps.flip(im2.resize((w, h - y)))
+            temp.paste(im1, (0, 0))
+            temp.paste(im2, (0, y))
+            temp = ImageOps.flip(temp)
+            out.append(temp)
+
+    output = io.BytesIO()
+    output.name = "output.gif"
+    out[0].save(output, save_all=True, append_images=out[1:], duration=1)
+    output.seek(0)
+    await reply.reply(file=output)
+    await message.delete()
