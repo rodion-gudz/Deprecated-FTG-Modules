@@ -9,7 +9,13 @@ from PIL import Image
 import logging
 import requests
 import asyncio
+from requests import get, post, exceptions
+import asyncio
+import os
+from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
+from userbot.events import register
 
+DOGBIN_URL = "https://dogbin.f0x1d.com/"
 # Author: https://t.me/GovnoCodules
 
 logger = logging.getLogger(__name__)
@@ -138,6 +144,8 @@ class x0Mod(loader.Module):
             else:
                 await message.client.send_message(message.to_id, response.message)
 
+    @loader.unrestricted
+    @loader.ratelimit
     async def uploadshcmd(self, message):
         if message.file:
             msg = message
@@ -156,6 +164,57 @@ class x0Mod(loader.Module):
         r.raise_for_status()
         logger.debug(r.headers)
         await utils.answer(message, self.strings("uploaded", message).format(r.text))
+
+    async def dogbincmd(self, message):
+        dogbin_final_url = ""
+        match = utils.get_args_raw(message)
+        reply_id = message.reply_to_msg_id
+
+        if not match and not reply_id:
+            await message.edit("`Elon Musk said I cannot paste void.`")
+            return
+
+        if match:
+            messageText = match
+        elif reply_id:
+            messageText = (await message.get_reply_message())
+            if messageText.media:
+                downloaded_file_name = await message.client.download_media(
+                    messageText,
+                    TEMP_DOWNLOAD_DIRECTORY,
+                )
+                m_list = None
+                with open(downloaded_file_name, "rb") as fd:
+                    m_list = fd.readlines()
+                messageText = ""
+                for m in m_list:
+                    messageText += m.decode("UTF-8") + "\r"
+                os.remove(downloaded_file_name)
+            else:
+                messageText = messageText.message
+
+        # Dogbin
+        await message.edit("Pasting text...")
+        resp = post(DOGBIN_URL + "documents", data=messageText.encode('utf-8'))
+
+        if resp.status_code == 200:
+            response = resp.json()
+            key = response['key']
+            dogbin_final_url = DOGBIN_URL + key
+
+            if response['isUrl']:
+                reply_text = (dogbin_final_url)
+            else:
+                reply_text = (dogbin_final_url)
+        else:
+            reply_text = ("`Failed to reach Dogbin`")
+
+        await message.edit(reply_text)
+        if BOTLOG:
+            await message.client.send_message(
+                BOTLOG_CHATID,
+                f"Paste query was executed successfully",
+            )
 
 
 async def check_media(reply_message):
