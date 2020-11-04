@@ -103,7 +103,7 @@ class x0Mod(loader.Module):
                 reply_to = True
         else:
             pass
-        await message.edit('<code>Ждем...</code>')
+        await message.edit('<code>Uploading...</code>')
         async with message.client.conversation('@hastebin_bbot') as conv:
             try:
                 response = conv.wait_event(events.NewMessage(incoming=True,
