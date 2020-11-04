@@ -51,7 +51,7 @@ class QuotesMod(loader.Module):
 
     @loader.unrestricted
     @loader.ratelimit
-    async def qcmd(self, message):
+    async def quotecmd(self, message):
         args = utils.get_args(message)
         reply = await message.get_reply_message()
         if not reply:

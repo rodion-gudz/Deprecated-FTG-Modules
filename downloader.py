@@ -11,7 +11,7 @@ def register(cb):
 
 
 class ReplyDownloaderMod(loader.Module):
-    strings = {'name': 'Reply Downloader'}
+    strings = {'name': 'Downloader'}
 
     async def dlrcmd(self, message):
         name = utils.get_args_raw(message)
