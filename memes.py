@@ -33,8 +33,7 @@ backgrouds = ["https://raw.githubusercontent.com/Fl1yd/FTG-modules/master/stuff/
 background = requests.get(f"{choice(backgrouds)}").content
 
 class ZapomniMod(loader.Module):
-    """Запомните твари"""
-    strings = {'name': 'Запомните твари'}
+    strings = {'name': 'Memes'}
 
     def __init__(self):
         self.name = self.strings['name']

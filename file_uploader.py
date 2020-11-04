@@ -1,11 +1,13 @@
-from .. import loader, utils  # pylint: disable=relative-beyond-top-level
 import logging
 from requests import post
-import io
-from .. import loader, utils
-import asyncio
 import requests
 from telethon.tl.types import DocumentAttributeFilename
+from telethon.errors.rpcerrorlist import YouBlockedUserError
+from telethon import events
+from .. import loader, utils
+import io
+from io import BytesIO
+from PIL import Image
 
 # Author: https://t.me/GovnoCodules
 
@@ -41,11 +43,10 @@ class x0Mod(loader.Module):
             await message.edit(ste(e))
             return
         url = x0at.text
-        output = f'<a href="{url}">URL: </a><code>{url}</code>'
+        output = f'{url}'
         await message.edit(output)
 
     async def phcmd(self, message):
-        """.ph <reply photo or video>"""
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data = await check_media(reply_message)
@@ -56,13 +57,37 @@ class x0Mod(loader.Module):
             await message.edit("<b>Reply to photo or video/gif</b>")
             return
 
-        file = await message.client.download_media(data, bytes)
+        file = lol(await message.client.download_media(data, bytes))
         path = requests.post('https://te.legra.ph/upload', files={'file': ('file', file, None)}).json()
         try:
             link = 'https://te.legra.ph' + path[0]['src']
         except KeyError:
             link = path["error"]
         await message.edit("<b>" + link + "</b>")
+
+    async def imgurcmd(self, event):
+        chat = '@ImgUploadBot'
+        reply = await event.get_reply_message()
+        async with event.client.conversation(chat) as conv:
+
+            if not reply:
+                await event.edit("где реплай на медиа.")
+                return
+            else:
+                pic = await check_mediaa(event, reply)
+                if not pic:
+                    await utils.answer(event, 'это не изображение, лол.')
+                    return
+            await event.edit("Uploading...")
+            try:
+                what = lol(pic)
+                response = conv.wait_event(events.NewMessage(incoming=True, from_users=985223903))
+                await event.client.send_file(chat, what)
+                response = await response
+            except YouBlockedUserError:
+                await event.edit('<code>Разблокируй @imgurbot_bot</code>')
+                return
+            await event.edit(response.text)
 
 
 async def check_media(reply_message):
@@ -83,3 +108,34 @@ async def check_media(reply_message):
         return False
     else:
         return data
+
+
+def lol(reply):
+    scrrrra = Image.open(BytesIO(reply))
+    out = io.BytesIO()
+    out.name = "outsider.png"
+    scrrrra.save(out)
+    return out.getvalue()
+
+
+async def check_mediaa(message, reply):
+    if reply and reply.media:
+        if reply.photo:
+            data = reply.photo
+        elif reply.document:
+            if reply.gif or reply.video or reply.audio or reply.voice:
+                return None
+            data = reply.media.document
+        else:
+            return None
+    else:
+        return None
+    if not data or data is None:
+        return None
+    else:
+        data = await message.client.download_file(data, bytes)
+        try:
+            Image.open(io.BytesIO(data))
+            return data
+        except:
+            return None

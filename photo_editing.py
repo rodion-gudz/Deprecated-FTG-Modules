@@ -365,6 +365,72 @@ class DistortMod(loader.Module):
         image_stream.seek(0)
         await message.client.send_file(message.chat_id, image_stream)
 
+    async def resizedoccmd(self, message):
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+
+            if isinstance(data, bool):
+                await message.edit("`I can't resize that!".upper())
+                return
+        else:
+            await message.edit("Reply to an image or sticker to resize it!".upper())
+            return
+        uinp = utils.get_args(message)
+
+        if not uinp:
+            await message.edit("What's about input".upper())
+            return
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+        x, y = image.size
+        rx, ry = None, None
+        if len(uinp) == 1:
+            try:
+                rx, ry = int(uinp[0]), int(uinp[0])
+            except ValueError:
+                if uinp[0] == "x":
+                    rx, ry = x, x
+                if uinp[0] == "y":
+                    rx, ry = y, y
+                else:
+                    await message.edit("INPUT MUST BE STING")
+                    return
+        else:
+            if uinp[0] == "x":
+                rx = x
+            if uinp[0] == "y":
+                rx = y
+            if uinp[1] == "x":
+                ry = x
+            if uinp[1] == "y":
+                ry = y
+            if not rx:
+                try:
+                    rx = int(uinp[0])
+                except:
+                    await message.edit("ERROR IN INPUT")
+                    return
+            if not ry:
+                try:
+                    ry = int(uinp[1])
+                except:
+                    await message.edit("ERROR IN INPUT")
+                    return
+
+        try:
+            image = image.resize((rx, ry))
+        except Exception as e:
+            await message.edit("ERROR IN RESIZE\n" + str(e))
+            return
+        await message.delete()
+        image_stream = io.BytesIO()
+        image_stream.name = "pilresize.png"
+        image.save(image_stream, "PNG")
+        image_stream.seek(0)
+        await message.client.send_file(message.chat_id, image_stream, force_document=True)
+
     async def soapcmd(self, message):
         soap = 3
         a = utils.get_args(message)
