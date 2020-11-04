@@ -100,6 +100,28 @@ class TyperMod(loader.Module):
                 text = str.translate(text, change)
                 await message.edit(text)
 
+    async def deltypecmd(self, message):
+        """.quicktype <timeout> <message>"""
+        args = utils.get_args(message)
+        logger.debug(args)
+        if len(args) == 0:
+            await utils.answer(message, self.strings("need_something", message))
+            return
+        if len(args) == 1:
+            await utils.answer(message, self.strings("lazy_af", message))
+            return
+        t = args[0]
+        mess = " ".join(args[1:])
+        try:
+            t = float(t)
+        except ValueError:
+            await utils.answer(message, self.strings("nice_number", message))
+            return
+        await utils.answer(message, mess)
+        await asyncio.sleep(t)
+        await message.delete()
+
+
 async def update_message(message, m, entities):
     try:
         return await utils.answer(message, m, parse_mode=lambda t: (t, entities))

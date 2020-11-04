@@ -1,6 +1,4 @@
-import logging
 from requests import post
-import requests
 from telethon.tl.types import DocumentAttributeFilename
 from telethon.errors.rpcerrorlist import YouBlockedUserError
 from telethon import events
@@ -8,17 +6,35 @@ from .. import loader, utils
 import io
 from io import BytesIO
 from PIL import Image
+import logging
+import requests
+import asyncio
+
 # Author: https://t.me/GovnoCodules
 
 logger = logging.getLogger(__name__)
+
+def sgen(agen, loop):
+    while True:
+        try:
+            yield utils.run_async(loop, agen.__anext__())
+        except StopAsyncIteration:
+            return
 
 
 @loader.tds
 class x0Mod(loader.Module):
     strings = {
-        "name": "File uploader"
+        "name": "File uploader",
+        "up_cfg_doc": "URL to upload the file to.",
+        "no_file": "<code>Provide a file to upload</code>",
+        "uploading": "<code>Uploading...</code>",
+        "uploaded": "<a href={}>Uploaded!</a>"
     }
 
+    def __init__(self):
+        self.config = loader.ModuleConfig("UPLOAD_URL", "https://transfer.sh/{}",
+                                          lambda m: self.strings("up_cfg_doc", m))
     async def client_ready(self, client, db):
         self.client = client
 
@@ -121,6 +137,25 @@ class x0Mod(loader.Module):
                 await message.client.send_message(message.to_id, response.message, reply_to=reply.id)
             else:
                 await message.client.send_message(message.to_id, response.message)
+
+    async def uploadshcmd(self, message):
+        if message.file:
+            msg = message
+        else:
+            msg = (await message.get_reply_message())
+        doc = getattr(msg, "media", None)
+        if doc is None:
+            await utils.answer(message, self.strings("no_file", message))
+            return
+        doc = message.client.iter_download(doc)
+        logger.debug("begin transfer")
+        await utils.answer(message, self.strings("uploading", message))
+        r = await utils.run_sync(requests.put, self.config["UPLOAD_URL"].format(msg.file.name),
+                                 data=sgen(doc, asyncio.get_event_loop()))
+        logger.debug(r)
+        r.raise_for_status()
+        logger.debug(r.headers)
+        await utils.answer(message, self.strings("uploaded", message).format(r.text))
 
 
 async def check_media(reply_message):
