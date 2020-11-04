@@ -36,6 +36,8 @@ class HelpMod(loader.Module):
         self._db = db
         self._client = client
         self.me = await client.get_me()
+        self.db = db
+        self.is_bot = await client.is_bot()
 
     @loader.unrestricted
     async def helpcmd(self, message):
