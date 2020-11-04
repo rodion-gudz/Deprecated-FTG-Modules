@@ -4,6 +4,7 @@ from random import randint, uniform
 from PIL import Image, ImageEnhance, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
 from PIL import Image,ImageFilter
+import string
 import random
 import logging
 
