@@ -22,7 +22,7 @@ from io import BytesIO as ist
 
 @loader.tds
 class DistortMod(loader.Module):
-    strings = {"name": "Picture editing"}
+    strings = {"name": "Picture editor"}
     f'{_R} фоточки'
 
     def __init__(A):

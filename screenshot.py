@@ -2,15 +2,13 @@ from .. import loader, utils
 from requests import get
 import io
 import logging
+import sys
 import pygments
 from pygments.lexers import Python3Lexer
 from pygments.formatters import ImageFormatter
 import os
 logger = logging.getLogger(__name__)
 
-
-def register(cb):
-    cb(WebShotMod())
 
 
 @loader.tds
