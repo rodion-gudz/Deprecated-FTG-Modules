@@ -1,9 +1,13 @@
-from .. import loader, utils
+
 import logging
 from PIL import Image, ImageDraw, ImageOps, ImageFont
 from textwrap import wrap
 import io
 import requests
+from random import choice
+from telethon import events
+from telethon.errors.rpcerrorlist import YouBlockedUserError
+from .. import loader, utils
 
 # Author: https://t.me/GovnoCodules
 
@@ -22,16 +26,43 @@ class DeMoTiVaToRsMod(loader.Module):
     @loader.owner
     async def demoticmd(self, message):
         await cmds(message, 0)
-
     async def demotcmd(self, message):
         await cmds(message, 1)
+    async def demotirandcmd(self, message):
+        await cmdsrand(message, 0)
+    async def demotrandcmd(self, message):
+        await cmdsrand(message, 1)
 
 
 async def cmds(message, type):
     event, is_reply = await check_media(message)
     if not event:
-        await message.edit("<b>Reply to photo</b>")
-        return
+        args = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        if not reply:
+            await message.edit("<b>Reply to media</b>")
+            return
+        try:
+            media = reply.media
+        except:
+            await message.edit("<b>Only media</b>")
+            return
+
+        chat = '@super_rjaka_demotivator_bot'
+        await message.edit('<b>Demotivating...</b>')
+        async with message.client.conversation(chat) as conv:
+            try:
+                response = conv.wait_event(events.NewMessage(incoming=True, from_users=1016409811))
+                mm = await message.client.send_file(chat, media, caption=args)
+                response = await response
+                await mm.delete()
+            except YouBlockedUserError:
+                await message.reply('<b>Разблокируй @super_rjaka_demotivator_bot</b>')
+                return
+            await message.edit('<b>Sending...</b>')
+            await message.delete()
+            await response.delete()
+            await message.client.send_file(message.to_id, response.media, reply_to=await message.get_reply_message())
     text = utils.get_args_raw(message)
 
     if not text:
@@ -171,6 +202,110 @@ async def demotion(font_bytes, bytes_image, text, type):
     output = await joiner(text, main)
     return output
 
+
+async def cmdsrand(message, type):
+    event, is_reply = await check_media(message)
+    if not event:
+        args = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        if not reply:
+            await message.edit("<b>Reply to media</b>")
+            return
+        try:
+            media = reply.media
+        except:
+            await message.edit("<b>Only media</b>")
+            return
+
+        chat = '@super_rjaka_demotivator_bot'
+        await message.edit('<b>Demotivating...</b>')
+        async with message.client.conversation(chat) as conv:
+            try:
+                response = conv.wait_event(events.NewMessage(incoming=True, from_users=1016409811))
+                mm = await message.client.send_file(chat, media)
+                response = await response
+                await mm.delete()
+            except YouBlockedUserError:
+                await message.reply('<b>Разблокируй @super_rjaka_demotivator_bot</b>')
+                return
+            await message.edit('<b>Sending...</b>')
+            await message.delete()
+            await response.delete()
+            await message.client.send_file(message.to_id, response.media, reply_to=await message.get_reply_message())
+    text = utils.get_args_raw(message)
+
+    if not text:
+        text = choice(tttxxx)
+
+    await message.edit("<b>Demotivating...</b>")
+    bytes_image = await event.download_media(bytes)
+    demotivator = await demotionrand(font_bytes, bytes_image, text, type)
+    if is_reply:
+        await message.delete()
+        return await event.reply(file=demotivator)
+
+    else:
+        return await event.edit(file=demotivator, text="")
+
+
+
+
+
+
+
+
+async def demotionrand(font_bytes, bytes_image, text, type):
+    main = await draw_main(bytes_image, type)
+    font_size = [20 * (min(main.size) // 100), 15 * (min(main.size) // 100)]
+    text = await draw_text(text, font_bytes, font_size)
+    text = await text_finaller(text, main)
+    output = await joiner(text, main)
+    return output
+
+
+tttxxx = ['А че', 'заставляет задуматься', 'Жалко пацана', 'ты че сука??', 'ААХАХАХАХХАХА\n\nААХАХААХАХА',
+          'ГИГАНТ МЫСЛИ\n\nотец русской демократии', 'Он', 'ЧТО БЛЯТЬ?', 'охуенная тема',
+          'ВОТ ОНИ\n\nтипичные комедиклабовские шутки', 'НУ НЕ БЛЯДИНА?', 'Узнали?', 'Согласны?', 'Вот это мужик',
+          'ЕГО ИДЕИ\n\nбудут актуальны всегда', '\n\nПРИ СТАЛИНЕ ОН БЫ СИДЕЛ', 'о вадим',
+          '2 месяца на дваче\n\nи это, блядь, нихуя не смешно', 'Что дальше?\n\nЧайник с функцией жопа?',
+          '\n\nИ нахуя мне эта информация?', 'Верхний текст', 'нижний текст', 'Показалось', 'Суды при анкапе',
+          'Хуйло с района\n\n\n\nтакая шелупонь с одной тычки ляжет', 'Брух', 'Расскажи им\n\nкак ты устал в офисе',
+          'Окурок блять\n\nесть 2 рубля?', 'Аниме ставшее легендой',
+          'СМИРИСЬ\n\n\n\nты никогда не станешь настолько же крутым', 'а ведь это идея',
+          '\n\nЕсли не лайкнешь у тебя нет сердца', 'Вместо тысячи слов', 'ШАХ И МАТ!!!',
+          'Самый большой член в мире\n\nУ этой девушки', 'Немного\n\nперфекционизма', 'кто',
+          '\n\nэта сука уводит чужих мужей', 'Кто он???', '\n\nВы тоже хотели насрать туда в детстве?',
+          '\n\nВся суть современного общества\n\nв одном фото', 'Он обязательно выживет!',
+          '\n\nВы тоже хотите подрочить ему?', '\n\nИ вот этой хуйне поклоняются русские?',
+          'Вот она суть\n\n\n\nчеловеческого общества в одной картинке', 'Вы думали это рофл?\n\nНет это жопа',
+          '\n\nПри сталине такой хуйни не было\n\nА у вас было?', 'Он грыз провода',
+          'Назло старухам\n\nна радость онанистам', 'Где-то в Челябинске', 'Агитация за Порошенко', 'ИДЕАЛЬНО', 'Грыз?',
+          'Ну давай расскажи им\n\nкакая у тебя тяжелая работа', '\n\nЖелаю в каждом доме такого гостя',
+          'Шкура на вырост', 'НИКОГДА\n\nне сдавайся', 'Оппа гангнам стайл\n\nуууу сэкси лейди оп оп',
+          'Они сделали это\n\nсукины дети, они справились', 'Эта сука\n\nхочет денег', 'Это говно, а ты?',
+          '\n\nВот она нынешняя молодежь', 'Погладь кота\n\nпогладь кота сука', 'Я обязательно выживу',
+          '\n\nВот она, настоящая мужская дружба\n\nбез политики и лицимерия',
+          '\n\nОБИДНО ЧТО Я ЖИВУ В СТРАНЕ\n\nгде гантели стоят в 20 раз дороже чем бутылка водки', 'Царь, просто царь',
+          '\n\nНахуй вы это в учебники вставили?\n\nИ ещё ебаную контрольную устроили',
+          '\n\nЭТО НАСТОЯЩАЯ КРАСОТА\n\nа не ваши голые бляди', '\n\nТема раскрыта ПОЛНОСТЬЮ',
+          '\n\nРОССИЯ, КОТОРУЮ МЫ ПОТЕРЯЛИ', 'ЭТО - Я\n\nПОДУМАЙ МОЖЕТ ЭТО ТЫ', 'почему\n\nчто почему',
+          'КУПИТЬ БЫ ДЖЫП\n\nБЛЯТЬ ДА НАХУЙ НАДО', '\n\n\n\nмы не продаём бомбастер лицам старше 12 лет', 'МРАЗЬ',
+          'Правильная аэрография', 'Вот она русская\n\nСМЕКАЛОЧКА', 'Он взял рехстаг!\n\nА чего добился ты?',
+          'На аватарку', 'Фотошоп по-деревенски', 'Инструкция в самолете', 'Цирк дю Солей',
+          'Вкус детства\n\nшколоте не понять', 'Вот оно - СЧАСТЬЕ',
+          'Он за тебя воевал\n\nа ты даже не знаешь его имени', 'Зато не за компьютером',
+          '\n\nНе трогай это на новый год', 'Мой первый рисунок\n\nмочой на снегу', '\n\nМайские праздники на даче',
+          'Ваш пиздюк?', 'Тест драйв подгузников', 'Не понимаю\n\nкак это вообще выросло?', 'Супермен в СССР',
+          'Единственный\n\nкто тебе рад', 'Макдональдс отдыхает', 'Ну че\n\n как дела на работе пацаны?',
+          'Вся суть отношений', 'Беларусы, спасибо!', '\n\nУ дверей узбекского военкомата', 'Вместо 1000 слов',
+          'Один вопрос\n\nнахуя?', 'Ответ на санкции\n\nЕВРОПЫ', 'ЦЫГАНСКИЕ ФОКУСЫ', 'Блять!\n\nда он гений!',
+          '\n\nУкраина ищет новые источники газа', 'ВОТ ЭТО\n\nНАСТОЯЩИЕ КАЗАКИ а не ряженные',
+          'Нового года не будет\n\nСанта принял Ислам', '\n\nОн был против наркотиков\n\nа ты и дальше убивай себя',
+          'Всем похуй!\n\nВсем похуй!', 'БРАТЬЯ СЛАВЯНЕ\n\nпомните друг о друге',
+          '\n\nОН ПРИДУМАЛ ГОВНО\n\nа ты даже не знаешь его имени', '\n\nкраткий курс истории нацболов',
+          'Эпоха ренессанса']
+font_bytes = requests.get("https://raw.githubusercontent.com/KeyZenD/l/master/times.ttf").content
+#######################
 
 font_bytes = requests.get("https://raw.githubusercontent.com/KeyZenD/l/master/times.ttf").content
 #######################
