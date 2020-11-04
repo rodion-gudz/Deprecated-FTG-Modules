@@ -1,7 +1,9 @@
-import os
-from .. import loader, utils
 from asyncio import sleep
-
+from .. import loader, utils
+from requests import get
+import io
+from telethon.tl.types import MessageEntityUrl, MessageEntityTextUrl
+import os
 # Author: https://t.me/ftgmodulesbyfl1yd
 
 def register(cb):
@@ -34,7 +36,6 @@ class ReplyDownloaderMod(loader.Module):
             return await message.edit('Please reply to message')
 
     async def ulrcmd(self, message):
-        """Команда .ulr <d>* <название файла> отправляет файл в чат.\n* - удалить файл после отправки."""
         name = utils.get_args_raw(message)
         d = False
         if ('d ' in name):
@@ -57,4 +58,53 @@ class ReplyDownloaderMod(loader.Module):
             await message.delete()
         else:
             return await message.edit('No arguments')
+
+    async def urldlcmd(self, message):
+        event = message
+        args = utils.get_args_raw(event)
+        reply = await event.get_reply_message()
+        if not args:
+            if not reply:
+                await event.edit("<b>Ссылки нету!</b>")
+                return
+            message = reply
+        else:
+            message = event
+
+        if not message.entities:
+            await event.edit("<b>Ссылки нету!</b>")
+            return
+
+        urls = []
+        for ent in message.entities:
+            if type(ent) in [MessageEntityUrl, MessageEntityTextUrl]:
+                url_ = True
+                if type(ent) == MessageEntityUrl:
+                    offset = ent.offset
+                    length = ent.length
+                    url = message.raw_text[offset:offset + length]
+                else:
+                    url = ent.url
+                if not url.startswith("http"):
+                    url = "http://" + url
+                urls.append(url)
+
+        if not urls:
+            await event.edit("<b>Ссылки нету!</b>")
+            return
+        for url in urls:
+            try:
+                await event.edit("Downloading...")
+                fname = url.split("/")[-1]
+                text = get(url, stream=False)
+                file = io.BytesIO(text.content)
+                file.name = fname
+                file.seek(0)
+                await event.edit("<b>Sending...</b>\n" + url)
+                await event.client.send_file(event.to_id, file, reply_to=reply)
+
+            except Exception as e:
+                await event.reply("<b>Ошибка при загрузке!</b>\n" + url + "\n<code>" + str(e) + "</code>")
+
+        await event.delete()
 
