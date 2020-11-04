@@ -1,26 +1,24 @@
-# requires: pydub
-# requires: numpy
-# requires: requests
-from pydub import AudioSegment
 from pydub import effects
 from telethon import types
-from .. import loader, utils
 from pydub import AudioSegment
 import io
-import os
 import requests
 import numpy as np
 import math
-
+import subprocess, os
+import random
+from .. import loader, utils
 # Author: https://t.me/dekftgmodules and https://t.me/ftgmodulesbyfl1yd
 
-def register(cb):
-    cb(AudioEditorMod())
 
 
 class AudioEditorMod(loader.Module):
     """AudioEditor"""
-    strings = {'name': 'Audio and video editor'}
+    strings = {'name': 'Media editor',
+               "reply": "Reply to video!",
+               "error": "ERROR! TRY AGAIN!!",
+               "processing": "DataDataMoshMosh!"
+               }
 
     def __init__(self):
         self.name = self.strings['name']
@@ -526,6 +524,72 @@ class AudioEditorMod(loader.Module):
             else:
                 return await event.edit('No arguments')
 
+    async def datamoshcmd(self, message):
+        fn = "if_you_see_it_then_delete_it"
+        reply = await message.get_reply_message()
+        if not reply:
+            await message.edit("".join([random.choice(html).format(ch) for ch in self.strings("reply", message)]))
+            return
+        if not reply.video:
+            await message.edit("".join([random.choice(html).format(ch) for ch in self.strings("reply", message)]))
+            return
+        else:
+            await reply.download_media(fn + "1.mp4")
+
+        lvl = 1
+        fp = False
+        args = utils.get_args(message)
+        if args:
+            if len(args) == 1:
+                if args[0].isdigit():
+                    lvl = int(args[0])
+                    if lvl <= 0:
+                        lvl = 1
+                else:
+                    fp = True
+            if len(args) > 1:
+                fp = True
+                if args[0].isdigit():
+                    lvl = int(args[0])
+                    if lvl <= 0:
+                        lvl = 1
+                elif args[1].isdigit():
+                    fp = True
+                    lvl = int(args[1])
+                    if lvl <= 0:
+                        lvl = 1
+
+        await message.edit("".join([random.choice(html).format(ch) for ch in self.strings("processing", message)]))
+        subprocess.call(f'ffmpeg -loglevel quiet -y -i {fn}1.mp4 -crf 0 -bf 0 {fn}1.avi', shell=True)
+        try:
+            _f = open(fn + '1.avi', 'rb')
+            f_ = open(fn + '2.avi', 'wb')
+        except FileNotFoundError:
+            await message.edit("".join([random.choice(html).format(ch) for ch in self.strings("error", message)]))
+            os.system(f"rm -f {fn}*")
+            return
+
+        frs = _f.read().split(b'00dc')
+        fi = b'\x00\x01\xb0'
+        cf = 0
+        for _, fr in enumerate(frs):
+            if fp == False:
+                f_.write(fr + b'00dc')
+                cf += 1
+                if fr[5:8] == fi:
+                    fp = True
+            else:
+                if fr[5:8] != fi:
+                    cf += 1
+                    for i in range(lvl):
+                        f_.write(fr + b'00dc')
+        f_.close()
+        _f.close()
+
+        subprocess.call(f'ffmpeg -loglevel quiet -y -i {fn}2.avi {fn}2.mp4', shell=True)
+        await reply.reply(file=fn + "2.mp4")
+        os.system(f"rm -f {fn}*")
+        await message.delete()
     async def fvcmd(self, message):
         reply = await message.get_reply_message()
         lvl = 0
@@ -577,3 +641,4 @@ class AudioEditorMod(loader.Module):
             await message.client.send_file(message.to_id, m, reply_to=reply.id, voice_note=True)
         await message.delete()
         os.remove(fname)
+html = ["<b>{}<b>", "<code>{}</code>", "<i>{}</i>", "<del>{}</del>", "<u>{}</u>", '<a href="https://bruh.moment">{}</a>']
