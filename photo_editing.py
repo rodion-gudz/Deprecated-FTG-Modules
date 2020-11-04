@@ -3,6 +3,7 @@ from .. import loader, utils
 from random import randint, uniform
 from PIL import Image, ImageEnhance, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
+from PIL import Image,ImageFilter
 import random
 import logging
 
@@ -129,6 +130,74 @@ class DistortMod(loader.Module):
         fried_io.seek(0)
         await message.delete()
         await message.client.send_file(message.chat_id, fried_io, reply_to=reply_message.id)
+
+    async def maccmd(S, message):
+        R = True
+        Q = 'image'
+        P = '/'
+        L = 'RGBA'
+        K = '<b>Image?</b>'
+        A = message
+        C = await A.get_reply_message()
+        B = io.BytesIO()
+        M = None
+        if A.file:
+            if A.file.mime_type.split(P)[0] == Q:
+                await A.download_media(B)
+            elif C:
+                if C.file:
+                    if C.file.mime_type.split(P)[0] == Q: M = R;await C.download_media(B)
+                else:
+                    await A.edit(K);
+                    return
+            else:
+                await A.edit(K);
+                return
+        elif C:
+            if C.file:
+                if C.file.mime_type.split(P)[0] == Q: M = R;await C.download_media(B)
+            else:
+                await A.edit(K);
+                return
+        else:
+            await A.edit(K);
+            return
+        try:
+            I = Image.open(B)
+        except:
+            await A.edit(K);
+            return
+        await A.edit('<b>Working...</b>');
+        F, G = I.size;
+        B = Image.new(L, (F, G));
+        J = min(F // 100, G // 100);
+        D = Image.new(L, (F + J * 40, G + J * 40), '#fff')
+        if I.mode == L:
+            B.paste(I, (0, 0), I);
+            E = Image.new(L, (F, G))
+            for N in range(F):
+                for O in range(G):
+                    if B.getpixel((N, O)) != (0, 0, 0, 0): E.putpixel((N, O), (0, 0, 0))
+        else:
+            B.paste(I, (0, 0));
+            E = Image.new(L, (F, G), 'black')
+        E = E.resize((F + J * 5, G + J * 5));
+        D.paste(E, ((D.width - E.width) // 2, (D.height - E.height) // 2), E);
+        D = D.filter(ImageFilter.GaussianBlur(J * 5));
+        D.paste(B, ((D.width - B.width) // 2, (D.height - B.height) // 2), B);
+        H = io.BytesIO();
+        H.name = '-'.join(
+            [''.join([random.choice(string.hexdigits) for B in range(A)]) for A in [5, 4, 3, 2, 1]]) + '.png';
+        D.save(H, 'PNG');
+        H.seek(0)
+        if utils.get_args_raw(A):
+            await A.client.send_file(A.to_id, H, force_document=R);
+            await A.delete()
+        elif M:
+            await C.reply(file=H);
+            await A.delete()
+        else:
+            await A.edit(file=H, text='')
 
     async def rotatecmd(self, message):
         global angle
@@ -298,6 +367,7 @@ class DistortMod(loader.Module):
         image.save(image_stream, "GIF", save_all=True, append_images=[invert], duration=1)
         image_stream.seek(0)
         await utils.answer(message, image_stream)
+
     async def resizecmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
@@ -382,6 +452,7 @@ class DistortMod(loader.Module):
     async def sd2ucmd(self, message):
         """swipe down to up"""
         await presser(message, 3)
+
     async def resizedoccmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
