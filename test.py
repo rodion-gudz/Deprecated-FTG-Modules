@@ -2,7 +2,7 @@ import logging
 import time
 
 from io import BytesIO
-
+import speedtest
 from .. import loader, utils
 from time import sleep
 from datetime import datetime
@@ -42,7 +42,13 @@ class TestMod(loader.Module):
                "logs_unsafe": ("<b>Warning: running this command may reveal personal or dangerous information. "
                                "You can write</b> <code>{}</code> <b>at the end to accept the risks</b>"),
                "logs_force": "FORCE_INSECURE",
-               "suspend_invalid_time": "<b>Invalid time to suspend</b>"}
+               "suspend_invalid_time": "<b>Invalid time to suspend</b>",
+               "running": "<b>Running speedtest...</b>",
+               "results": "<b>Speedtest Results:</b>",
+               "results_download": "<b>Download:</b> <code>{}</code> <b>MiB/s</b>",
+               "results_upload": "<b>Upload:</b> <code>{}</code> <b>MiB/s</b>",
+               "results_ping": "<b>Ping:</b> <code>{}</code> <b>ms</b>"
+               }
 
     @loader.test(resp="Pong")
     @loader.unrestricted
@@ -106,3 +112,28 @@ class TestMod(loader.Module):
 
     async def client_ready(self, client, db):
         self.client = client
+
+    async def speedtestcmd(self, message):
+        """Tests your internet speed"""
+        await utils.answer(message, self.strings("running", message))
+        args = utils.get_args(message)
+        servers = []
+        for server in args:
+            try:
+                servers += [int(server)]
+            except ValueError:
+                logger.warning("server failed")
+        results = await utils.run_sync(self.speedtest, servers)
+        ret = self.strings("results", message) + "\n\n"
+        ret += self.strings("results_download", message).format(round(results["download"] / 2 ** 20, 2)) + "\n"
+        ret += self.strings("results_upload", message).format(round(results["upload"] / 2 ** 20, 2)) + "\n"
+        ret += self.strings("results_ping", message).format(round(results["ping"], 2)) + "\n"
+        await utils.answer(message, ret)
+
+    def speedtest(self, servers):
+        speedtester = speedtest.Speedtest()
+        speedtester.get_servers(servers)
+        speedtester.get_best_server()
+        speedtester.download(threads=None)
+        speedtester.upload(threads=None)
+        return speedtester.results.dict()
