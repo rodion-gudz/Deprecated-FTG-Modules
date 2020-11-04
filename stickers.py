@@ -288,7 +288,6 @@ async def convert(message, as_file=True):
 
 def click_buttons(buttons, target_pack):
     buttons = list(itertools.chain.from_iterable(buttons))
-    # Process in reverse order; most difficult to match first
     try:
         return buttons[int(target_pack)]
     except (IndexError, ValueError):
@@ -308,11 +307,8 @@ def click_buttons(buttons, target_pack):
 
 
 def resize_image(img, size, dest):
-    # Wrapper for asyncio purposes
     try:
         im = Image.open(img)
-        # We used to use thumbnail(size) here, but it returns with a *max* dimension of 512,512
-        # rather than making one side exactly 512 so we have to calculate dimensions manually :(
         if im.width == im.height:
             size = (512, 512)
         elif im.width < im.height:

@@ -8,7 +8,6 @@ from .. import loader, utils
 import io
 from io import BytesIO
 from PIL import Image
-
 # Author: https://t.me/GovnoCodules
 
 logger = logging.getLogger(__name__)
@@ -88,6 +87,40 @@ class x0Mod(loader.Module):
                 await event.edit('<code>Разблокируй @imgurbot_bot</code>')
                 return
             await event.edit(response.text)
+
+    async def hastecmd(self, message):
+        media = False
+        reply_to = False
+        user_msg = f"""{utils.get_args_raw(message)}"""
+        reply = await message.get_reply_message()
+        if reply:
+            if reply.media:
+                user_msg = reply.media
+                media = True
+                reply_to = True
+            else:
+                user_msg = f"""{reply.text}"""
+                reply_to = True
+        else:
+            pass
+        await message.edit('<code>Ждем...</code>')
+        async with message.client.conversation('@hastebin_bbot') as conv:
+            try:
+                response = conv.wait_event(events.NewMessage(incoming=True,
+                                                             from_users=1358418309))
+                if media:
+                    await message.client.send_file('@hastebin_bbot', user_msg)
+                else:
+                    await message.client.send_message('@hastebin_bbot', user_msg)
+                response = await response
+            except YouBlockedUserError:
+                await message.reply('<code>Разблокируй </code> @hastebin_bbot')
+                return
+            await message.delete()
+            if reply_to:
+                await message.client.send_message(message.to_id, response.message, reply_to=reply.id)
+            else:
+                await message.client.send_message(message.to_id, response.message)
 
 
 async def check_media(reply_message):
