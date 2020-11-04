@@ -4,6 +4,21 @@ from requests import get
 import io
 from telethon.tl.types import MessageEntityUrl, MessageEntityTextUrl
 import os
+import os
+import time
+import asyncio
+from requests import get
+
+from youtube_dl import YoutubeDL
+from youtube_dl.utils import (DownloadError, ContentTooShortError,
+                              ExtractorError, GeoRestrictedError,
+                              MaxDownloadsReached, PostProcessingError,
+                              UnavailableVideoError, XAttrMetadataError)
+from asyncio import sleep
+from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER, GOOGLE_CHROME_BIN
+from userbot.events import register
+from telethon.tl.types import DocumentAttributeAudio
+from uniborg.util import progress, humanbytes, time_formatter
 # Author: https://t.me/ftgmodulesbyfl1yd
 
 def register(cb):
@@ -108,3 +123,169 @@ class ReplyDownloaderMod(loader.Module):
 
         await event.delete()
 
+    async def dlvideocmd(self, message):
+        url = utils.get_args_raw(message)
+
+        await message.edit("Preparing to download...")
+
+        opts = {
+            'format':
+                'best',
+            'addmetadata':
+                True,
+            'key':
+                'FFmpegMetadata',
+            'prefer_ffmpeg':
+                True,
+            'geo_bypass':
+                True,
+            'nocheckcertificate':
+                True,
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4'
+            }],
+            'outtmpl':
+                '%(id)s.mp4',
+            'logtostderr':
+                False,
+            'quiet':
+                True
+        }
+
+        try:
+            await message.edit("`Fetching data, please wait..`")
+            with YoutubeDL(opts) as rip:
+                rip_data = rip.extract_info(url)
+        except DownloadError as DE:
+            await message.edit(f"`{str(DE)}`")
+            return
+        except ContentTooShortError:
+            await message.edit("`The download content was too short.`")
+            return
+        except GeoRestrictedError:
+            await message.edit(
+                "`Video is not available from your geographic location due to geographic restrictions imposed by a website.`"
+            )
+            return
+        except MaxDownloadsReached:
+            await message.edit("`Max-downloads limit has been reached.`")
+            return
+        except PostProcessingError:
+            await message.edit("`There was an error during post processing.`")
+            return
+        except UnavailableVideoError:
+            await message.edit("`Media is not available in the requested format.`")
+            return
+        except XAttrMetadataError as XAME:
+            await message.edit(f"`{XAME.code}: {XAME.msg}\n{XAME.reason}`")
+            return
+        except ExtractorError:
+            await message.edit("`There was an error during info extraction.`")
+            return
+        except Exception as e:
+            await message.edit(f"{str(type(e)): {str(e)}}")
+            return
+        c_time = time.time()
+        await message.edit(f"Preparing to upload video:\
+        \n**{rip_data['title']}**\
+        \nby *{rip_data['uploader']}*")
+        await message.client.send_file(
+            message.chat_id,
+            f"{rip_data['id']}.mp4",
+            supports_streaming=True,
+            caption=rip_data['title'],
+            progress_callback=lambda d, t: asyncio.get_event_loop(
+               ).create_task(
+                   progress(d, t, message, c_time, "Uploading..",
+                        f"{rip_data['title']}.mp4")))
+        os.remove(f"{rip_data['id']}.mp4")
+        await message.delete()
+
+    async def dlaudiocmd(self, message):
+        url = utils.get_args_raw(message)
+        await message.edit("Preparing to download...")
+
+        opts = {
+            'format':
+                'bestaudio',
+            'addmetadata':
+                True,
+            'key':
+                'FFmpegMetadata',
+            'writethumbnail':
+                True,
+            'prefer_ffmpeg':
+                True,
+            'geo_bypass':
+                True,
+            'nocheckcertificate':
+                True,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '320',
+            }],
+            'outtmpl':
+                '%(id)s.mp3',
+            'quiet':
+                True,
+            'logtostderr':
+                False
+        }
+        video = False
+        song = True
+
+        try:
+            await message.edit("`Fetching data, please wait..`")
+            with YoutubeDL(opts) as rip:
+                rip_data = rip.extract_info(url)
+        except DownloadError as DE:
+            await message.edit(f"`{str(DE)}`")
+            return
+        except ContentTooShortError:
+            await message.edit("`The download content was too short.`")
+            return
+        except GeoRestrictedError:
+            await message.edit(
+                "`Video is not available from your geographic location due to geographic restrictions imposed by a website.`"
+            )
+            return
+        except MaxDownloadsReached:
+            await message.edit("`Max-downloads limit has been reached.`")
+            return
+        except PostProcessingError:
+            await message.edit("`There was an error during post processing.`")
+            return
+        except UnavailableVideoError:
+            await message.edit("`Media is not available in the requested format.`")
+            return
+        except XAttrMetadataError as XAME:
+            await message.edit(f"`{XAME.code}: {XAME.msg}\n{XAME.reason}`")
+            return
+        except ExtractorError:
+            await message.edit("`There was an error during info extraction.`")
+            return
+        except Exception as e:
+            await message.edit(f"{str(type(e)): {str(e)}}")
+            return
+        c_time = time.time()
+
+        await message.edit(f"`Preparing to upload song:`\
+        \n**{rip_data['title']}**\
+        \nby *{rip_data['uploader']}*")
+        await message.client.send_file(
+            message.chat_id,
+            f"{rip_data['id']}.mp3",
+            supports_streaming=True,
+            attributes=[
+                DocumentAttributeAudio(duration=int(rip_data['duration']),
+                                        title=str(rip_data['title']),
+                                        performer=str(rip_data['uploader']))
+            ],
+            progress_callback=lambda d, t: asyncio.get_event_loop(
+            ).create_task(
+                progress(d, t, message, c_time, "Uploading..",
+                        f"{rip_data['title']}.mp3")))
+        os.remove(f"{rip_data['id']}.mp3")
+        await message.delete()

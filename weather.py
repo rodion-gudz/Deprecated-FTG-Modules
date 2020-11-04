@@ -18,7 +18,7 @@ class WWWTrMod(loader.Module):
         self.client = client
 
     @loader.sudo
-    async def weathercmd(self, message):
+    async def wcmd(self, message):
         city = utils.get_args(message)
         msg = []
         await message.edit("Processing...")
