@@ -8,8 +8,7 @@ logger = logging.getLogger("FilterModule")
 
 @loader.tds
 class FiltersMod(loader.Module):
-    """When you filter a text, it auto responds to it if a user triggers the word)"""
-    strings = {"name": "Фильтры"}
+    strings = {"name": "Filters"}
 
     def __init__(self):
         self._me = None

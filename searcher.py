@@ -2,32 +2,11 @@ from .. import loader, utils  # pylint: disable=relative-beyond-top-level
 from telethon.tl.types import DocumentAttributeFilename
 import logging
 
-from youtube_search import YoutubeSearch
 from search_engine_parser import GoogleSearch
 import json
 import io
 import requests
 logger = logging.getLogger(__name__)
-import os
-import time
-import asyncio
-import shutil
-from bs4 import BeautifulSoup
-import re
-from html import unescape
-from googleapiclient.discovery import build
-from requests import get
-
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import (DownloadError, ContentTooShortError,
-                              ExtractorError, GeoRestrictedError,
-                              MaxDownloadsReached, PostProcessingError,
-                              UnavailableVideoError, XAttrMetadataError)
-from asyncio import sleep
-from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER, GOOGLE_CHROME_BIN
-from userbot.events import register
-from telethon.tl.types import DocumentAttributeAudio
-from uniborg.util import progress, humanbytes, time_formatter
 import asyncurban
 
 
