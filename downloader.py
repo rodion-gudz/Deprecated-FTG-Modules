@@ -74,7 +74,7 @@ class ReplyDownloaderMod(loader.Module):
         else:
             return await message.edit('No arguments')
 
-    async def urldlcmd(self, message):
+    async def dlfilecmd(self, message):
         event = message
         args = utils.get_args_raw(event)
         reply = await event.get_reply_message()

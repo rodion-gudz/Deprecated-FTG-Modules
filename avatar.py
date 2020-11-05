@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class GetPPMod(loader.Module):
-    strings = {"name": "Avatar utils"}
+    strings = {"name": "Profile photo"}
 
     async def client_ready(self, client, db):
         self.client = client
