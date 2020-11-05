@@ -28,7 +28,7 @@ from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRI
 from userbot.events import register
 from telethon.tl.types import DocumentAttributeAudio
 from uniborg.util import progress, humanbytes, time_formatter
-
+import asyncurban
 
 
 @loader.tds
@@ -42,11 +42,16 @@ class YTsearchMod(loader.Module):
         "no_term": "<b>I can't Google nothing</b>",
         "no_results": "<b>Could not find anything about</b> <code>{}</code> <b>on Google</b>",
         "results": "<b>These came back from a Google search for</b> <code>{}</code>:\n\n",
-        "result": "<a href='{}'>{}</a>\n\n<code>{}</code>\n",
+        "provide_word": "<b>Provide a word(s) to define.</b>",
+        "def_error": "<b>Couldn't find definition for that.</b>",
+        "resulta": "<b>Text</b>: <code>{}</code>\n<b>Meaning</b>: <code>{}\n<b>Example</b>: <code>{}</code>"
     }
 
     async def client_ready(self, client, db):
         self.client = client
+
+    def __init__(self):
+        self.urban = asyncurban.UrbanDictionary()
 
     @loader.unrestricted
     @loader.ratelimit
@@ -88,6 +93,20 @@ class YTsearchMod(loader.Module):
             await utils.answer(message, text)
         else:
             await utils.answer(message, self.strings("error", message))
+
+    async def urbancmd(self, message):
+        args = utils.get_args_raw(message)
+
+        if not args:
+            return await utils.answer(message, self.strings("provide_word", message))
+
+        try:
+            definition = await self.urban.get_word(args)
+        except asyncurban.WordNotFoundError:
+            return await utils.answer(message, self.strings("def_error", message))
+        result = self.strings("resulta", message).format(definition.word, definition.definition, definition.example)
+        await utils.answer(message, result)
+
 
 async def check_media(message, reply):
     if reply and reply.media:
