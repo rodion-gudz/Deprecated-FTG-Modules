@@ -8,6 +8,11 @@ import io
 import requests
 logger = logging.getLogger(__name__)
 import asyncurban
+from .. import loader, utils
+
+import logging
+import lyricsgenius
+
 
 
 @loader.tds
@@ -23,7 +28,11 @@ class YTsearchMod(loader.Module):
         "results": "<b>These came back from a Google search for</b> <code>{}</code>:\n\n",
         "provide_word": "<b>Provide a word(s) to define.</b>",
         "def_error": "<b>Couldn't find definition for that.</b>",
-        "resulta": "<b>Text</b>: <code>{}</code>\n<b>Meaning</b>: <code>{}\n<b>Example</b>: <code>{}</code>"
+        "resulta": "<b>Text</b>: <code>{}</code>\n<b>Meaning</b>: <code>{}\n<b>Example</b>: <code>{}</code>",
+        "genius_api_token_doc": "The LyricsGenius API token from http://genius.com/api-clients",
+        "invalid_syntax": "<b>Please specify song and artist.</b>",
+        "song_not_found": "<b>Song not found</b>",
+        "missing_token": "<b>API Token missing</b>"
     }
 
     async def client_ready(self, client, db):
@@ -31,6 +40,13 @@ class YTsearchMod(loader.Module):
 
     def __init__(self):
         self.urban = asyncurban.UrbanDictionary()
+        self.config = loader.ModuleConfig("GENIUS_API_TOKEN", None, lambda m: self.strings("genius_api_token_doc", m))
+
+    def config_complete(self):
+        if self.config["GENIUS_API_TOKEN"]:
+            self.genius = lyricsgenius.Genius(self.config["GENIUS_API_TOKEN"])
+        else:
+            self.genius = None
 
     @loader.unrestricted
     @loader.ratelimit
@@ -85,6 +101,29 @@ class YTsearchMod(loader.Module):
             return await utils.answer(message, self.strings("def_error", message))
         result = self.strings("resulta", message).format(definition.word, definition.definition, definition.example)
         await utils.answer(message, result)
+
+    @loader.unrestricted
+    @loader.ratelimit
+    async def lyricscmd(self, message):
+        if self.genius is None:
+            await utils.answer(message, self.strings("missing_token", message))
+        args = utils.get_args_split_by(message, ",")
+        if len(args) != 2:
+            logger.debug(args)
+            await utils.answer(message, self.strings("invalid_syntax", message))
+            return
+        logger.debug("getting song lyrics for " + args[0] + ", " + args[1])
+        try:
+            song = await utils.run_sync(self.genius.search_song, args[0], args[1])
+        except TypeError:
+            # Song not found causes internal library error
+            song = None
+        if song is None:
+            await utils.answer(message, self.strings("song_not_found", message))
+            return
+        logger.debug(song)
+        logger.debug(song.lyrics)
+        await utils.answer(message, utils.escape_html(song.lyrics))
 
 
 async def check_media(message, reply):
