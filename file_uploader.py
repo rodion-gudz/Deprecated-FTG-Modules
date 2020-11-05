@@ -144,26 +144,6 @@ class x0Mod(loader.Module):
             else:
                 await message.client.send_message(message.to_id, response.message)
 
-    @loader.unrestricted
-    @loader.ratelimit
-    async def uploadshcmd(self, message):
-        if message.file:
-            msg = message
-        else:
-            msg = (await message.get_reply_message())
-        doc = getattr(msg, "media", None)
-        if doc is None:
-            await utils.answer(message, self.strings("no_file", message))
-            return
-        doc = message.client.iter_download(doc)
-        logger.debug("begin transfer")
-        await utils.answer(message, self.strings("uploading", message))
-        r = await utils.run_sync(requests.put, self.config["UPLOAD_URL"].format(msg.file.name),
-                                 data=sgen(doc, asyncio.get_event_loop()))
-        logger.debug(r)
-        r.raise_for_status()
-        logger.debug(r.headers)
-        await utils.answer(message, self.strings("uploaded", message).format(r.text))
 
     async def dogbincmd(self, message):
         dogbin_final_url = ""
