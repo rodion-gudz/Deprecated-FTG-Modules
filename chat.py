@@ -16,6 +16,8 @@ from telethon.errors import (UserIdInvalidError, UserNotMutualContactError, User
                              UserBlockedError, ChatAdminRequiredError, UserKickedError, InputUserDeactivatedError, ChatWriteForbiddenError, UserAlreadyParticipantError)
 from telethon.tl.types import (ChannelParticipantsAdmins, PeerChat, ChannelParticipantsBots)
 from userbot import bot
+from .. import loader, utils
+import os
 logger = logging.getLogger(__name__)
 def register(cb):
     cb(TagAllMod())
@@ -64,7 +66,6 @@ class TagAllMod(loader.Module):
             await chatinfo.edit("<b>Это не чат!</b>")
 
     async def invitecmd(self, event):
-        """Используйте .invite <@ или реплай>, чтобы добавить пользователя в чат."""
         if event.fwd_from:
             return
         to_add_users = utils.get_args_raw(event)
@@ -181,8 +182,7 @@ class TagAllMod(loader.Module):
                             return
                         await event.edit("<b>Пользователь приглашён успешно!</b>")
 
-    async def kickmecmd(self, leave):
-        """Используйте команду .kickme <причина>; ничего, чтобы кикнуть себя из чата."""
+    async def leavecmd(self, leave):
         reason = utils.get_args_raw(leave)
         try:
             if reason:
@@ -194,8 +194,55 @@ class TagAllMod(loader.Module):
             await leave.edit("<b>Это не чат!</b>")
             return
 
+    async def dumpcmd(self, message):
+        """.du <n> <m> <s>
+            Дамп юзеров чата
+            <n> - Получить только пользователей с открытыми номерами
+            <m> - Отправить дамп в этот чат
+            <s> - Тихий дамп
+        """
+        num = False
+        silent = False
+        tome = False
+        if (utils.get_args_raw(message)):
+            a = utils.get_args_raw(message)
+            if ("n" in a):
+                num = True
+            if ("s" in a):
+                silent = True
+            if ("m" in a):
+                tome = True
+        if silent == False:
+            await message.edit("🖤Дампим чат...🖤")
+        else:
+            await message.delete()
+        f = open(f"dump-{str(message.to_id)}.txt", "w")
+        f.write("FNAME;LNAME;USER;ID;NUMBER\n")
+        me = await message.client.get_me()
+        for i in await message.client.get_participants(message.to_id):
+            if (i.id == self.me.id): continue
+            if (num):
+                if (i.phone):
+                    f.write(f"{str(i.first_name)};{str(i.last_name)};{str(i.username)};{str(i.id)};{str(i.phone)}\n")
+            else:
+                f.write(f"{str(i.first_name)};{str(i.last_name)};{str(i.username)};{str(i.id)};{str(i.phone)}\n")
+        f.close()
+        if tome:
+            await message.client.send_file('me', f"dump-{str(message.to_id)}.txt",
+                                           caption="Дамп чата " + str(message.to_id))
+        else:
+            await message.client.send_file(message.to_id, f"dump-{str(message.to_id)}.txt",
+                                           caption="Дамп чата " + str(message.to_id))
+        if silent == False:
+            if tome:
+                if num:
+                    await message.edit("🖤Дамп юзеров чата сохранён в избранных!🖤")
+                else:
+                    await message.edit("🖤Дамп юзеров чата с открытыми номерами сохранён в избранных!🖤")
+            else:
+                await message.delete()
+
     async def userscmd(self, message):
-        """Команда .users <имя> выводит список всех пользователей в чате."""
         if message.chat:
             try:
                 await message.edit("<b>Считаем...</b>")
