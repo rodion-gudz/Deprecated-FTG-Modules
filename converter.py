@@ -63,24 +63,26 @@ class WEBPtoPNGMod(loader.Module):
             await message.edit("Downloading...")
             reply = await message.get_reply_message()
             if reply:
-                await message.edit("Converting...")
-                await message.client.download_media(reply.media, "tgs.tgs")
-                os.system("lottie_convert.py tgs.tgs tgs.gif")
-                await message.edit("Sending...")
-                await message.client.send_file(message.to_id, "tgs.gif")
+                ext = reply.file.ext
+                if reply.video:
+                    await message.edit("Converting...")
+                    await message.client.download_media(reply.media, "inputfile.mp4")
+                    os.system("ffmpeg -i inputfile.mp4 -vcodec copy -an outputfile.mp4")
+                    await message.edit("Sending...")
+                    await message.client.send_file(message.to_id, "outputfile.mp4")
+                else:
+                    await message.edit("Converting...")
+                    await message.client.download_media(reply.media, f"tgs.tgs")
+                    os.system("lottie_convert.py tgs.tgs tgs.gif")
+                    await message.edit("Sending...")
+                    await message.client.send_file(message.to_id, "tgs.gif")
                 await message.delete()
-                try:
-                    os.remove("tgs*")
-                except FileNotFoundError:
-                    pass
+                os.system("rm -rf inputfile.mp4 outputfile.mp4 tgs.tgs tgs.gif")
             else:
-                return await message.edit("Reply to media")
+                return await message.edit("Нет реплая на гиф/анимированный стикер/видеосообщение.")
         except:
-            await message.edit("Reply to media")
-            try:
-                os.remove("tgs*")
-            except FileNotFoundError:
-                pass
+            await message.edit("Произошла непредвиденная ошибка.")
+            os.system("rm -rf inputfile.mp4 outputfile.mp4 tgs.tgs tgs.gif")
             return
 
     async def mp3cmd(self, message):
