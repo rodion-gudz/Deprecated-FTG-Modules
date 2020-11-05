@@ -6,7 +6,7 @@ import logging
 import asyncio
 from asyncio import sleep
 logger = logging.getLogger(__name__)
-
+import io
 
 @loader.tds
 class TyperMod(loader.Module):
@@ -121,6 +121,29 @@ class TyperMod(loader.Module):
         await asyncio.sleep(t)
         await message.delete()
 
+    async def mtfcmd(self, message):
+        reply = await message.get_reply_message()
+        if not reply or not reply.message:
+            await message.edit("<b>Reply to text!</b>")
+            return
+        text = bytes(reply.raw_text, "utf8")
+        fname = utils.get_args_raw(message) or str(message.id + reply.id) + ".txt"
+        file = io.BytesIO(text)
+        file.name = fname
+        file.seek(0)
+        await reply.reply(file=file)
+        await message.delete()
+
+    async def ftmcmd(self, message):
+        reply = await message.get_reply_message()
+        if not reply or not reply.file:
+            await message.edit("<b>Reply to file!</b>")
+            return
+        text = await reply.download_media(bytes)
+        text = str(text, "utf8")
+        if utils.get_args(message):
+            text = f"<code>{text}</code>"
+        await utils.answer(message, utils.escape_html(text))
 
 async def update_message(message, m, entities):
     try:
