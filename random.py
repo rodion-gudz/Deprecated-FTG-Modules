@@ -25,7 +25,7 @@ class YesNoMod(loader.Module):
                                                               "🎯": [1, 2, 3, 4, 5, 6],
                                                               "🏀": [1, 2, 3, 4, 5]},
                                           "Mapping of emoji to possible values")
-    def __init__(self):
+
 
 
     @loader.unrestricted
