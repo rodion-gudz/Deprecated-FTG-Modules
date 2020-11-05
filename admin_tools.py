@@ -72,7 +72,6 @@ def register(cb):
     cb(AdminToolsMod())
 
 class AdminToolsMod(loader.Module):
-    """Администрирование чата"""
     strings = {'name': 'Admin Tools',
                'no_reply': '<b>Нет реплая на картинку/стикер.</b>',
                'not_pic': '<b>Это не картинка/стикер</b>',

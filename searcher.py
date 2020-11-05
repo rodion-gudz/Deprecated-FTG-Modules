@@ -8,10 +8,27 @@ import json
 import io
 import requests
 logger = logging.getLogger(__name__)
+import os
+import time
+import asyncio
+import shutil
+from bs4 import BeautifulSoup
+import re
+from html import unescape
+from googleapiclient.discovery import build
+from requests import get
 
+from youtube_dl import YoutubeDL
+from youtube_dl.utils import (DownloadError, ContentTooShortError,
+                              ExtractorError, GeoRestrictedError,
+                              MaxDownloadsReached, PostProcessingError,
+                              UnavailableVideoError, XAttrMetadataError)
+from asyncio import sleep
+from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER, GOOGLE_CHROME_BIN
+from userbot.events import register
+from telethon.tl.types import DocumentAttributeAudio
+from uniborg.util import progress, humanbytes, time_formatter
 
-def register(cb):
-    cb(YTsearchod())
 
 
 @loader.tds
@@ -21,33 +38,19 @@ class YTsearchMod(loader.Module):
         "search": "⚪⚪⚪\n⚪❓⚪\n⚪⚪⚪",
         "no_reply": "<b>Reply to image or sticker!</b>",
         "result": '<a href="{}"><b>🔴⚪🔴|See</b>\n<b>⚪🔴⚪|Search</b>\n<b>⚪🔴⚪|Results</b></a>',
-        "error": '<b>Something went wrong...</b>'
+        "error": '<b>Something went wrong...</b>',
+        "no_term": "<b>I can't Google nothing</b>",
+        "no_results": "<b>Could not find anything about</b> <code>{}</code> <b>on Google</b>",
+        "results": "<b>These came back from a Google search for</b> <code>{}</code>:\n\n",
+        "result": "<a href='{}'>{}</a>\n\n<code>{}</code>\n",
     }
 
     async def client_ready(self, client, db):
         self.client = client
 
-    @loader.sudo
-    async def ytcmd(self, message):
-        """текст или реплай"""
-        text = utils.get_args_raw(message)
-        if not text:
-            reply = await message.get_reply_message()
-            if not reply:
-                await message.delete()
-                return
-            text = reply.raw_text
-        results = YoutubeSearch(text, max_results=10).to_dict()
-        out = f'Найдено по запросу: {text}'
-        for r in results:
-            out += f'\n\n<a href="https://www.youtube.com/{r["link"]}">{r["title"]}</a>'
-
-        await message.edit(out)
-
     @loader.unrestricted
     @loader.ratelimit
     async def googlecmd(self, message):
-        """Shows Google search results."""
         text = utils.get_args_raw(message.message)
         if not text:
             text = (await message.get_reply_message()).message
