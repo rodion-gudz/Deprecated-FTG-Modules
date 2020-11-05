@@ -10,7 +10,6 @@ from .. import loader, utils, security
 
 @loader.tds
 class YesNoMod(loader.Module):
-    """Helps you make important life choices"""
     strings = {"name": "Random",
                "yes_words_cfg_doc": "Yes words",
                "no_words_cfg_doc": "No words"}
