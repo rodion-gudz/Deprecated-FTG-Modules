@@ -154,7 +154,7 @@ class DistortMod(loader.Module):
         fried_io.name = "image.jpeg"
         image.save(fried_io, "JPEG")
         fried_io.seek(0)
-
+        await message.delete()
         await message.reply(file=fried_io)
 
     async def distortcmd(self, message):
