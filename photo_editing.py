@@ -3,7 +3,7 @@ from .. import loader, utils
 from random import randint, uniform
 from PIL import Image, ImageEnhance, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
-from PIL import Image,ImageFilter
+from PIL import Image, ImageFilter
 import string
 import random
 from telethon import events
@@ -217,6 +217,7 @@ class DistortMod(loader.Module):
 
             await message.delete()
             await message.client.send_file(message.to_id, response.media)
+
     async def jpegdcmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
@@ -803,7 +804,7 @@ async def griding(file):
 
 
 async def presser(message, way):
-    reply = await check_media(message)
+    reply = await check_mediaa(message)
     if not reply:
         await message.edit("<b>Senpai... please reply to image or not animated sticker!</b>")
         return
@@ -861,25 +862,39 @@ async def presser(message, way):
     output.seek(0)
     await reply.reply(file=output)
     await message.delete()
+
+
+async def check_mediaa(message):
+    reply = await message.get_reply_message()
+    if not reply:
+        return False
+    if not reply.file:
+        return False
+    mime = reply.file.mime_type.split("/")[0].lower()
+    if mime != "image":
+        return False
+    return reply
+
+
 async def cropping(img):
-	(x, y) = img.size
-	cy = 5
-	cx = 5
-	sx = x//cx
-	sy = y//cy
-	if (sx*cx, sy*cy) != (x, y):
-		img = img.resize((sx*cx, sy*cy))
-	(lx, ly) = (0, 0)
-	media = []
-	for i in range(1, cy+1):
-		for o in range(1, cx+1):
-			mimg = img.crop((lx, ly, lx+sx, ly+sy))
-			mimg = mimg.resize((512,512))
-			bio = io.BytesIO()
-			bio.name = 'image.png'
-			mimg.save(bio, 'PNG')
-			media.append(bio.getvalue())
-			lx = lx + sx
-		lx = 0
-		ly = ly + sy
-	return media
+    (x, y) = img.size
+    cy = 5
+    cx = 5
+    sx = x // cx
+    sy = y // cy
+    if (sx * cx, sy * cy) != (x, y):
+        img = img.resize((sx * cx, sy * cy))
+    (lx, ly) = (0, 0)
+    media = []
+    for i in range(1, cy + 1):
+        for o in range(1, cx + 1):
+            mimg = img.crop((lx, ly, lx + sx, ly + sy))
+            mimg = mimg.resize((512, 512))
+            bio = io.BytesIO()
+            bio.name = 'image.png'
+            mimg.save(bio, 'PNG')
+            media.append(bio.getvalue())
+            lx = lx + sx
+        lx = 0
+        ly = ly + sy
+    return media
