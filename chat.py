@@ -194,7 +194,7 @@ class TagAllMod(loader.Module):
             await leave.edit("<b>Это не чат!</b>")
             return
 
-    async def dumpcmd(self, message):
+    async def chatdumpcmd(self, message):
         num = False
         silent = False
         tome = False
