@@ -38,7 +38,6 @@ class TagAllMod(loader.Module):
         self.client = client
 
     async def tagallcmd(self, message):
-        """Используй .tagall <текст (по желанию)>."""
         arg = utils.get_args_raw(message)
         logger.error(message)
         notifies = []
