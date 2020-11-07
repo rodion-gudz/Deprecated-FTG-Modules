@@ -13,7 +13,7 @@ class GetPPMod(loader.Module):
         self.client = client
         self.db = db
 
-    async def potocmd(self, message):
+    async def getavacmd(self, message):
         id = utils.get_args_raw(message)
         user = await message.get_reply_message()
         chat = message.input_chat
@@ -53,35 +53,80 @@ class GetPPMod(loader.Module):
                 return
         await message.delete()
 
-    async def onavacmd(self, message):
-        try:
-            reply = await message.get_reply_message()
-            if reply:
-                await message.edit("Скачиваем...")
-                if reply.video:
-                    await message.client.download_media(reply.media, "ava.mp4")
-                    await message.edit("Конвертируем...")
-                    os.system("ffmpeg -i ava.mp4 -c copy -an gifavaa.mp4 -y")
-                    os.system("ffmpeg -i gifavaa.mp4 -vf scale=360:360 gifava.mp4 -y")
-                else:
-                    await message.client.download_media(reply.media, "tgs.tgs")
-                    await message.edit("Конвертируем...")
-                    os.system("lottie_convert.py tgs.tgs tgs.gif; mv tgs.gif gifava.mp4")
-            else:
-                return await message.edit("Нет реплая на гиф/анимированный стикер/видеосообщение.")
-            await message.edit("Устанавливаем аву...")
-            await message.client(
-                functions.photos.UploadProfilePhotoRequest(video=await message.client.upload_file("gifava.mp4"),
-                                                           video_start_ts=0.0))
-            await message.edit("Ава установлена.")
-            os.system("rm -rf ava.mp4 gifava.mp4 gifavaa.mp4 tgs*")
-        except:
-            await message.edit(
-                "Блин, какой я дурак, я не отличаю гифку/анимированный стикер/видео от любого другого файла.\n\n"
-                "<b>ЭТОТ ФАЙЛ НЕ ПОДДЕРЖИВАЕТСЯ!!!</b>(либо просто какая-то тех.ошибка c: )")
+    async def setavacmd(self, message):
+        reply = await check_mediaa(message)
+        if not reply:
             try:
+                reply = await message.get_reply_message()
+                if reply:
+                    await message.edit("Скачиваем...")
+                    if reply.video:
+                        await message.client.download_media(reply.media, "ava.mp4")
+                        await message.edit("Конвертируем...")
+                        os.system("ffmpeg -i ava.mp4 -c copy -an gifavaa.mp4 -y")
+                        os.system("ffmpeg -i gifavaa.mp4 -vf scale=360:360 gifava.mp4 -y")
+                    else:
+                        await message.client.download_media(reply.media, "tgs.tgs")
+                        await message.edit("Конвертируем...")
+                        os.system("lottie_convert.py tgs.tgs tgs.gif; mv tgs.gif gifava.mp4")
+                else:
+                    return await message.edit("Нет реплая на гиф/анимированный стикер/видеосообщение.")
+                await message.edit("Устанавливаем аву...")
+                await message.client(
+                    functions.photos.UploadProfilePhotoRequest(video=await message.client.upload_file("gifava.mp4"),
+                                                               video_start_ts=0.0))
+                await message.edit("Ава установлена.")
                 os.system("rm -rf ava.mp4 gifava.mp4 gifavaa.mp4 tgs*")
             except:
-                pass
-            return
+                await message.edit(
+                    "Блин, какой я дурак, я не отличаю гифку/анимированный стикер/видео от любого другого файла.\n\n"
+                    "<b>ЭТОТ ФАЙЛ НЕ ПОДДЕРЖИВАЕТСЯ!!!</b>(либо просто какая-то тех.ошибка c: )")
+                try:
+                    os.system("rm -rf ava.mp4 gifava.mp4 gifavaa.mp4 tgs*")
+                except:
+                    pass
+                return
+        else:
+            reply = await message.get_reply_message()
+            try:
+                reply.media.photo
+            except:
+                await message.edit("ДАЙ МНЕ БЛЯТЬ ФОТО СУКА ТЫ ЕБАНАЯ")
+                return
+            await message.edit("Downloading...")
+            photo = await message.client.download_media(message=reply.photo)
+            up = await message.client.upload_file(photo)
+            await message.edit("Uploading avatar...")
+            await message.client(functions.photos.UploadProfilePhotoRequest(up))
+            await message.delete()
+            os.remove(photo)
 
+    async def delavacmd(self, message):
+        ava = await message.client.get_profile_photos('me', limit=1)
+        if len(ava) > 0:
+            await message.edit("Удаляем аватарку...")
+            await message.client(functions.photos.DeletePhotosRequest(ava))
+            await message.edit("Текущая аватарка удалена")
+        else:
+            await message.edit("ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКИ!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
+
+    async def delavascmd(self, message):
+        ava = await message.client.get_profile_photos('me')
+        if len(ava) > 0:
+            await message.edit("Удаляем аватарки...")
+            await message.client(functions.photos.DeletePhotosRequest(await message.client.get_profile_photos('me')))
+            await message.edit("Аватарки удалены")
+        else:
+            await message.edit("ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКОК!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
+
+
+async def check_mediaa(message):
+    reply = await message.get_reply_message()
+    if not reply:
+        return False
+    if not reply.file:
+        return False
+    mime = reply.file.mime_type.split("/")[0].lower()
+    if mime != "image":
+        return False
+    return reply
