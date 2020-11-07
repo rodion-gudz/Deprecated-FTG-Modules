@@ -195,12 +195,6 @@ class TagAllMod(loader.Module):
             return
 
     async def dumpcmd(self, message):
-        """.du <n> <m> <s>
-            Дамп юзеров чата
-            <n> - Получить только пользователей с открытыми номерами
-            <m> - Отправить дамп в этот чат
-            <s> - Тихий дамп
-        """
         num = False
         silent = False
         tome = False
@@ -213,14 +207,14 @@ class TagAllMod(loader.Module):
             if ("m" in a):
                 tome = True
         if silent == False:
-            await message.edit("🖤Дампим чат...🖤")
+            await message.edit("Dumping...")
         else:
             await message.delete()
         f = open(f"dump-{str(message.to_id)}.txt", "w")
         f.write("FNAME;LNAME;USER;ID;NUMBER\n")
         me = await message.client.get_me()
         for i in await message.client.get_participants(message.to_id):
-            if (i.id == self.me.id): continue
+            if (i.id == me.id): continue
             if (num):
                 if (i.phone):
                     f.write(f"{str(i.first_name)};{str(i.last_name)};{str(i.username)};{str(i.id)};{str(i.phone)}\n")

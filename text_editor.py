@@ -25,8 +25,7 @@ class TyperMod(loader.Module):
                                           "DELAY_TEXT", 0.02, lambda m: self.strings("delay_text_cfg_doc", m))
 
     @loader.ratelimit
-    async def typecmd(self, message):
-        """.type <message>"""
+    async def typercmd(self, message):
         a = utils.get_args_raw(message)
         if not a:
             await utils.answer(message, self.strings("no_message", message))
