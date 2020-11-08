@@ -68,7 +68,7 @@ class x0Mod(loader.Module):
         output = f'{url}'
         await message.edit(output)
 
-    async def phcmd(self, message):
+    async def telegraphcmd(self, message):
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data = await check_media(reply_message)
