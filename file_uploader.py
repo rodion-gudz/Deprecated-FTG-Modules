@@ -103,12 +103,14 @@ class x0Mod(loader.Module):
             try:
                 what = lol(pic)
                 response = conv.wait_event(events.NewMessage(incoming=True, from_users=985223903))
-                await event.client.send_file(chat, what)
+                mm = await event.client.send_file(chat, what)
                 response = await response
+                await mm.delete()
             except YouBlockedUserError:
                 await event.edit('<code>Разблокируй @imgurbot_bot</code>')
                 return
             await event.edit(response.text)
+            await response.delete()
 
     async def hastecmd(self, message):
         media = False

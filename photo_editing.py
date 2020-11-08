@@ -212,16 +212,19 @@ class DistortMod(loader.Module):
         async with message.client.conversation(chat) as conv:
             try:
                 response = conv.wait_event(events.NewMessage(incoming=True, from_users=1120861844))
-
-                await message.client.send_file(chat, photo)
-
+                response2 = conv.wait_event(events.NewMessage(incoming=True, from_users=1120861844))
+                mm = await message.client.send_file(chat, photo)
                 response = await response
+                response2 = await response2
+                await mm.delete()
             except YouBlockedUserError:
                 await message.reply('<code>Unblock</code> @Lines50Bot')
                 return
 
             await message.delete()
-            await message.client.send_file(message.to_id, response.media)
+            await message.client.send_file(message.to_id, response2.media)
+            await response.delete()
+            await response2.delete()
 
     async def jpegdcmd(self, message):
         if message.is_reply:

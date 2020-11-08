@@ -8,7 +8,9 @@ import os
 import time
 import asyncio
 from requests import get
-
+import requests
+from .. import loader, utils
+import io
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import (DownloadError, ContentTooShortError,
                               ExtractorError, GeoRestrictedError,
@@ -73,6 +75,24 @@ class ReplyDownloaderMod(loader.Module):
             await message.delete()
         else:
             return await message.edit('No arguments')
+
+    async def dltiktokcmd(self, event):
+        args = utils.get_args_raw(event)
+        reply = await event.get_reply_message()
+        if not args:
+            if not reply:
+                await event.edit("где ссылка, клоун.")
+                return
+            else:
+                args = reply.raw_text
+        await event.edit("Downloading...")
+        data = {'url': args}
+        response = requests.post('https://tik.fail/api/geturl', data=data).json()
+        tik = requests.get(response['direct'])
+        file = io.BytesIO(tik.content)
+        file.name = response['direct']
+        file.seek(0)
+        await event.client.send_file(event.to_id, file)
 
     async def dlfilecmd(self, message):
         event = message
