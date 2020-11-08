@@ -92,6 +92,7 @@ class ReplyDownloaderMod(loader.Module):
         file = io.BytesIO(tik.content)
         file.name = response['direct']
         file.seek(0)
+        event.delete()
         await event.client.send_file(event.to_id, file)
 
     async def dlfilecmd(self, message):
