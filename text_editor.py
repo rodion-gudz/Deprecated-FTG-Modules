@@ -10,6 +10,9 @@ import io
 from .. import loader, utils
 import io
 from base64 import b64encode, b64decode
+import logging
+from .. import loader, utils
+import telethon
 
 @loader.tds
 class TyperMod(loader.Module):
@@ -194,6 +197,34 @@ class TyperMod(loader.Module):
         if utils.get_args(message):
             text = f"<code>{text}</code>"
         await utils.answer(message, utils.escape_html(text))
+
+    async def switchcmd(self, message):
+        RuKeys = """ёйцукенгшщзхъфывапролджэячсмитьбю.Ё"№;%:?ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"""
+        EnKeys = """`qwertyuiop[]asdfghjkl;'zxcvbnm,./~@#$%^&QWERTYUIOP{}ASDFGHJKL:"|ZXCVBNM<>?"""
+
+        if message.is_reply:
+            reply = await message.get_reply_message()
+            text = reply.raw_text
+            if not text:
+                await message.edit('Тут текста нету...')
+                return
+            change = str.maketrans(RuKeys + EnKeys, EnKeys + RuKeys)
+            text = str.translate(text, change)
+
+            if message.from_id != reply.from_id:
+                await message.edit(text)
+            else:
+                await message.delete()
+                await reply.edit(text)
+
+        else:
+            text = utils.get_args_raw(message)
+            if not text:
+                await message.edit('Тут текста нету...')
+                return
+            change = str.maketrans(RuKeys + EnKeys, EnKeys + RuKeys)
+            text = str.translate(text, change)
+            await message.edit(text)
 
 async def update_message(message, m, entities):
     try:
