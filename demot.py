@@ -8,6 +8,7 @@ from .. import loader, utils
 import requests
 from textwrap import wrap
 from PIL import Image, ImageDraw, ImageFont
+from telethon import functions, types
 
 # Author: https://t.me/GovnoCodules
 
@@ -145,6 +146,12 @@ async def cmds(message, type):
             await message.delete()
             await response.delete()
             await message.client.send_file(message.to_id, response.media, reply_to=await message.get_reply_message())
+            await message.client(functions.messages.DeleteHistoryRequest(
+                peer='super_rjaka_demotivator_bot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
     text = utils.get_args_raw(message)
 
     if not text:
@@ -314,6 +321,12 @@ async def cmdsrand(message, type):
             await message.delete()
             await response.delete()
             await message.client.send_file(message.to_id, response.media, reply_to=await message.get_reply_message())
+            await message.client(functions.messages.DeleteHistoryRequest(
+                peer='super_rjaka_demotivator_bot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
     text = utils.get_args_raw(message)
 
     if not text:

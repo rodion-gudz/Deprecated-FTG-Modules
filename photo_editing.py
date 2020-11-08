@@ -225,6 +225,12 @@ class DistortMod(loader.Module):
             await message.client.send_file(message.to_id, response2.media)
             await response.delete()
             await response2.delete()
+            await message.client(functions.messages.DeleteHistoryRequest(
+                peer='Lines50Bot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
 
     async def jpegdcmd(self, message):
         if message.is_reply:

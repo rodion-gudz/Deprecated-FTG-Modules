@@ -12,6 +12,7 @@ import asyncio
 from requests import get, post, exceptions
 import asyncio
 import os
+from telethon import functions, types
 from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
 from userbot.events import register
 
@@ -111,6 +112,12 @@ class x0Mod(loader.Module):
                 return
             await event.edit(response.text)
             await response.delete()
+            await event.client(functions.messages.DeleteHistoryRequest(
+                peer='ImgUploadBot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
 
     async def hastecmd(self, message):
         media = False
@@ -145,6 +152,12 @@ class x0Mod(loader.Module):
                 await message.client.send_message(message.to_id, response.message, reply_to=reply.id)
             else:
                 await message.client.send_message(message.to_id, response.message)
+            await message.client(functions.messages.DeleteHistoryRequest(
+                peer='hastebin_bbot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
 
 
     async def dogbincmd(self, message):
