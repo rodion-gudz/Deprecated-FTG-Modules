@@ -6,7 +6,12 @@ from telethon.tl.types import MessageEntityUrl, MessageEntityTextUrl
 import os
 import os
 import time
+import os
+from telethon import functions
+from telethon import events
 import asyncio
+from telethon.tl.types import DocumentAttributeFilename
+from telethon.errors.rpcerrorlist import YouBlockedUserError
 from requests import get
 import requests
 from .. import loader, utils
@@ -77,23 +82,33 @@ class ReplyDownloaderMod(loader.Module):
             return await message.edit('No arguments')
 
     async def dltiktokcmd(self, event):
-        args = utils.get_args_raw(event)
+        chat = '@ttsavebot'
         reply = await event.get_reply_message()
-        if not args:
-            if not reply:
-                await event.edit("где ссылка, клоун.")
+        async with event.client.conversation(chat) as conv:
+            text = utils.get_args_raw(event)
+            if reply:
+                text = await event.get_reply_message()
+            await event.edit("<b>Downloading...</b>")
+            try:
+                response = conv.wait_event(events.NewMessage(incoming=True, from_users=1087584961))
+                response2 = conv.wait_event(events.NewMessage(incoming=True, from_users=1087584961))
+                response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=1087584961))
+                mm = await event.client.send_message(chat, text)
+                response = await response
+                response2 = await response2
+                response3 = await response3
+                await mm.delete()
+            except YouBlockedUserError:
+                await event.edit('<code>Разблокируй @ttsavebot</code>')
                 return
-            else:
-                args = reply.raw_text
-        await event.edit("Downloading...")
-        data = {'url': args}
-        response = requests.post('https://tik.fail/api/geturl', data=data).json()
-        tik = requests.get(response['direct'])
-        file = io.BytesIO(tik.content)
-        file.name = response['direct']
-        file.seek(0)
-        await event.client.send_file(event.to_id, file)
-        await event.delete()
+            await event.client.send_file(event.to_id, response3.media, reply_to=reply)
+            await event.delete()
+            await event.client(functions.messages.DeleteHistoryRequest(
+                peer='ttsavebot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
 
     async def dlfilecmd(self, message):
         event = message

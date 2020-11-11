@@ -1,7 +1,8 @@
 from .. import loader, utils
 
 from telethon.errors.rpcerrorlist import MessageNotModifiedError
-
+from telethon.tl.types import DocumentAttributeFilename
+from telethon.errors.rpcerrorlist import YouBlockedUserError
 import logging
 import asyncio
 from asyncio import sleep

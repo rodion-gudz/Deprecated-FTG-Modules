@@ -1,6 +1,9 @@
 from .. import loader, utils
 from hashlib import md5, sha1, sha224, sha256, sha384, sha512, blake2b, blake2s
-
+import asyncio
+import logging
+from telethon.tl.types import DocumentAttributeFilename
+from .. import loader, utils
 
 def register(cb):
     cb(HasherMod())
@@ -51,6 +54,27 @@ class HasherMod(loader.Module):
         """.blake2s <(text or media) or (reply to text or media)\nHashing to blake2s"""
         await hashing(message, 7)
 
+    async def filenamecmd(self, message):
+        """.filename <filename> + reply.file"""
+        reply = await message.get_reply_message()
+        if not reply or not reply.file:
+            await message.edit(self.strings["wf"])
+            return
+        name = utils.get_args_raw(message)
+        if not name:
+            await message.edit(self.strings["wn"])
+            return
+        fn = reply.file.name
+        if not fn:
+            fn = ""
+        fs = reply.file.size
+
+        [await message.edit(f"<b>Downloading {fn}</b>") if fs > 500000 else ...]
+        file = await reply.download_media(bytes)
+        [await message.edit(f"<b>Uploading</b> <code>{name}</code>") if fs > 500000 else ...]
+        await message.client.send_file(message.to_id, file, force_document=True, reply_to=reply,
+                                       attributes=[DocumentAttributeFilename(file_name=name)])
+        await message.delete()
 
 async def hashing(m, type):
     types = [md5, sha1, sha224, sha256, sha384, sha512, blake2b, blake2s]
