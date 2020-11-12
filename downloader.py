@@ -5,6 +5,7 @@ import io
 from telethon.tl.types import MessageEntityUrl, MessageEntityTextUrl
 import os
 import os
+from asyncio import sleep
 import time
 import os
 from telethon import functions
@@ -159,84 +160,33 @@ class ReplyDownloaderMod(loader.Module):
 
         await event.delete()
 
-    async def dlvideocmd(self, message):
-        url = utils.get_args_raw(message)
+    async def dlvideocmd(self, event):
+        chat = '@SaveYoutubeBot'
+        reply = await event.get_reply_message()
+        async with event.client.conversation(chat) as conv:
+            text = utils.get_args_raw(event)
+            if reply:
+                text = await event.get_reply_message()
+            await event.edit("<b>Downloading...</b>")
+            try:
+                response = conv.wait_event(events.NewMessage(incoming=True, from_users=620565940))
+                response2 = conv.wait_event(events.MessageEdited(incoming=True, from_users=620565940))
+                await event.client.send_message(chat, text)
+                response = await response
+                await response.click(2)
+                response2 = await response2
+            except YouBlockedUserError:
+                await event.edit('<code>Разблокируй @SaveYoutubeBot</code>')
+                return
+            await event.delete()
+            await event.client.send_file(event.to_id, response2.media, reply_to=reply)
+            await event.client(functions.messages.DeleteHistoryRequest(
+                peer='SaveYoutubeBot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
 
-        await message.edit("Preparing to download...")
-
-        opts = {
-            'format':
-                'best',
-            'addmetadata':
-                True,
-            'key':
-                'FFmpegMetadata',
-            'prefer_ffmpeg':
-                True,
-            'geo_bypass':
-                True,
-            'nocheckcertificate':
-                True,
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4'
-            }],
-            'outtmpl':
-                '%(id)s.mp4',
-            'logtostderr':
-                False,
-            'quiet':
-                True
-        }
-
-        try:
-            await message.edit("`Fetching data, please wait..`")
-            with YoutubeDL(opts) as rip:
-                rip_data = rip.extract_info(url)
-        except DownloadError as DE:
-            await message.edit(f"`{str(DE)}`")
-            return
-        except ContentTooShortError:
-            await message.edit("`The download content was too short.`")
-            return
-        except GeoRestrictedError:
-            await message.edit(
-                "`Video is not available from your geographic location due to geographic restrictions imposed by a website.`"
-            )
-            return
-        except MaxDownloadsReached:
-            await message.edit("`Max-downloads limit has been reached.`")
-            return
-        except PostProcessingError:
-            await message.edit("`There was an error during post processing.`")
-            return
-        except UnavailableVideoError:
-            await message.edit("`Media is not available in the requested format.`")
-            return
-        except XAttrMetadataError as XAME:
-            await message.edit(f"`{XAME.code}: {XAME.msg}\n{XAME.reason}`")
-            return
-        except ExtractorError:
-            await message.edit("`There was an error during info extraction.`")
-            return
-        except Exception as e:
-            await message.edit(f"{str(type(e)): {str(e)}}")
-            return
-        c_time = time.time()
-        await message.edit(f"Preparing to upload video:\
-        \n**{rip_data['title']}**\
-        \nby *{rip_data['uploader']}*")
-        await message.client.send_file(
-            message.chat_id,
-            f"{rip_data['id']}.mp4",
-            supports_streaming=True,
-            caption=rip_data['title'],
-            progress_callback=lambda d, t: asyncio.get_event_loop(
-               ).create_task(
-                   progress(d, t, message, c_time, "Uploading..",
-                        f"{rip_data['title']}.mp4")))
-        os.remove(f"{rip_data['id']}.mp4")
-        await message.delete()
 
     async def dlaudiocmd(self, message):
         url = utils.get_args_raw(message)
