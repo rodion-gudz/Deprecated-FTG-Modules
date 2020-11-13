@@ -64,6 +64,20 @@ class TagAllMod(loader.Module):
         else:
             await chatinfo.edit("<b>Это не чат!</b>")
 
+    async def tagcmd(self, message):
+        args = utils.get_args_raw(message).split(' ')
+        tag = 'говно залупное\n                пашет.'
+        try:
+            user = await message.client.get_entity(args[0])
+        except:
+            return await message.edit('Пользователь не найден.')
+        await message.delete()
+        if len(args) == 1:
+            tag = tag
+        elif len(args) >= 2:
+            tag = utils.get_args_raw(message).split(' ', 1)[1]
+        await message.client.send_message(message.to_id, f'{tag} <a href="tg://user?id={user.id}">\u2060</a>')
+
     async def invitecmd(self, event):
         if event.fwd_from:
             return
