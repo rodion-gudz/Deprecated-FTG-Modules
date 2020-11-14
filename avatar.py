@@ -5,7 +5,7 @@ from .. import loader, utils
 from telethon import functions
 logger = logging.getLogger(__name__)
 from telethon.errors.rpcerrorlist import UsernameOccupiedError
-from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameReques
+from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRequest
 
 class GetPPMod(loader.Module):
     strings = {"name": "Profile"}
