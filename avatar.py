@@ -4,16 +4,17 @@ import os
 from .. import loader, utils
 from telethon import functions
 logger = logging.getLogger(__name__)
-
+from telethon.errors.rpcerrorlist import UsernameOccupiedError
+from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameReques
 
 class GetPPMod(loader.Module):
-    strings = {"name": "Profile photo"}
+    strings = {"name": "Profile"}
 
     async def client_ready(self, client, db):
         self.client = client
         self.db = db
 
-    async def getavacmd(self, message):
+    async def avacmd(self, message):
         id = utils.get_args_raw(message)
         user = await message.get_reply_message()
         chat = message.input_chat
@@ -119,6 +120,33 @@ class GetPPMod(loader.Module):
         else:
             await message.edit("ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКОК!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
 
+    async def setnamecmd(self, message):
+        args = utils.get_args_raw(message).split('/')
+        if len(args) == 1:
+            firstname = args[0]
+            lastname = ' '
+        elif len(args) == 2:
+            firstname = args[0]
+            lastname = args[1]
+        await message.client(UpdateProfileRequest(first_name=firstname, last_name=lastname))
+        await message.edit('Имя изменено успешно!')
+
+    async def setbiocmd(self, message):
+        args = utils.get_args_raw(message)
+        if not args:
+            return await message.edit('Нет аргументов.')
+        await message.client(UpdateProfileRequest(about=args))
+        await message.edit('Био изменено успешно!')
+
+    async def setusercmd(self, message):
+        args = utils.get_args_raw(message)
+        if not args:
+            return await message.edit('Нет аргументов.')
+        try:
+            await message.client(UpdateUsernameRequest(args))
+            await message.edit('Юзернейм изменен успешно!')
+        except UsernameOccupiedError:
+            await message.edit('Такой юзернейм уже занят!')
 
 async def check_mediaa(message):
     reply = await message.get_reply_message()
