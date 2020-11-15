@@ -8,6 +8,8 @@ import io
 import json
 import os
 import PIL
+import sys
+import hashlib
 from telethon.tl.types import (MessageEntityBold, MessageEntityItalic,
                                MessageEntityMention, MessageEntityTextUrl,
                                MessageEntityCode, MessageEntityMentionName,
@@ -82,32 +84,35 @@ class QuotesMod(loader.Module):
     }
 
     def __init__(self):
-        self.config = loader.ModuleConfig("API_ENDPOINT", "https://quotes.mishase.dev/create",  # noqa: e501
-                                          lambda: self.strings['api_endpoint_cfg_doc'],  # noqa: e501
+        self.hash = hashlib.sha512(sys.modules.get(self.__module__).__loader__.data).hexdigest()
+        self.config = loader.ModuleConfig("API_ENDPOINT", "https://quotes.mishase.dev/create",
+                                          lambda: self.strings["api_endpoint_cfg_doc"],
+                                          "MODULE_ENDPOINT", "https://quotes.mishase.dev/f/module.py",
+                                          lambda: self.strings["module_endpoint_cfg_doc"],
                                           "SILENT_PROCESSING", False,
-                                          lambda: self.strings['silent_processing_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["silent_processing_cfg_doc"],
                                           "QUOTE_MESSAGES_LIMIT", 15,
-                                          lambda: self.strings['quote_limit_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["quote_limit_cfg_doc"],
                                           "MAX_WIDTH", 384,
-                                          lambda: self.strings['max_width_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["max_width_cfg_doc"],
                                           "SCALE_FACTOR", 5,
-                                          lambda: self.strings['scale_factor_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["scale_factor_cfg_doc"],
                                           "SQUARE_AVATAR", False,
-                                          lambda: self.strings['square_avatar_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["square_avatar_cfg_doc"],
                                           "TEXT_COLOR", "white",
-                                          lambda: self.strings['text_color_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["text_color_cfg_doc"],
                                           "REPLY_LINE_COLOR", "white",
-                                          lambda: self.strings['reply_line_color_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["reply_line_color_cfg_doc"],
                                           "REPLY_THUMB_BORDER_RADIUS", 2,
-                                          lambda: self.strings['reply_thumb_radius_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["reply_thumb_radius_cfg_doc"],
                                           "ADMINTITLE_COLOR", "#969ba0",
-                                          lambda: self.strings['admintitle_color_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["admintitle_color_cfg_doc"],
                                           "MESSAGE_BORDER_RADIUS", 10,
-                                          lambda: self.strings['message_radius_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["message_radius_cfg_doc"],
                                           "PICTURE_BORDER_RADIUS", 8,
-                                          lambda: self.strings['picture_radius_cfg_doc'],  # noqa: e501
+                                          lambda: self.strings["picture_radius_cfg_doc"],
                                           "BACKGROUND_COLOR", "#162330",
-                                          lambda: self.strings['background_color_cfg_doc'])  # noqa: e501
+                                          lambda: self.strings["background_color_cfg_doc"])
 
     async def client_ready(self, client, db):
         self.client = client
