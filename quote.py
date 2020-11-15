@@ -21,6 +21,13 @@ import requests
 import io
 import json
 import os
+import logging
+from .. import loader, utils
+import telethon
+import requests
+import io
+import json
+import os
 import PIL
 from telethon.tl.types import (MessageEntityBold, MessageEntityItalic,
                                MessageEntityMention, MessageEntityTextUrl,
@@ -176,7 +183,7 @@ class QuotesMod(loader.Module):
             text = msg.raw_text
             markdown = await get_markdown(msg)
             admintitle = str()
-            if isinstance(msg.to_id, PeerChannel) \
+            if isinstance(msg.to_id, PeerChannel)\
                     and msg.fwd_from:
                 user = msg.forward.chat
             elif isinstance(msg.to_id, PeerChat):
@@ -214,16 +221,16 @@ class QuotesMod(loader.Module):
                         name = msg.fwd_from.from_name
                         profile_photo_url = None
                     elif msg.forward.sender:
-                        name = telethon.utils. \
+                        name = telethon.utils.\
                             get_display_name(msg.forward.sender)
                         profile_photo_url = msg.forward.sender.id
                     elif msg.forward.chat:
                         profile_photo_url = user
-                    if msg.fwd_from is not None \
+                    if msg.fwd_from is not None\
                             and msg.fwd_from.post_author is not None:
                         name += f" ({msg.fwd_from.post_author})"
                     if not pfp:
-                        pfp = await self.client \
+                        pfp = await self.client\
                             .download_profile_photo(profile_photo_url,
                                                     "mishase_cache/")
                         if pfp:
@@ -246,7 +253,7 @@ class QuotesMod(loader.Module):
                         None
                     )
                     if not pfp:
-                        pfp = await self.client \
+                        pfp = await self.client\
                             .download_profile_photo(msg.from_id,
                                                     "mishase_cache/")
                         if pfp:
@@ -256,7 +263,7 @@ class QuotesMod(loader.Module):
                 else:
                     name = message.chat.title
                     try:
-                        dl_chat_pfp = await self.client \
+                        dl_chat_pfp = await self.client\
                             .download_profile_photo(id, "mishase_cache/")
                         no_pfp = False
                     except Exception as e:
@@ -298,9 +305,10 @@ class QuotesMod(loader.Module):
                             'author': reply_name,
                             'text': reply_text,
                         }
-                        if "@mediareply" in media_files:
+                        if "@mediareply{}".format(message_reply.id) \
+                                in media_files:
                             reply_message['thumbnail'] = {
-                                "file": "@mediareply"
+                                "file": "@mediareply{}".format(message_reply.id)  # noqa: e501
                             }
                     elif message_reply.fwd_from.from_id:
                         reply_sender = message_reply.fwd_from.from_id
@@ -322,9 +330,10 @@ class QuotesMod(loader.Module):
                             'author': reply_name,
                             'text': reply_text,
                         }
-                        if "@mediareply" in media_files:
+                        if "@mediareply{}".format(message_reply.id) \
+                                in media_files:
                             reply_message['thumbnail'] = {
-                                "file": "@mediareply"
+                                "file": "@mediareply{}".format(message_reply.id)  # noqa: e501
                             }
                     else:
                         media_files = await check_media(
@@ -354,8 +363,10 @@ class QuotesMod(loader.Module):
                         'author': reply_name,
                         'text': reply_text
                     }
-                    if "@mediareply" in media_files:
-                        reply_message['thumbnail'] = {"file": "@mediareply"}
+                    if "@mediareply{}".format(message_reply.id) in media_files:
+                        reply_message['thumbnail'] = {
+                            "file": "@mediareply{}".format(message_reply.id)
+                        }
                 else:
                     reply_name = message.chat.title
                     media_files = await check_media(
@@ -368,17 +379,19 @@ class QuotesMod(loader.Module):
                         'author': reply_name,
                         'text': reply_text
                     }
-                    if "@mediareply" in media_files:
-                        reply_message['thumbnail'] = {"file": "@mediareply"}
+                    if "@mediareply{}".format(message_reply.id) in media_files:
+                        reply_message['thumbnail'] = {
+                            "file": "@mediareply{}".format(message_reply.id)
+                        }
             else:
                 reply_message = None
             if message.chat:
                 if msg.from_id and not msg.fwd_from:
-                    admins = await self.client \
+                    admins = await self.client\
                         .get_participants(
-                        message.to_id,
-                        filter=ChannelParticipantsAdmins
-                    )
+                            message.to_id,
+                            filter=ChannelParticipantsAdmins
+                        )
                     if msg.sender in admins:
                         admin = admins[admins.index(msg.sender)].participant
                         if not admin:
@@ -423,9 +436,9 @@ class QuotesMod(loader.Module):
                 message_to_append['author']['picture'] = {
                     "file": f"@av{str(id).lstrip('-')}"
                 }
-            if "@media" in media_files:
+            if "@media{}".format(msg.id) in media_files:
                 message_to_append['picture'] = {
-                    "file": "@media"
+                    "file": "@media{}".format(msg.id)
                 }
             messages.append(message_to_append)
         data = {
@@ -454,6 +467,17 @@ class QuotesMod(loader.Module):
                             "rb"
                         ),
                         "image/jpg"
+                    )
+                )
+            )
+        if not files:
+            files.append(
+                (
+                    "files",
+                    (
+                        "file",
+                        bytearray(),
+                        "text/text"
                     )
                 )
             )
@@ -693,9 +717,9 @@ async def check_media(client, reply,
     else:
         data = await client.download_media(data, "mishase_cache/")
         if not is_reply:
-            media_files["@media"] = data
+            media_files["@media{}".format(reply.id)] = data
         else:
-            media_files["@mediareply"] = data
+            media_files["@mediareply{}".format(reply.id)] = data
         return media_files
 
 
@@ -837,3 +861,6 @@ async def get_markdown(message):
             etype = 'bluetext'
         entities.append({'type': etype, 'offset': start, 'length': end})
     return entities
+
+
+
