@@ -116,20 +116,11 @@ class QuotesMod(loader.Module):
     @loader.ratelimit
     async def quotecmd(self, message):
         if not self.config["SILENT_PROCESSING"]:
-            await utils.answer(
-                message,
-                self.strings(
-                    "processing",
-                    message
-                )
-            )
+            await utils.answer(message, self.strings("processing", message))
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not reply:
-            return await utils.answer(
-                message,
-                self.strings("no_reply", message)
-            )
+            return await utils.answer(message, self.strings("no_reply", message))
         if not args or not args.isdigit():
             count = 1
         else:
@@ -139,12 +130,7 @@ class QuotesMod(loader.Module):
             if count > self.config["QUOTE_MESSAGES_LIMIT"]:
                 return await utils.answer(
                     message,
-                    self.strings(
-                        "quote_limit_reached",
-                        message
-                    ).format(
-                        self.config["QUOTE_MESSAGES_LIMIT"]
-                    )
+                    self.strings("quote_limit_reached", message).format(self.config["QUOTE_MESSAGES_LIMIT"])
                 )
         messages = list()
         messages_client = list()
