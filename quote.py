@@ -365,25 +365,13 @@ class QuotesMod(loader.Module):
                             admintitle = admin.rank
                         if not admintitle:
                             if type(admin) == ChannelParticipantCreator:
-                                admintitle = self.strings(
-                                    "creator",
-                                    message
-                                )
+                                admintitle = self.strings("creator", message)
                             else:
-                                admintitle = self.strings(
-                                    "admin",
-                                    message
-                                )
+                                admintitle = self.strings("admin", message)
                 elif msg.fwd_from.saved_from_peer:
-                    admintitle = self.strings(
-                        "channel",
-                        message
-                    )
+                    admintitle = self.strings("channel", message)
                 elif msg.fwd_from.channel_id:
-                    admintitle = self.strings(
-                        "channel",
-                        message
-                    )
+                    admintitle = self.strings("channel", message)
                 else:
                     admintitle = reply.post_author if \
                         reply.post_author else " "
@@ -455,21 +443,12 @@ class QuotesMod(loader.Module):
             )
         except (requests.ConnectionError, requests.exceptions.Timeout):
             await clean_files()
-            return await utils.answer(
-                message,
-                self.strings("unreachable_error", message)
-            )
+            return await utils.answer(message,self.strings("unreachable_error", message))
         await clean_files()
         if req.status_code >= 520:
-            return await utils.answer(
-                message,
-                self.strings("unreachable_error", message)
-            )
+            return await utils.answer(message, self.strings("unreachable_error", message))
         if req.status_code >= 500:
-            return await utils.answer(
-                message,
-                self.strings("server_error", message)
-            )
+            return await utils.answer(message,self.strings("server_error", message))
         if req.status_code == 418:
             if not self.config["SILENT_PROCESSING"]:
                 await utils.answer(message, self.strings("updating", message))
@@ -485,13 +464,7 @@ class QuotesMod(loader.Module):
             return await utils.answer(message, image)
         except Exception as e:
             logger.error(e, exc_info=True)
-            return await utils.answer(
-                message,
-                self.strings(
-                    "server_error",
-                    message
-                )
-            )
+            return await utils.answer(message, self.strings("server_error", message))
 
     async def stextcmd(self, message):
         await message.delete()
