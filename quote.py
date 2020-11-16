@@ -118,7 +118,7 @@ class QuotesMod(loader.Module):
 
     @loader.unrestricted
     @loader.ratelimit
-    async def mquotecmd(self, message):
+    async def quotecmd(self, message):
         """.mquote <reply> - quote a message"""
         if not self.config["SILENT_PROCESSING"]:
             await utils.answer(
