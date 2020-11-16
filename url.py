@@ -45,7 +45,7 @@ class GGdotGGMod(loader.Module):
         args = utils.get_args_raw(message)
         if not args: return await message.edit("Нет аргументов.")
         link = os.popen(f"curl verylegit.link/sketchify -d long_url={args}").read()
-        await message.edit(f"Ссылка:\n> {link}")
+        await message.edit(f"{link}")
 
     async def clckcmd(self, message):
         m_text = utils.get_args_raw(message)
