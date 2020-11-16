@@ -1,11 +1,11 @@
-from textwrap import wrap
-from PIL import Image, ImageDraw, ImageFont
 import logging
 from .. import loader, utils
 import telethon
 import requests
 import io
 import json
+from textwrap import wrap
+from PIL import Image, ImageDraw, ImageFont
 import os
 import PIL
 import sys
@@ -23,15 +23,14 @@ from telethon.tl.types import (MessageEntityBold, MessageEntityItalic,
                                PeerChat, User,
                                MessageMediaUnsupported)
 
-bytes_font = requests.get("https://github.com/KeyZenD/l/blob/master/bold.ttf?raw=true").content
 logger = logging.getLogger(__name__)
 
 
 @loader.tds
 class QuotesMod(loader.Module):
-    """Quote a message"""
+    """Quote a message using MishaseQuotes API"""
     strings = {
-        "name": "Quotes",
+        "name": "mQuotes",
         "silent_processing_cfg_doc": ("Process quote "
                                       "silently(mostly"
                                       " w/o editing)"),
@@ -119,13 +118,23 @@ class QuotesMod(loader.Module):
 
     @loader.unrestricted
     @loader.ratelimit
-    async def quotecmd(self, message):
+    async def mquotecmd(self, message):
+        """.mquote <reply> - quote a message"""
         if not self.config["SILENT_PROCESSING"]:
-            await utils.answer(message, self.strings("processing", message))
+            await utils.answer(
+                message,
+                self.strings(
+                    "processing",
+                    message
+                )
+            )
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not reply:
-            return await utils.answer(message, self.strings("no_reply", message))
+            return await utils.answer(
+                message,
+                self.strings("no_reply", message)
+            )
         if not args or not args.isdigit():
             count = 1
         else:
@@ -135,7 +144,12 @@ class QuotesMod(loader.Module):
             if count > self.config["QUOTE_MESSAGES_LIMIT"]:
                 return await utils.answer(
                     message,
-                    self.strings("quote_limit_reached", message).format(self.config["QUOTE_MESSAGES_LIMIT"])
+                    self.strings(
+                        "quote_limit_reached",
+                        message
+                    ).format(
+                        self.config["QUOTE_MESSAGES_LIMIT"]
+                    )
                 )
         messages = list()
         messages_client = list()
@@ -370,13 +384,25 @@ class QuotesMod(loader.Module):
                             admintitle = admin.rank
                         if not admintitle:
                             if type(admin) == ChannelParticipantCreator:
-                                admintitle = self.strings("creator", message)
+                                admintitle = self.strings(
+                                    "creator",
+                                    message
+                                )
                             else:
-                                admintitle = self.strings("admin", message)
+                                admintitle = self.strings(
+                                    "admin",
+                                    message
+                                )
                 elif msg.fwd_from.saved_from_peer:
-                    admintitle = self.strings("channel", message)
+                    admintitle = self.strings(
+                        "channel",
+                        message
+                    )
                 elif msg.fwd_from.channel_id:
-                    admintitle = self.strings("channel", message)
+                    admintitle = self.strings(
+                        "channel",
+                        message
+                    )
                 else:
                     admintitle = reply.post_author if \
                         reply.post_author else " "
@@ -448,12 +474,21 @@ class QuotesMod(loader.Module):
             )
         except (requests.ConnectionError, requests.exceptions.Timeout):
             await clean_files()
-            return await utils.answer(message,self.strings("unreachable_error", message))
+            return await utils.answer(
+                message,
+                self.strings("unreachable_error", message)
+            )
         await clean_files()
         if req.status_code >= 520:
-            return await utils.answer(message, self.strings("unreachable_error", message))
+            return await utils.answer(
+                message,
+                self.strings("unreachable_error", message)
+            )
         if req.status_code >= 500:
-            return await utils.answer(message,self.strings("server_error", message))
+            return await utils.answer(
+                message,
+                self.strings("server_error", message)
+            )
         if req.status_code == 418:
             if not self.config["SILENT_PROCESSING"]:
                 await utils.answer(message, self.strings("updating", message))
@@ -469,8 +504,13 @@ class QuotesMod(loader.Module):
             return await utils.answer(message, image)
         except Exception as e:
             logger.error(e, exc_info=True)
-            return await utils.answer(message, self.strings("server_error", message))
-
+            return await utils.answer(
+                message,
+                self.strings(
+                    "server_error",
+                    message
+                )
+            )
     async def stextcmd(self, message):
         await message.delete()
         text = utils.get_args_raw(message)
@@ -513,13 +553,12 @@ class QuotesMod(loader.Module):
         output.seek(0)
         await self.client.send_file(message.to_id, output, reply_to=reply)
 
-
 async def clean_files():
     return os.system("rm -rf mishase_cache/*")
 
 
 async def update(url, modules, message):
-    loader = next(filter(lambda x: "LoaderMod" == x.__class__.__name__ and x.name == "Loader", modules))
+    loader = next(filter(lambda x: "LoaderMod" == x.__class__.__name__, modules))
     try:
         if await loader.download_and_install(url, message):
             loader._db.set(__name__, "loaded_modules",
