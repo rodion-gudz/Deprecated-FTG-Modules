@@ -6,7 +6,24 @@ from requests import post
 import urllib
 logger = logging.getLogger(__name__)
 import os
-
+import re
+from requests import post
+from telethon.tl.types import DocumentAttributeFilename
+from telethon.errors.rpcerrorlist import YouBlockedUserError
+from telethon import events
+from .. import loader, utils
+import io
+from io import BytesIO
+from PIL import Image
+import logging
+import requests
+import asyncio
+from requests import get, post, exceptions
+import asyncio
+import os
+from telethon import functions, types
+from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
+from userbot.events import register
 
 
 
@@ -40,6 +57,29 @@ class GGdotGGMod(loader.Module):
                      data={'custom_path': None, 'use_norefs': '0', 'long_url': long_url, 'app': 'site',
                            'version': '0.1'}).text
         await utils.answer(message, short)
+    async def nullcmd(self, event):
+        chat = '@nullifybot'
+        reply = await event.get_reply_message()
+        async with event.client.conversation(chat) as conv:
+            if not reply:
+                text = utils.get_args_raw(event)
+            else:
+                text = await event.get_reply_message()
+            try:
+                response = conv.wait_event(events.NewMessage(incoming=True, from_users=1481485420))
+                mm = await event.client.send_message(chat, text)
+                response = await response
+                await mm.delete()
+            except YouBlockedUserError:
+                await event.edit('<code>Разблокируй @nullifybot</code>')
+                return
+            await event.edit(response.text.replace("🔗 Твоя ссылка: ", ""))
+            await event.client(functions.messages.DeleteHistoryRequest(
+                peer='nullifybot',
+                max_id=0,
+                just_clear=False,
+                revoke=True
+            ))
 
     async def lgtcmd(self, message):
         args = utils.get_args_raw(message)
