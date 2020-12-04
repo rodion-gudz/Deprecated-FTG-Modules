@@ -57,6 +57,14 @@ class GGdotGGMod(loader.Module):
                      data={'custom_path': None, 'use_norefs': '0', 'long_url': long_url, 'app': 'site',
                            'version': '0.1'}).text
         await utils.answer(message, short)
+
+    async def lgtcmd(self, message):
+        """Сократить ссылку с помощью сервиса verylegit.link"""
+        args = utils.get_args_raw(message)
+        if not args: return await message.edit("Нет аргументов.")
+        link = os.popen(f"curl verylegit.link/sketchify -d long_url={args}").read()
+        await message.edit(f"Ссылка:\n> {link}")
+
     async def nullcmd(self, event):
         chat = '@nullifybot'
         reply = await event.get_reply_message()

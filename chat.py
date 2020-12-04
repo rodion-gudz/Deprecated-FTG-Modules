@@ -5,6 +5,9 @@ from telethon.tl.functions.messages import GetHistoryRequest, GetFullChatRequest
 from telethon.tl.types import MessageActionChannelMigrateFrom, ChannelParticipantsAdmins, UserStatusOnline
 from telethon.errors import (ChannelInvalidError, ChannelPrivateError, ChannelPublicGroupNaError)
 from datetime import datetime
+from telethon.tl.types import *
+from telethon.tl.functions.messages import GetCommonChatsRequest
+from telethon.tl.functions.users import GetFullUserRequest
 from math import sqrt
 logger = logging.getLogger(__name__)
 from .. import loader, utils
@@ -36,6 +39,32 @@ class TagAllMod(loader.Module):
 
     async def client_ready(self, client, db):
         self.client = client
+
+    async def statacmd(self, m):
+        await m.edit("<b>Считаем...</b>")
+        al = str((await m.client.get_messages(m.to_id, limit=0)).total)
+        ph = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterPhotos())).total)
+        vi = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterVideo())).total)
+        mu = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterMusic())).total)
+        vo = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterVideo())).total)
+        vv = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterRoundVideo())).total)
+        do = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterDocument())).total)
+        urls = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterUrl())).total)
+        gifs = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterGif())).total)
+        geos = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterGeo())).total)
+        cont = str((await m.client.get_messages(m.to_id, limit=0, filter=InputMessagesFilterContacts())).total)
+        await m.edit(
+            ("<b>Всего сoообщений</b> {}\n" +
+             "<b>Фоток:</b> {}\n" +
+             "<b>Видосов:</b> {}\n" +
+             "<b>Попсы:</b> {}\n" +
+             "<b>Голосовых:</b> {}\n" +
+             "<b>Кругляшков:</b> {}\n" +
+             "<b>Файлов:</b> {}\n" +
+             "<b>Ссылок:</b> {}\n" +
+             "<b>Гифок:</b> {}\n" +
+             "<b>Координат:</b> {}\n" +
+             "<b>Контактов:</b> {}").format(al, ph, vi, mu, vo, vv, do, urls, gifs, geos, cont))
 
     async def tagallcmd(self, message):
         arg = utils.get_args_raw(message)
@@ -77,6 +106,35 @@ class TagAllMod(loader.Module):
         elif len(args) >= 2:
             tag = utils.get_args_raw(message).split(' ', 1)[1]
         await message.client.send_message(message.to_id, f'{tag} <a href="tg://user?id={user.id}">\u2060</a>')
+
+    async def commoncmd(self, message):
+        """Используй .common <@ или реплай>, чтобы узнать общие чаты с пользователем."""
+        args = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        if not args and not reply:
+            return await message.edit('<b>Нет аргументов или реплая.</b>')
+        await message.edit('<b>Считаем...</b>')
+        try:
+            if args:
+                if args.isnumeric():
+                    user = int(args)
+                    user = await message.client.get_entity(user)
+                else:
+                    user = await message.client.get_entity(args)
+            else:
+                user = await utils.get_user(reply)
+        except ValueError:
+            return await message.edit('<b>Не удалось найти пользователя.</b>')
+        msg = f'<b>Общие чаты с {user.first_name}:</b>\n'
+        user = await message.client(GetFullUserRequest(user.id))
+        comm = await message.client(GetCommonChatsRequest(user_id=user.user.id, max_id=0, limit=100))
+        count = 0
+        m = ''
+        for chat in comm.chats:
+            m += f'\n• <a href="tg://resolve?domain={chat.username}">{chat.title}</a> <b>|</b> <code>{chat.id}</code>'
+            count += 1
+        msg = f'<b>Общие чаты с {user.user.first_name}: {count}</b>\n'
+        await message.edit(f'{msg} {m}')
 
     async def invitecmd(self, event):
         if event.fwd_from:
