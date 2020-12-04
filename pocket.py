@@ -22,9 +22,8 @@ class ReplyDownloaderMod(loader.Module):
             await event.edit("<b>Saving...</b>")
             try:
                 mm = await event.client.send_message(chat, text)
-                await mm.delete()
             except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @ttsavebot</code>')
+                await event.edit('<code>Разблокируй @pockebot</code>')
                 return
             await event.delete()
             await event.client(functions.messages.DeleteHistoryRequest(
