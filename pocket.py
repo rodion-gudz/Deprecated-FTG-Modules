@@ -10,7 +10,7 @@ def register(cb):
 class ReplyDownloaderMod(loader.Module):
     strings = {'name': 'Pocket'}
 
-    async def savecmd(self, event):
+    async def savepcmd(self, event):
         chat = '@pockebot'
         reply = await event.get_reply_message()
         async with event.client.conversation(chat) as conv:
