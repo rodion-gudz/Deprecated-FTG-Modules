@@ -19,12 +19,6 @@ class ReplyDownloaderMod(loader.Module):
                 text = str(await event.get_reply_message())
                 if len(utils.get_args_raw(event)) != 0:
                     text += utils.get_args_raw(event)
-            await event.edit("<b>Saving...</b>")
-            try:
-                mm = await event.client.send_message(chat, text)
-            except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @pockebot</code>')
-                return
             await event.delete()
             await event.client(functions.messages.DeleteHistoryRequest(
                 peer='pockebot',
