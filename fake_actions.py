@@ -1,7 +1,7 @@
 from random import choice, randint
 from .. import loader, utils
 from asyncio import sleep
-
+from telethon import events, errors, functions, types
 
 def register(cb):
     cb(FakeMod())
@@ -77,3 +77,14 @@ class FakeMod(loader.Module):
                 await sleep(scam_time)
         except BaseException:
             return
+
+    async def scrncmd(self, message):
+        a = 1
+        r = utils.get_args(message)
+        if r and r[0].isdigit():
+            a = int(r[0])
+        await message.edit("Screenshoting...")
+        for _ in range(a):
+            await message.client(
+                functions.messages.SendScreenshotNotificationRequest(peer=message.to_id, reply_to_msg_id=message.id))
+        await message.delete()
