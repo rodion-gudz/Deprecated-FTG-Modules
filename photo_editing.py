@@ -1223,70 +1223,82 @@ async def dotify(message, reply, pix, mode):
     out.seek(0)
     await reply.reply(file=out)
     await message.delete()
+
+
 async def get_img_from_msg(reply):
-  if reply and reply.file:
-      if not reply.file.mime_type == "image":
-        return io.BytesIO(await reply.download_media(bytes))
-      else:
+    if reply and reply.file:
+        if not reply.file.mime_type == "image":
+            return io.BytesIO(await reply.download_media(bytes))
+        else:
+            return None
+    else:
         return None
-  else:
-      return None
+
+
 async def invert_image(im, ext):
-  image = Image.open(im)
-  file = io.BytesIO()
-  iswebp = True if ext == ".webp" else False
-  file.name = "bw." + (".webp" if iswebp else ".png")
-  if image.mode == 'RGBA':
-      r,g,b,a = image.split()
-      rgb_image = Image.merge('RGB', (r,g,b))
-      inverted_image = PIL.ImageOps.invert(rgb_image)
-      r2,g2,b2 = inverted_image.split()
-      final_transparent_image = Image.merge('RGBA', (r2,g2,b2,a))
-      if iswebp:
-          final_transparent_image.thumbnail((512,512))
-      final_transparent_image.save(file)
-  else:
-      inverted_image = PIL.ImageOps.invert(image)
-      if iswebp:
-          inverted_image.thumbnail((512,512))
-      inverted_image.save(file)
-  file.seek(0)
-  return file
+    image = Image.open(im)
+    file = io.BytesIO()
+    iswebp = True if ext == ".webp" else False
+    file.name = "bw." + (".webp" if iswebp else ".png")
+    if image.mode == 'RGBA':
+        r, g, b, a = image.split()
+        rgb_image = Image.merge('RGB', (r, g, b))
+        inverted_image = PIL.ImageOps.invert(rgb_image)
+        r2, g2, b2 = inverted_image.split()
+        final_transparent_image = Image.merge('RGBA', (r2, g2, b2, a))
+        if iswebp:
+            final_transparent_image.thumbnail((512, 512))
+        final_transparent_image.save(file)
+    else:
+        inverted_image = PIL.ImageOps.invert(image)
+        if iswebp:
+            inverted_image.thumbnail((512, 512))
+        inverted_image.save(file)
+    file.seek(0)
+    return file
+
+
 async def contrast(im, level, ext):
-  image = ImageEnhance.Contrast(Image.open(im)).enhance(level)
-  out = io.BytesIO()
-  iswebp = True if ext == ".webp" else False
-  if iswebp:
-    image.thumbnail((512,512))
-  out.name = "contrast." + (".webp" if iswebp else ".png")
-  image.save(out)
-  out.seek(0)
-  return out
+    image = ImageEnhance.Contrast(Image.open(im)).enhance(level)
+    out = io.BytesIO()
+    iswebp = True if ext == ".webp" else False
+    if iswebp:
+        image.thumbnail((512, 512))
+    out.name = "contrast." + (".webp" if iswebp else ".png")
+    image.save(out)
+    out.seek(0)
+    return out
+
+
 async def blwh(im, ext):
-  image = Image.open(im).convert('L')
-  out = io.BytesIO()
-  iswebp = True if ext == ".webp" else False
-  if iswebp:
-    image.thumbnail((512,512))
-  out.name = "bw." + (".webp" if iswebp else ".png")
-  image.save(out)
-  out.seek(0)
-  return out
+    image = Image.open(im).convert('L')
+    out = io.BytesIO()
+    iswebp = True if ext == ".webp" else False
+    if iswebp:
+        image.thumbnail((512, 512))
+    out.name = "bw." + (".webp" if iswebp else ".png")
+    image.save(out)
+    out.seek(0)
+    return out
+
+
 def setbright(im, level, ext):
     iswebp = True if ext == ".webp" else False
     image = ImageEnhance.Brightness(Image.open(im)).enhance(level)
     if iswebp:
-        image.thumbnail((512,512))
+        image.thumbnail((512, 512))
     out = io.BytesIO()
     out.name = "brigth." + (".webp" if iswebp else ".png")
     image.save(out)
     out.seek(0)
     return out
+
+
 def setsharpness(im, level, ext):
     iswebp = True if ext == ".webp" else False
     image = ImageEnhance.Sharpness(Image.open(im)).enhance(level)
     if iswebp:
-        image.thumbnail((512,512))
+        image.thumbnail((512, 512))
     out = io.BytesIO()
     out.name = "sharpness." + (".webp" if iswebp else ".png")
     image.save(out)

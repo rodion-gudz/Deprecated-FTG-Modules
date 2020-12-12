@@ -7,6 +7,7 @@ from telethon.tl.types import InputMediaDice
 
 from .. import loader, utils, security
 
+logger = logging.getLogger(__name__)
 
 @loader.tds
 class YesNoMod(loader.Module):

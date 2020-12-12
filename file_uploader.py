@@ -10,11 +10,11 @@ import logging
 import requests
 import asyncio
 from requests import get, post, exceptions
-import asyncio
 import os
 from telethon import functions, types
 from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
-from userbot.events import register
+from userbot.events import registerpost
+import io
 
 DOGBIN_URL = "https://dogbin.f0x1d.com/"
 # Author: https://t.me/GovnoCodules
@@ -62,7 +62,7 @@ class x0Mod(loader.Module):
         try:
             x0at = post('https://x0.at', files={'file': file})
         except ConnectionError as e:
-            await message.edit(ste(e))
+            await message.edit("ConnectionError")
             return
         url = x0at.text
         output = f'{url}'

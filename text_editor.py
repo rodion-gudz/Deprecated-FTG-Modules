@@ -49,7 +49,7 @@ class TyperMod(loader.Module):
         mtext = utils.get_args_raw(message)
         if message.media:
             await message.edit("<b>Загрузка файла...</b>")
-            data = await message.client.download_file(m, bytes)
+            data = await message.client.download_file(mtext, bytes)
         elif mtext:
             data = bytes(mtext, "utf-8")
         elif reply:

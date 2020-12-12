@@ -11,7 +11,6 @@ def register(cb):
 
 @loader.tds
 class WWWTrMod(loader.Module):
-
     strings = {"name": "Weather"}
 
     async def client_ready(self, client, db):
@@ -41,5 +40,3 @@ class WWWTrMod(loader.Module):
         await message.edit("Processing...")
         r = requests.get(f"https://wttr.in/{city if city != None else ''}?0?q?T&lang=ru")
         await message.edit(f"<code>Город: {r.text}</code>")
-
-
