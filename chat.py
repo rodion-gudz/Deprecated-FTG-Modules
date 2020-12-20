@@ -10,7 +10,6 @@ from telethon.tl.functions.messages import GetCommonChatsRequest
 from telethon.tl.functions.users import GetFullUserRequest
 from math import sqrt
 logger = logging.getLogger(__name__)
-from .. import loader, utils
 from os import remove
 from telethon import functions
 from telethon.tl.functions.channels import LeaveChannelRequest
@@ -19,7 +18,6 @@ from telethon.errors import (UserIdInvalidError, UserNotMutualContactError, User
                              UserBlockedError, ChatAdminRequiredError, UserKickedError, InputUserDeactivatedError, ChatWriteForbiddenError, UserAlreadyParticipantError)
 from telethon.tl.types import (ChannelParticipantsAdmins, PeerChat, ChannelParticipantsBots)
 from userbot import bot
-from .. import loader, utils
 import os
 logger = logging.getLogger(__name__)
 def register(cb):

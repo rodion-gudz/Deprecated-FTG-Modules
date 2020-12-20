@@ -1,5 +1,4 @@
 from .. import loader, utils
-
 from telethon.errors.rpcerrorlist import MessageNotModifiedError
 from telethon.tl.types import DocumentAttributeFilename
 from telethon.errors.rpcerrorlist import YouBlockedUserError
@@ -8,11 +7,8 @@ import asyncio
 from asyncio import sleep
 logger = logging.getLogger(__name__)
 import io
-from .. import loader, utils
-import io
 from base64 import b64encode, b64decode
 import logging
-from .. import loader, utils
 import telethon
 
 @loader.tds
