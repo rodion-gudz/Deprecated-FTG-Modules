@@ -13,7 +13,6 @@ from requests import get, post, exceptions
 import os
 from telethon import functions, types
 from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
-from userbot.events import registerpost
 import io
 
 DOGBIN_URL = "https://dogbin.f0x1d.com/"
