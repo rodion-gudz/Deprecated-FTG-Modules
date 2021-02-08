@@ -33,7 +33,7 @@ class WebShotMod(loader.Module):
                 await message.delete()
                 return
             link = reply.raw_text
-        await message.edit("<b>S c r e e n s h o t i n g . . .</b>")
+        await message.edit("<b>Screenshoting...</b>")
         url = "https://webshot.deam.io/{}/?width=1920&height=1080?type=png"
         file = get(url.format(link))
         if not file.ok:

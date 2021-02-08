@@ -45,3 +45,6 @@ pydub ~= 0.24.1
 
 # Image editor
 Wand ~= 0.6.5
+
+# Search module
+search-engine-parser ~= 0.6.2
