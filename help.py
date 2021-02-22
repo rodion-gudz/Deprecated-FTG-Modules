@@ -1,11 +1,6 @@
 import logging
 import inspect
 import io
-from telethon.tl.functions.channels import JoinChannelRequest
-from telethon import functions, types, events
-from .. import loader, utils
-import re
-import io
 from .. import loader, utils, main, security
 
 logger = logging.getLogger(__name__)
@@ -131,3 +126,32 @@ class HelpMod(loader.Module):
         await m.delete()
         await m.client.send_file(m.to_id, txt, caption=f"Modules backup completed\nSaved modules: {len(modules)}")
         await m.delete()
+
+    async def modulecmd(self, message):
+        """Вывести ссылку на модуль"""
+        args = utils.get_args_raw(message)
+        if not args:
+            return await message.edit('Нет аргументов.')
+
+        await message.edit('<b>Searching...</b>')
+
+        try:
+            f = ' '.join(
+                [x.strings["name"] for x in self.allmodules.modules if args.lower() == x.strings["name"].lower()])
+            r = inspect.getmodule(
+                next(filter(lambda x: args.lower() == x.strings["name"].lower(), self.allmodules.modules)))
+
+            link = str(r).split('(')[1].split(')')[0]
+            if "http" not in link:
+                text = f"File {f}:"
+            else:
+                text = f"<a href=\"{link}\">Link</a> for {f}: \n<code>{link}</code>"
+
+            out = io.BytesIO(r.__loader__.data)
+            out.name = f + ".py"
+            out.seek(0)
+
+            await message.respond(text, file=out)
+            await message.delete()
+        except:
+            return await message.edit("Произошла непредвиденная ошибка")
