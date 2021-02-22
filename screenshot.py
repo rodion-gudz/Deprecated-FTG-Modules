@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class WebShotMod(loader.Module):
+    """Screenshot module"""
     strings = {
         "name": "Screenshot"
     }
@@ -24,6 +25,7 @@ class WebShotMod(loader.Module):
 
     @loader.sudo
     async def webshotcmd(self, message):
+        """Reply to link"""
         reply = None
         link = utils.get_args_raw(message)
         if not link:
@@ -39,12 +41,13 @@ class WebShotMod(loader.Module):
             await message.edit("<b>Something went wrong...</b>")
             return
         file = io.BytesIO(file.content)
-        file.name = "webshot.png"
+        file.name = "webScreenshot.png"
         file.seek(0)
         await message.client.send_file(message.to_id, file, reply_to=reply)
         await message.delete()
 
     async def fileshotcmd(self, message):
+        """Reply to file"""
         await message.edit("<b>Screenshotting...</b>")
         reply = await message.get_reply_message()
         if not reply:
