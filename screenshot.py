@@ -2,7 +2,6 @@ from .. import loader, utils
 from requests import get
 import io
 import logging
-import sys
 import pygments
 from pygments.lexers import Python3Lexer
 from pygments.formatters import ImageFormatter
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 @loader.tds
 class WebShotMod(loader.Module):
     strings = {
-        "name": "Screenshots"
+        "name": "Screenshot"
     }
 
     async def client_ready(self, client, db):
@@ -33,7 +32,7 @@ class WebShotMod(loader.Module):
                 await message.delete()
                 return
             link = reply.raw_text
-        await message.edit("<b>Screenshoting...</b>")
+        await message.edit("<b>Screenshotting...</b>")
         url = "https://webshot.deam.io/{}/?width=1920&height=1080?type=png"
         file = get(url.format(link))
         if not file.ok:
@@ -45,8 +44,8 @@ class WebShotMod(loader.Module):
         await message.client.send_file(message.to_id, file, reply_to=reply)
         await message.delete()
 
-    async def pyshotcmd(self, message):
-        message.edit("<b>Py to PNG</b>")
+    async def fileshotcmd(self, message):
+        await message.edit("<b>Screenshotting...</b>")
         reply = await message.get_reply_message()
         if not reply:
             await message.edit("<b>reply to file.py</b>")
@@ -58,8 +57,8 @@ class WebShotMod(loader.Module):
         file = await message.client.download_file(media)
         text = file.decode('utf-8')
         pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name='DejaVu Sans Mono', line_numbers=True),
-                           'out.png')
-        await message.client.send_file(message.to_id, 'out.png', force_document=True)
-        os.remove("out.png")
+                           'fileScreenshot.png')
+        await message.client.send_file(message.to_id, 'fileScreenshot.png', force_document=True)
+        os.remove("fileScreenshot.png")
         await message.delete()
 
