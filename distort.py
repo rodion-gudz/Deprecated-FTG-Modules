@@ -1,6 +1,5 @@
 import logging, os
 from random import choice, randint
-from .. import loader, utils
 import io
 from telethon.tl.types import DocumentAttributeFilename
 import logging
@@ -8,16 +7,24 @@ from wand.image import Image
 from PIL import Image as IM
 from .. import loader, utils
 
+
 # Author: https://t.me/GovnoCodules
+
+def register(cb):
+    cb(StickersDistortMod())
+
 
 logger = logging.getLogger(__name__)
 
+
 @loader.tds
 class StickersDistortMod(loader.Module):
-    strings = {"name": "Stickers distort"}
+    """Stickers or photo distort"""
+    strings = {"name": "Distort"}
 
     @loader.unrestricted
     async def tgscmd(self, message):
+        """Animated stickers distort"""
         reply = await message.get_reply_message()
         if not reply:
             await message.edit("Reply to animated sticker")
@@ -48,15 +55,16 @@ class StickersDistortMod(loader.Module):
         os.remove("json.json")
         await message.delete()
 
-    async def dcmd(self, message):
+    async def distortcmd(self, message):
+        """Stickers or photo distort"""
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data, mime = await check_media(reply_message)
             if isinstance(data, bool):
-                await utils.answer(message, "<code>Reply to sticker</code>")
+                await utils.answer(message, "<code>Reply to sticker or photo</code>")
                 return
         else:
-            await utils.answer(message, "<code>Reply to sticker</code>")
+            await utils.answer(message, "<code>Reply to sticker or photo</code>")
             return
         rescale_rate = 70
         a = utils.get_args(message)
@@ -71,7 +79,7 @@ class StickersDistortMod(loader.Module):
                     if rescale_rate <= 0:
                         rescale_rate = 70
 
-        await message.edit("Distorting...")
+        await message.edit("<b>Distorting...</b>")
         file = await message.client.download_media(data, bytes)
         file, img = io.BytesIO(file), io.BytesIO()
         img.name = 'img.png'
@@ -83,22 +91,23 @@ class StickersDistortMod(loader.Module):
         out.name = f'out.{mime}'
         im.save(out, mime.upper())
         out.seek(0)
-        await message.edit("<code>Sending...</code>")
+        await message.edit("<b>Sending...</b>")
         await message.client.send_file(message.to_id, out, reply_to=reply_message.id)
-
         await message.delete()
+
 
 async def distort(file, rescale_rate):
     img = Image(file=file)
     x, y = img.size[0], img.size[1]
-    popx = int(rescale_rate*(x//100))
-    popy = int(rescale_rate*(y//100))
+    popx = int(rescale_rate * (x // 100))
+    popy = int(rescale_rate * (y // 100))
     img.liquid_rescale(popx, popy, delta_x=1, rigidity=0)
     img.resize(x, y)
     out = io.BytesIO()
     out.name = f'output.png'
     img.save(file=out)
     return io.BytesIO(out.getvalue())
+
 
 async def check_media(reply_message):
     mime = None
@@ -125,4 +134,3 @@ async def check_media(reply_message):
     else:
         mime = mime.split('/')[1]
         return data, mime
-

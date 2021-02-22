@@ -376,40 +376,6 @@ class DistortMod(loader.Module):
         await message.delete()
         await message.reply(file=fried_io)
 
-    async def distortcmd(self, message):
-        if message.is_reply:
-            reply_message = await message.get_reply_message()
-            data = await check_media(reply_message)
-            if isinstance(data, bool):
-                await message.edit("Error")
-                return
-        else:
-            await message.edit("Error")
-            return
-        await message.edit("Distorting...")
-        for distorted in glob.glob("distorted*"):
-            os.remove(distorted)
-        for findistorted in glob.glob("*/distorted*"):
-            os.remove(findistorted)
-
-        fname = f"distorted{random.randint(1, 100)}.png"
-
-        with open(fname, "wb") as file:
-            file.write(await message.client.download_media(data, bytes))
-        image = Image.open(fname)
-        image.save(fname)
-        imgdimens = image.width, image.height
-        distortcmd = f"convert {fname} -liquid-rescale 60x60%! -resize {imgdimens[0]}x{imgdimens[1]}\! {fname}"
-        os.system(distortcmd)
-        image = Image.open(f"{fname}")
-        buf = io.BytesIO()
-        buf.name = 'image.png'
-        image.save(buf, 'PNG')
-        buf.seek(0)
-        await message.edit("Sending...")
-        await message.client.send_file(message.chat_id, buf, reply_to=reply_message.id)
-        await message.delete()
-
     async def linescmd(self, message):
         reply = await message.get_reply_message()
         if not reply:
