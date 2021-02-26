@@ -67,7 +67,7 @@ class AFKMod(loader.Module):
             logger.debug("tagged!")
             ratelimit = self._db.get(__name__, "ratelimit", [])
             if utils.get_chat_id(message) in ratelimit:
-                pass
+                return
             else:
                 self._db.setdefault(__name__, {}).setdefault("ratelimit", []).append(utils.get_chat_id(message))
                 self._db.save()
@@ -76,7 +76,7 @@ class AFKMod(loader.Module):
                 logger.debug("User is self, bot or verified.")
                 return
             if self.get_afk() is False:
-                pass
+                return
             now = datetime.datetime.now().replace(microsecond=0)
             gone = datetime.datetime.fromtimestamp(self._db.get(__name__, "gone ")).replace(microsecond=0)
             diff = now - gone
