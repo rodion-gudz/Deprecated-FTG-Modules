@@ -63,7 +63,7 @@ class CuMod(loader.Module):
             user.last_name if user.last_name != None else "",
             full.about[:70] if full.about != None else ""
         ))
-        if s: await message.delete()
+        await message.delete()
 
     async def userinfocmd(self, whos):
         await whos.edit("<b>Получаю информацию о пользователе...</b>")
