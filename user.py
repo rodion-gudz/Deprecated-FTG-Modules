@@ -49,10 +49,6 @@ class CuMod(loader.Module):
             if not s: await message.edit("Кого?")
             return
         if s: await message.delete()
-        if not s:
-            for i in range(0, 11):
-                await message.edit(f"Получаем доступ к аккаунту пользователя [{i * 10}%]\n[{(i * '#').ljust(10, '–')}]")
-                await sleep(0.3)
         if a:
             avs = await message.client.get_profile_photos('me')
             if len(avs) > 0:
@@ -71,7 +67,6 @@ class CuMod(loader.Module):
             full.about[:70] if full.about != None else ""
         ))
         if not s: await message.edit("Аккаунт клонирован! [100%]\n[##########]")
-        if not s: await sleep(5)
         if not s: await message.edit("Аккаунт клонирован!")
 
     async def userinfocmd(self, whos):
