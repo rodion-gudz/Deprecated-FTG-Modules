@@ -55,19 +55,15 @@ class CuMod(loader.Module):
                 await message.client(
                     functions.photos.DeletePhotosRequest(await message.client.get_profile_photos('me')))
         full = await message.client(GetFullUserRequest(user.id))
-        if not s: await message.edit("Получаем аватарку... [35%]\n[###–––––––]")
         if full.profile_photo:
             up = await message.client.upload_file(await message.client.download_profile_photo(user, bytes))
-            if not s: await message.edit("Ставим аватарку... [50%]\n[#####–––––]")
             await message.client(functions.photos.UploadProfilePhotoRequest(up))
-        if not s: await message.edit("Получаем данные...  [99%]\n[#########–]")
         await message.client(UpdateProfileRequest(
             user.first_name if user.first_name != None else "",
             user.last_name if user.last_name != None else "",
             full.about[:70] if full.about != None else ""
         ))
-        if not s: await message.edit("Аккаунт клонирован! [100%]\n[##########]")
-        if not s: await message.edit("Аккаунт клонирован!")
+        if s: await message.delete()
 
     async def userinfocmd(self, whos):
         await whos.edit("<b>Получаю информацию о пользователе...</b>")
