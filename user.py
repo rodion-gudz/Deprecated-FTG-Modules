@@ -49,6 +49,7 @@ class CuMod(loader.Module):
             if not s: await message.edit("Кого?")
             return
         if s: await message.delete()
+        await message.delete()
         if a:
             avs = await message.client.get_profile_photos('me')
             if len(avs) > 0:
@@ -63,7 +64,6 @@ class CuMod(loader.Module):
             user.last_name if user.last_name != None else "",
             full.about[:70] if full.about != None else ""
         ))
-        await message.delete()
 
     async def userinfocmd(self, whos):
         await whos.edit("<b>Получаю информацию о пользователе...</b>")
