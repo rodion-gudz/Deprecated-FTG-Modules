@@ -1,4 +1,6 @@
 import time
+from datetime import datetime
+
 from .. import loader, utils
 
 import logging
@@ -15,7 +17,7 @@ class AFKMod(loader.Module):
                "gone": "<b>I'm goin' AFK</b>",
                "back": "<b>I'm no longer AFK</b>",
                "afk": "<b>I'm AFK right now (since {} ago).</b>",
-               "afk_reason": "<b>I'm AFK right now.\nReason:</b> <i>{}</i>"}
+               "afk_reason": "<b>I'm AFK right now (since {} ago).\nReason:</b> <i>{}</i>"}
 
     async def client_ready(self, client, db):
         self._db = db
@@ -41,17 +43,20 @@ class AFKMod(loader.Module):
     async def watcher(self, message):
         if not isinstance(message, types.Message):
             return
+        now = datetime.now().replace(microsecond=0)
+        gone = datetime.fromtimestamp(self._db.get(__name__, "gone")).replace(microsecond=0)
+        diff = now - gone
         if getattr(message.to_id, "user_id", None) == self._me.id:
             if self.get_afk():
                 afk_state = self.get_afk()
-                ret = self.strings("afk_reason", message).format(afk_state)
+                ret = self.strings("afk_reason", message).format(diff, afk_state)
                 await utils.answer(message, ret)
             else:
                 return
         elif message.mentioned:
             if self.get_afk():
                 afk_state = self.get_afk()
-                ret = self.strings("afk_reason", message).format(afk_state)
+                ret = self.strings("afk_reason", message).format(diff, afk_state)
                 await utils.answer(message, ret, reply_to=message)
             else:
                 return
