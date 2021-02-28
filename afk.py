@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 @loader.tds
 class AFKMod(loader.Module):
     """Provides a message saying that you are unavailable"""
-    strings = {"name": "AFK",
+    strings = {"name": "AFK Status",
                "gone": "<b>I'm goin' AFK</b>",
                "back": "<b>I'm no longer AFK</b>",
                "afk": "<b>I'm AFK right now (since {} ago).</b>",
@@ -45,7 +45,6 @@ class AFKMod(loader.Module):
         else:
             self._db.set(__name__, "afk", True)
         self._db.set(__name__, "gone", time.time())
-        self._db.set(__name__, "ratelimit", [])
         await self.allmodules.log("afk", data=utils.get_args_raw(message) or None)
         await utils.answer(message, self.strings("gone", message))
 
@@ -53,7 +52,6 @@ class AFKMod(loader.Module):
         """Remove the AFK status"""
         self._db.set(__name__, "afk", False)
         self._db.set(__name__, "gone", None)
-        self._db.set(__name__, "ratelimit", [])
         await self.allmodules.log("unafk")
         await utils.answer(message, self.strings("back", message))
 
@@ -61,30 +59,12 @@ class AFKMod(loader.Module):
         if not isinstance(message, types.Message):
             return
         if message.mentioned or getattr(message.to_id, "user_id", None) == self._me.id:
-            afk_state = self.get_afk()
-            if not afk_state:
-                return
-            logger.debug("tagged!")
-            ratelimit = self._db.get(__name__, "ratelimit", [])
-            if utils.get_chat_id(message) in ratelimit:
-                return
+            if self.get_afk():
+                afk_state = self.get_afk()
+                ret = self.strings("afk_reason", message).format(afk_state)
+                await utils.answer(message, ret)
             else:
-                self._db.setdefault(__name__, {}).setdefault("ratelimit", []).append(utils.get_chat_id(message))
-                self._db.save()
-            user = await utils.get_user(message)
-            if user.is_self or user.bot or user.verified:
-                logger.debug("User is self, bot or verified.")
                 return
-            if self.get_afk() is False:
-                return
-            now = datetime.datetime.now().replace(microsecond=0)
-            gone = datetime.datetime.fromtimestamp(self._db.get(__name__, "gone ")).replace(microsecond=0)
-            diff = now - gone
-            if afk_state is True:
-                ret = self.strings("afk", message).format(diff)
-            elif afk_state is not False:
-                ret = self.strings("afk_reason", message).format(diff, afk_state)
-            await utils.answer(message, ret, reply_to=message)
 
     def get_afk(self):
         return self._db.get(__name__, "afk", False)
