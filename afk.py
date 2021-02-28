@@ -69,7 +69,7 @@ class AFKMod(loader.Module):
             if utils.get_chat_id(message) in ratelimit:
                 return
             else:
-                self._db.set(__name__, "ratelimit", [])
+                self._db.setdefault(__name__, {}).setdefault("ratelimit", []).append(utils.get_chat_id(message))
                 self._db.save()
             user = await utils.get_user(message)
             if user.is_self or user.bot or user.verified:
