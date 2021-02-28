@@ -3,10 +3,10 @@ from .. import loader, utils
 
 import logging
 
-
 from telethon import types
 
 logger = logging.getLogger(__name__)
+
 
 @loader.tds
 class AFKMod(loader.Module):
@@ -41,11 +41,18 @@ class AFKMod(loader.Module):
     async def watcher(self, message):
         if not isinstance(message, types.Message):
             return
-        if message.mentioned or getattr(message.to_id, "user_id", None) == self._me.id:
-            if self.get_afk() != False:
+        if getattr(message.to_id, "user_id", None) == self._me.id:
+            if self.get_afk():
                 afk_state = self.get_afk()
                 ret = self.strings("afk_reason", message).format(afk_state)
                 await utils.answer(message, ret)
+            else:
+                return
+        elif message.mentioned:
+            if self.get_afk():
+                afk_state = self.get_afk()
+                ret = self.strings("afk_reason", message).format(afk_state)
+                await utils.answer(message.mentioned, ret)
             else:
                 return
 
