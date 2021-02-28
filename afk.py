@@ -52,7 +52,7 @@ class AFKMod(loader.Module):
             if self.get_afk():
                 afk_state = self.get_afk()
                 ret = self.strings("afk_reason", message).format(afk_state)
-                await utils.answer(message.mentioned, ret)
+                await utils.answer(message, ret, reply_to=message)
             else:
                 return
 
