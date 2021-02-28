@@ -65,12 +65,6 @@ class AFKMod(loader.Module):
             if not afk_state:
                 return
             logger.debug("tagged!")
-            ratelimit = self._db.get(__name__, "ratelimit", [])
-            if utils.get_chat_id(message) in ratelimit:
-                return
-            else:
-                self._db.setdefault(__name__, {}).setdefault("ratelimit", []).append(utils.get_chat_id(message))
-                self._db.save()
             user = await utils.get_user(message)
             if user.is_self or user.bot or user.verified:
                 logger.debug("User is self, bot or verified.")
