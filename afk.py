@@ -15,13 +15,13 @@ class AFKMod(loader.Module):
                "gone": "<b>I'm goin' AFK</b>",
                "back": "<b>I'm no longer AFK</b>",
                "afk": "<b>I'm AFK right now (since {} ago).</b>",
-               "afk_reason": "{}"}
+               "afk_reason": "<b>I'm AFK right now.\nReason:</b> <i>{}</i>"}
 
     async def client_ready(self, client, db):
         self._db = db
         self._me = await client.get_me()
 
-    async def rfdcmd(self, message):
+    async def afkcmd(self, message):
         """.afk [message]"""
         if utils.get_args_raw(message):
             self._db.set(__name__, "afk", utils.get_args_raw(message))
@@ -31,7 +31,7 @@ class AFKMod(loader.Module):
         await self.allmodules.log("afk", data=utils.get_args_raw(message) or None)
         await utils.answer(message, self.strings("gone", message))
 
-    async def unrfdcmd(self, message):
+    async def unafkcmd(self, message):
         """Remove the AFK status"""
         self._db.set(__name__, "afk", False)
         self._db.set(__name__, "gone", None)
