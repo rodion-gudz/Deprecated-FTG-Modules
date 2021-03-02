@@ -51,7 +51,7 @@ class TestMod(loader.Module):
                "results": "<b>Speedtest Results:</b>",
                "results_download": "<b>Download:</b> <code>{}</code> <b>MiB/s</b>",
                "results_upload": "<b>Upload:</b> <code>{}</code> <b>MiB/s</b>",
-               "results_ping": "<b>Ping:</b> <code>{}</code> <b>ms</b>"               }
+               "results_ping": "<b>Ping:</b> <code>{}</code> <b>ms</b>"}
 
     @loader.test(resp="Pong")
     @loader.unrestricted
