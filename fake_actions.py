@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @hftgmodulesbyfl1yd, @GovnoCodules
+
 from random import choice, randint
 from .. import loader, utils
 from asyncio import sleep
@@ -8,90 +12,159 @@ def register(cb):
     cb(FakeMod())
 
 
-# options = ['typing', 'contact', 'game', 'location', 'record-audio', 'record-round',
-#                    'record-video', 'voice', 'round', 'video', 'photo', 'document', 'cancel']
-
 class FakeMod(loader.Module):
+    """Imitates your actions"""
     strings = {'name': 'Fake Actions'}
 
     async def typecmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'typing'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates typing"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'typing'):
+                    await sleep(int(activity_time[0]))
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'typing'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def voicecmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'record-audio'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates sending voices"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'voice'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'voice'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def gamecmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'game'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates your game activity"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'game'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'game'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def videocmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'record-video'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates sending video"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'video'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'video'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def photocmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'photo'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates sending photo"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'photo'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'photo'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def documentcmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'document'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates sending document"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'document'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'document'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def locationcmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'document'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+        """Imitates sending location"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'location'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'location'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
-    async def cancelcmd(self, event):
-        scam_time = randint(30, 60)
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'cancel'):
-                await sleep(scam_time)
-        except BaseException:
-            return
+    async def contactcmd(self, event):
+        """Imitates sending contact"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'contact'):
+                    await sleep(activity_time)
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'contact'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
 
     async def scrncmd(self, message):
         a = 1
         r = utils.get_args(message)
         if r and r[0].isdigit():
             a = int(r[0])
-        await message.edit("Screenshoting...")
         for _ in range(a):
             await message.client(
                 functions.messages.SendScreenshotNotificationRequest(peer=message.to_id, reply_to_msg_id=message.id))
