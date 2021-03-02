@@ -5,10 +5,7 @@
 from .. import loader, utils
 
 
-def register(cb):
-    cb(CalculatorMod())
-
-
+@loader.tds
 class CalculatorMod(loader.Module):
     """Calculator module"""
     strings = {'name': 'Calculator'}

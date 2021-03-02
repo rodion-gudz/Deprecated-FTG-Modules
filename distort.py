@@ -14,10 +14,6 @@ from PIL import Image as IM
 from .. import loader, utils
 
 
-def register(cb):
-    cb(DistortMod())
-
-
 logger = logging.getLogger(__name__)
 
 

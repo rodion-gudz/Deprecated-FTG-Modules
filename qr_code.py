@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
 from .. import loader, utils
 from telethon.tl.types import DocumentAttributeFilename
 from requests import get, post
@@ -7,10 +11,12 @@ from io import BytesIO
 
 @loader.tds
 class QRtoolsMod(loader.Module):
-    strings = {"name": "QR code"}
+    """Generator and reader of QR codes"""
+    strings = {"name": "QR Code"}
 
     @loader.owner
     async def makeqrcmd(self, message):
+        """.makeqr <text or reply>"""
         text = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         file = False
@@ -36,6 +42,7 @@ class QRtoolsMod(loader.Module):
 
     @loader.owner
     async def readqrcmd(self, message):
+        """.readqr <qrcode or reply to qrcode>"""
         ok = await check(message)
         if not ok:
             reply = await message.get_reply_message()
@@ -74,7 +81,6 @@ async def check(msg):
         return False
     else:
         return ok
-
 
 
 

@@ -8,10 +8,7 @@ from asyncio import sleep
 from telethon import events, errors, functions, types
 
 
-def register(cb):
-    cb(FakeMod())
-
-
+@loader.tds
 class FakeMod(loader.Module):
     """Imitates your actions"""
     strings = {'name': 'Fake Actions'}
