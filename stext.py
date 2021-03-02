@@ -9,10 +9,6 @@ bytes_font = requests.get("https://github.com/KeyZenD/l/blob/master/bold.ttf?raw
 logger = logging.getLogger(__name__)
 
 
-def register(cb):
-    cb(Text2stickMod())
-
-
 @loader.tds
 class Text2stickMod(loader.Module):
     """Text to sticker"""

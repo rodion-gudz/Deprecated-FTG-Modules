@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
+
+# Module author: Official Repo
+
+# requires: git+https://gitlab.com/mattia.basaglia/python-lottie@master cairosvg Pillow>=6.1.0
+
 from .. import loader, utils
 
 import logging
 import warnings
 import itertools
 import asyncio
-import io
-from string import hexdigits
 
 from io import BytesIO
 from PIL import Image
@@ -47,6 +51,9 @@ class StickersMod(loader.Module):
         self._lock = asyncio.Lock()
 
     async def kangcmd(self, message):
+        """Use in reply or with an attached media:
+           .kang <pack name> [emojis]
+           If pack is not matched the most recently created will be used instead"""
         args = utils.get_args(message)
         if len(args) not in (1, 2):
             logger.debug("wrong args len(%s) or bad args(%s)", len(args), args)
@@ -152,7 +159,12 @@ class StickersMod(loader.Module):
                     thumb = BytesIO()
                     task = asyncio.ensure_future(utils.run_sync(resize_image, img, self.config["STICKER_SIZE"], thumb))
                     thumb.name = "sticker.png"
+                    # The data is now in thumb.
+                    # Lock access to @Stickers
                     async with self._lock:
+                        # Without t.me/ there is ambiguity; Stickers could be a name,
+                        # in which case the wrong entity could be returned
+                        # TODO should this be translated?
                         conv = message.client.conversation("t.me/" + self.config["STICKERS_USERNAME"],
                                                            timeout=5, exclusive=True)
                         async with conv:
@@ -248,46 +260,48 @@ class StickersMod(loader.Module):
         packurl = utils.escape_html("https://t.me/addstickers/{}".format(button.text))
         await utils.answer(message, self.strings("added", message).format(packurl))
 
-    async def filecmd(self, message):
-        await convert(message)
+    async def gififycmd(self, message):
+        """Convert the replied animated sticker to a GIF"""
+        args = utils.get_args(message)
+        fps = 5
+        quality = 256
+        try:
+            if len(args) == 1:
+                fps = int(args[0])
+            elif len(args) == 2:
+                quality = int(args[0])
+                fps = int(args[1])
+        except ValueError:
+            logger.exception("Failed to parse quality/fps")
+        target = await message.get_reply_message()
+        if target is None or target.file is None or target.file.mime_type != "application/x-tgsticker":
+            await utils.answer(message, self.strings("bad_animated_sticker", message))
+            return
+        try:
+            file = BytesIO()
+            await target.download_media(file)
+            file.seek(0)
+            anim = await utils.run_sync(lottie.parsers.tgs.parse_tgs, file)
+            file.close()
+            result = BytesIO()
+            result.name = "animation.gif"
+            await utils.run_sync(lottie.exporters.gif.export_gif, anim, result, quality, fps)
+            result.seek(0)
+            await utils.answer(message, result)
+        finally:
+            try:
+                file.close()
+            except UnboundLocalError:
+                pass
+            try:
+                result.close()
+            except UnboundLocalError:
+                pass
 
-
-async def convert(message, as_file=True):
-    reply = await message.get_reply_message()
-    if not reply or not reply.sticker:
-        await message.edit("<b>Reply to sticker!</b>")
-        return
-    fname = reply.sticker.attributes[-1].file_name
-    if ".tgs" in fname:
-        await message.edit("<b>Reply to not animated sticker!</b>")
-        return
-    bg = (0, 0, 0, 0)
-    args = utils.get_args(message)
-    if args:
-        args = args[0]
-        if args.startswith("#"):
-            for ch in args[1:]:
-                if ch not in hexdigits:
-                    break
-            bg = args
-
-    im = io.BytesIO()
-    await message.client.download_file(reply, im)
-    im = Image.open(im)
-    img = Image.new("RGBA", im.size, bg)
-    if im.mode == "RGBA":
-        img.paste(im, (0, 0), im)
-    else:
-        img.paste(im, (0, 0))
-    out = io.BytesIO()
-    out.name = fname + ".png"
-    img.save(out, "PNG")
-    out.seek(0)
-    await message.delete()
-    await message.client.send_file(message.to_id, out, force_document=as_file, reply_to=reply)
 
 def click_buttons(buttons, target_pack):
     buttons = list(itertools.chain.from_iterable(buttons))
+    # Process in reverse order; most difficult to match first
     try:
         return buttons[int(target_pack)]
     except (IndexError, ValueError):
@@ -307,8 +321,11 @@ def click_buttons(buttons, target_pack):
 
 
 def resize_image(img, size, dest):
+    # Wrapper for asyncio purposes
     try:
         im = Image.open(img)
+        # We used to use thumbnail(size) here, but it returns with a *max* dimension of 512,512
+        # rather than making one side exactly 512 so we have to calculate dimensions manually :(
         if im.width == im.height:
             size = (512, 512)
         elif im.width < im.height:
