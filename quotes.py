@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Hackintosh5 is gay
-
-# API author: @mishase
 # Module author: @mishase, @rf0x1d
-# Special thanks to: @h3xcode
 
 # requires: Pillow requests pycryptodome
 
@@ -35,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class mQuotesMod(loader.Module):
+class QuotesMod(loader.Module):
     """Quotes a message using Mishase Quotes API"""
     strings = {
         "name": "Quotes",

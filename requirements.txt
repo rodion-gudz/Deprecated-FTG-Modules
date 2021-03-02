@@ -48,3 +48,6 @@ Wand ~= 0.6.5
 
 # Search module
 search-engine-parser ~= 0.6.2
+
+# Speedtest module
+speedtest-cli ~=2.1.0

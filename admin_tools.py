@@ -1,42 +1,17 @@
-# Admin Tools for Friendly-Telegram UserBot.
-# Copyright (C) 2020 @Fl1yd, @AtiksX.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-# ======================================================================
+# -*- coding: utf-8 -*-
+
+# Module author: @ftgmodulesbyfl1yd
 
 import io, time
-import logging
-
 from .. import loader, utils, security
 from PIL import Image
-import telethon
-from telethon.errors import (ChatAdminRequiredError, UserAdminInvalidError, FloodWaitError, PhotoCropSizeSmallError)
-from telethon.tl.types import (ChatAdminRights, ChatBannedRights)
-from telethon.tl.functions.channels import (EditAdminRequest, EditBannedRequest, EditPhotoRequest,
-                                            DeleteUserHistoryRequest)
+from telethon.errors import ChatAdminRequiredError, UserAdminInvalidError, PhotoCropSizeSmallError
+from telethon.tl.types import ChatAdminRights, ChatBannedRights
+from telethon.tl.functions.channels import EditAdminRequest, EditBannedRequest, EditPhotoRequest, \
+    DeleteUserHistoryRequest
 from telethon.tl.functions.messages import EditChatAdminRequest
-from userbot import bot
-from telethon import events
 
 # ================== КОНСТАНТЫ ========================
-
-PROMOTE_RIGHTS = ChatAdminRights(add_admins=False,
-                                 invite_users=True,
-                                 change_info=False,
-                                 ban_users=True,
-                                 delete_messages=True,
-                                 pin_messages=True)
 
 DEMOTE_RIGHTS = ChatAdminRights(post_messages=None,
                                 add_admins=None,
@@ -82,9 +57,6 @@ UNBAN_RIGHTS = ChatBannedRights(until_date=None,
 
 def register(cb):
     cb(AdminToolsMod())
-
-
-logger = logging.getLogger(__name__)
 
 
 class AdminToolsMod(loader.Module):
@@ -161,7 +133,8 @@ class AdminToolsMod(loader.Module):
             return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
 
     async def promotecmd(self, message):
-        """Команда .promote повышает пользователя в правах администратора.\nИспользование: .promote <@ или реплай> <ранг>."""
+        """Команда .promote повышает пользователя в правах администратора.\nИспользование: .promote <@ или реплай>
+        <ранг>. """
         if message.chat:
             try:
                 args = utils.get_args_raw(message).split(' ')
@@ -256,266 +229,6 @@ class AdminToolsMod(loader.Module):
             await utils.answer(message, self.strings('unpinned', message))
         else:
             await utils.answer(message, self.strings('this_isn`t_a_chat', message))
-
-    async def purgecmd(self, message):
-        """Purge from the replied message"""
-        if not message.is_reply:
-            await utils.answer(message, self.strings("from_where", message))
-            return
-
-        from_users = set()
-        args = utils.get_args(message)
-        for arg in args:
-            try:
-                entity = await message.client.get_entity(arg)
-                if isinstance(entity, telethon.tl.types.User):
-                    from_users.add(entity.id)
-            except ValueError:
-                pass
-
-        msgs = []
-        from_ids = set()
-        if await message.client.is_bot():
-            if not message.is_channel:
-                await utils.answer(message, self.strings("not_supergroup_bot", message))
-                return
-            for msg in range(message.reply_to_msg_id, message.id + 1):
-                msgs.append(msg)
-                if len(msgs) >= 99:
-                    logger.debug(msgs)
-                    await message.client.delete_messages(message.to_id, msgs)
-                    msgs.clear()
-        else:
-            async for msg in message.client.iter_messages(
-                    entity=message.to_id,
-                    min_id=message.reply_to_msg_id - 1,
-                    reverse=True):
-                if from_users and msg.from_id not in from_users:
-                    continue
-                msgs.append(msg.id)
-                from_ids.add(msg.from_id)
-                if len(msgs) >= 99:
-                    logger.debug(msgs)
-                    await message.client.delete_messages(message.to_id, msgs)
-                    msgs.clear()
-        if msgs:
-            logger.debug(msgs)
-            await message.client.delete_messages(message.to_id, msgs)
-        await self.allmodules.log("purge", group=message.to_id, affected_uids=from_ids)
-
-    async def welcomecmd(self, message):
-        """Включить/выключить приветствие новых пользователей в чате. Используй: .welcome."""
-        welcome = self.db.get("Welcome", "welcome", {})
-        chatid = str(message.chat_id)
-        if chatid not in welcome:
-            welcome.setdefault(chatid, {})
-        if "message" not in welcome[chatid]:
-            welcome[chatid].setdefault("message", "Добро пожаловать в чат!")
-        if "status" not in welcome[chatid]:
-            welcome[chatid].setdefault("status", False)
-
-        if welcome[chatid]["status"] == False or welcome[chatid]["status"] == None:
-            welcome[chatid]["status"] = True
-            self.db.set("Welcome", "welcome", welcome)
-            return await message.edit("<b>[Welcome Mode]</b> Активирован!")
-        else:
-            welcome.pop(chatid)
-            self.db.set("Welcome", "welcome", welcome)
-            return await message.edit("<b>[Welcome Mode]</b> Деактивирован!")
-
-    async def setwelcomecmd(self, message):
-        """Установить новое приветствие новых пользователей в чате.\nИспользуй: .setwelcome <текст (можно использовать {name}; {chat})>; ничего."""
-        welcome = self.db.get("Welcome", "welcome", {})
-        args = utils.get_args_raw(message)
-        chatid = str(message.chat_id)
-        chat = await message.client.get_entity(int(chatid))
-        if not args:
-            try:
-                return await message.edit(f'<b>Приветствие новых пользователей в "{chat.title}":</b>\n\n'
-                                          f'<b>Статус:</b> Включено.\n'
-                                          f'<b>Приветствие:</b> {welcome[chatid]["message"]}\n\n'
-                                          f'<b>~ Установить новое приветствие можно с помощью команды:</b> .setwelcome <текст>.')
-
-            except KeyError:
-                return await message.edit(f'<b>Приветствие новых пользователей в "{chat.title}":</b>\n\n'
-                                          f'<b>Статус:</b> Отключено.')
-        else:
-            try:
-                welcome[chatid]["message"] = args
-                self.db.set("Welcome", "welcome", welcome)
-                return await message.edit("<b>Новое приветствие установлено успешно!</b>")
-            except KeyError:
-                return await message.edit(f'<b>Приветствие новых пользователей в "{chat.title}":</b>\n\n'
-                                          f'<b>Статус:</b> Отключено')
-
-    @bot.on(events.ChatAction)
-    async def watcher(self, event):
-        """Интересно, почему он именно watcher называется... 🤔"""
-        try:
-            welcome = self.db.get("Welcome", "welcome", {})
-            user = await event.get_user()
-            chat = await event.get_chat()
-            chatid = str(event.chat_id)
-            if chatid in welcome:
-                if event.user_joined or event.user_added:
-                    await event.reply((welcome[chatid]["message"]).format(name=user.first_name, chat=chat.title))
-        except (AttributeError, TypeError):
-            pass
-
-    @loader.group_admin_delete_messages
-    @loader.ratelimit
-    async def delcmd(self, message):
-        msgs = [message.id]
-        if not message.is_reply:
-            if await message.client.is_bot():
-                await utils.answer(message, self.strings("delete_what", message))
-                return
-            msg = await message.client.iter_messages(message.to_id, 1, max_id=message.id).__anext__()
-        else:
-            msg = await message.get_reply_message()
-        msgs.append(msg.id)
-        logger.debug(msgs)
-        await message.client.delete_messages(message.to_id, msgs)
-        await self.allmodules.log("delete", group=message.to_id, affected_uids=[msg.from_id])
-
-    async def addbwcmd(self, message):
-        """Добавить слово в список "Плохих слов". Используй: .addbw <слово>."""
-        if not message.is_private:
-            chat = await message.get_chat()
-            if not chat.admin_rights and not chat.creator:
-                return await message.edit("<b>Я не админ здесь.</b>")
-            else:
-                if chat.admin_rights.delete_messages == False:
-                    return await message.edit("<b>У меня нет нужных прав.</b>")
-        words = self.db.get("BanWords", "bws", {})
-        args = utils.get_args_raw(message)
-        if not args: return await message.edit("<b>[BanWords]</b> Нет аргументов.")
-        chatid = str(message.chat_id)
-        if chatid not in words:
-            words.setdefault(chatid, [])
-        if "stats" not in words:
-            words.setdefault("stats", {})
-        if chatid not in words["stats"]:
-            words["stats"].setdefault(chatid, {})
-        if args not in words[chatid]:
-            if ", " in args:
-                args = args.split(', ')
-                words[chatid].extend(args)
-                self.db.set("BanWords", "bws", words)
-                await message.edit(
-                    f"<b>[BanWords]</b> В список чата добавлены слова - \"<code>{'; '.join(args)}</code>\".")
-            else:
-                words[chatid].append(args)
-                self.db.set("BanWords", "bws", words)
-                await message.edit(f"<b>[BanWords]</b> В список чата добавлено слово - \"<code>{args}</code>\".")
-        else:
-            return await message.edit("<b>[BanWords]</b> Такое слово уже есть в списке слов чата.")
-
-    async def rmbwcmd(self, message):
-        """Удалить слово из список "Плохих слов". Используй: .rmbw <слово или all/clearall (по желанию)>."""
-        words = self.db.get("BanWords", "bws", {})
-        args = utils.get_args_raw(message)
-        if not args: return await message.edit("<b>[BanWords]</b> Нет аргументов.")
-        chatid = str(message.chat_id)
-        try:
-            if args == "all":
-                words.pop(chatid)
-                words["stats"].pop(chatid)
-                self.db.set("BanWords", "bws", words)
-                return await message.edit("<b>[BanWords]</b> Из списка чата удалены все слова.")
-            if args == "clearall":
-                self.db.set("BanWords", "bws", {})
-                return await message.edit("<b>[BanWords]</b> Все списки из всех чатов были удалены.")
-            words[chatid].remove(args)
-            if len(words[chatid]) == 0:
-                words.pop(chatid)
-            self.db.set("BanWords", "bws", words)
-            await message.edit(f"<b>[BanWords]</b> Из списка чата удалено слово - \"<code>{args}</code>\".")
-        except KeyError:
-            return await message.edit("<b>Этого слова нет в словаре этого чата.</b>")
-
-    async def bwscmd(self, message):
-        """Посмотреть список "Плохих слов". Используй: .bws."""
-        words = self.db.get("BanWords", "bws", {})
-        chatid = str(message.chat_id)
-        try:
-            ls = words[chatid]
-        except KeyError:
-            return await message.edit("<b>[BanWords]</b> В этом чате нет списка слов.")
-        word = ""
-        for _ in ls:
-            word += f"• <code>{_}</code>\n"
-        await message.edit(f"<b>[BanWords]</b> Список слов в этом чате:\n\n{word}")
-
-    async def bwstatscmd(self, message):
-        """Статистика "Плохих слов". Используй: .bwstats <clear (по желанию)>."""
-        words = self.db.get("BanWords", "bws", {})
-        chatid = str(message.chat_id)
-        args = utils.get_args_raw(message)
-        if args == "clear":
-            words["stats"].pop(chatid)
-            self.db.set("BanWords", "bws", words)
-            return await message.edit("<b>[BanWords]</b> Статистика пользователей чата сброшена.")
-        w = ""
-        try:
-            for _ in words["stats"][chatid]:
-                if _ != "kick" and words["stats"][chatid][_] != 0:
-                    user = await message.client.get_entity(int(_))
-                    w += f'• <a href="tg://user?id={int(_)}">{user.first_name}</a>: <code>{words["stats"][chatid][_]}</code>\n'
-            return await message.edit(f"<b>[BanWords]</b> Кто использовал спец.слова:\n\n{w}")
-        except KeyError:
-            return await message.edit("<b>[BanWords]</b> В этом чате нет тех, кто использовал спец.слова.")
-
-    async def swbwcmd(self, message):
-        """Переключить режим "Плохих слов". Используй: .swbw"""
-        words = self.db.get("BanWords", "bws", [])
-        args = utils.get_args_raw(message)
-        chatid = str(message.chat_id)
-
-        if chatid not in words:
-            words.setdefault(chatid, [])
-        if "stats" not in words:
-            words.setdefault("stats", {})
-        if chatid not in words["stats"]:
-            words["stats"].setdefault(chatid, {})
-        if "kick" not in words["stats"][chatid]:
-            words["stats"][chatid].setdefault("kick", None)
-
-        if words["stats"][chatid]["kick"] == False or words["stats"][chatid]["kick"] == None:
-            words["stats"][chatid]["kick"] = True
-            self.db.set("BanWords", "bws", words)
-            return await message.edit("<b>[BanWords]</b> Режим кик участников включен.\nЛимит: 5 спец.слова.")
-
-        elif words["stats"][chatid]["kick"] == True:
-            words["stats"][chatid]["kick"] = False
-            self.db.set("BanWords", "bws", words)
-            return await message.edit(f"<b>[BanWords]</b> Режим кик участников выключен.")
-
-    async def watcher(self, message):
-        """мда"""
-        if message.sender_id == (await message.client.get_me()).id: return
-        words = self.db.get("BanWords", "bws", [])
-        chatid = str(message.chat_id)
-        userid = str(message.sender_id)
-        user = await message.client.get_entity(int(userid))
-        if chatid not in str(words): return
-        if userid not in words["stats"][chatid]:
-            words["stats"][chatid].setdefault(userid, 0)
-        ls = words[chatid]
-        for _ in ls:
-            if _ in message.text.lower().split():
-                count = words["stats"][chatid][userid]
-                words["stats"][chatid].update({userid: count + 1})
-                self.db.set("BanWords", "bws", words)
-                if "kick" in words["stats"][chatid]:
-                    if words["stats"][chatid]["kick"] == True:
-                        if count == 5:
-                            await message.client.kick_participant(int(chatid), int(userid))
-                            words["stats"][chatid].pop(userid)
-                            self.db.set("BanWords", "bws", words)
-                            await message.respond(
-                                f"<b>[BanWords]</b> {user.first_name} достиг лимит (5) спец.слова, и был кикнут из чата.")
-                await message.client.delete_messages(message.chat_id, message.id)
 
     async def kickcmd(self, message):
         """Команда .kick кикает пользователя.\nИспользование: .kick <@ или реплай>."""
@@ -620,7 +333,7 @@ class AdminToolsMod(loader.Module):
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                 else:
-                    args = utils.get_args(message)
+                    args = utils.get_args_raw(message)
                     if not args:
                         return await utils.answer(message, self.strings('unban_none', message))
                     user = await message.client.get_entity(args if not args.isnumeric() else int(args))
@@ -633,107 +346,70 @@ class AdminToolsMod(loader.Module):
             return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
 
     async def mutecmd(self, message):
-        """Команда .mute даёт мут пользователю.\nИспользование: .mute <@ или реплай> <время (1m, 1h, 1d)>."""
+        """Команда .mute даёт мут пользователю.\nИспользование: .mute <@ или реплай> <время (1m, 1h, 1d)>; ничего."""
         if not message.is_private:
+            args = utils.get_args_raw(message).split()
+            reply = await message.get_reply_message()
+            timee = False
+
             try:
-                reply = await message.get_reply_message()
-                chat = await message.get_chat()
-                if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
-                else:
-                    if chat.admin_rights.ban_users == False:
-                        return await utils.answer(message, self.strings('no_rights', message))
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
+                    args = utils.get_args_raw(message)
+                    if args:
+                        timee = args
                 else:
-                    who = utils.get_args_raw(message).split(' ')
-                    user = await message.client.get_entity(who[0] if not who[0].isnumeric() else int(who[0]))
-
-                    if len(who) == 1:
-                        timee = ChatBannedRights(until_date=True, send_messages=True)
-                        await message.client(EditBannedRequest(message.chat_id, user.id, timee))
-                        await message.edit('<b>{} теперь в муте.</b>'.format(user.first_name))
-                        return
-
-                    if not user:
-                        return await utils.answer(message, self.strings('mute_none', message))
-                    if user:
-                        tim = who[1]
-                        if tim:
-                            if len(tim) != 2:
-                                return await utils.answer(message, self.strings('no_args', message))
-                            num = ''
-                            t = ''
-                            for q in tim:
-                                if q.isdigit():
-                                    num += q
-                                else:
-                                    t += q
-
-                            text = f'<b>{num}'
-                            if t == 'm':
-                                num = int(num) * 60
-                                text += ' минут(-ы).</b>'
-                            elif t == 'h':
-                                num = int(num) * 3600
-                                text += ' час(-а/-ов).</b>'
-                            elif t == 'd':
-                                num = int(num) * 86400
-                                text += ' дня(-ей).</b>'
-                            else:
-                                return await utils.answer(message, self.strings('no_args', message))
-                            timee = ChatBannedRights(until_date=time.time() + int(num), send_messages=True)
-                            try:
-                                await message.client(EditBannedRequest(message.chat_id, user.id, timee))
-                                await utils.answer(message, self.strings('muted', message).format(
-                                    utils.escape_html(user.first_name)) + text)
-                                return
-                            except:
-                                await utils.answer(message, self.strings('no_rights', message))
-                        else:
-                            timee = ChatBannedRights(until_date=True, send_messages=True)
-                            await message.client(EditBannedRequest(message.chat_id, user.id, timee))
-                            await message.edit('<b>{} теперь в муте.</b>'.format(user.first_name))
-                            return
-
-                tim = utils.get_args(message)
-                if tim:
-                    if len(tim[0]) < 2:
-                        return await utils.answer(message, self.strings('no_args', message))
-                    num = ''
-                    t = ''
-                    for q in tim[0]:
-                        if q.isdigit():
-                            num += q
-                        else:
-                            t += q
-
-                    text = f'<b>{num}'
-                    if t == 'm':
-                        num = int(num) * 60
-                        text += ' минут(-ы).</b>'
-                    elif t == 'd':
-                        num = int(num) * 86400
-                        text += ' дня(-ей) .</b>'
-                    elif t == 'h':
-                        num = int(num) * 3600
-                        text += ' час(-а/-ов).</b>'
-                    else:
-                        return await utils.answer(message, self.strings('no_args', message))
-                    timee = ChatBannedRights(until_date=time.time() + int(num), send_messages=True)
-                    await message.client(EditBannedRequest(message.chat_id, user.id, timee))
-                    await utils.answer(message,
-                                       self.strings('muted', message).format(utils.escape_html(user.first_name)) + text)
-                    return
-                else:
-                    timee = ChatBannedRights(until_date=True, send_messages=True)
-                    await message.client(EditBannedRequest(message.chat_id, user.id, timee))
-                    await message.edit('<b>{} теперь в муте.</b>'.format(user.first_name))
-                    return
+                    user = await message.client.get_entity(args[0] if not args[0].isnumeric() else int(args[0]))
+                    if args:
+                        if len(args) == 1:
+                            args = utils.get_args_raw(message)
+                            user = await message.client.get_entity(args if not args.isnumeric() else int(args))
+                            timee = False
+                        elif len(args) >= 2:
+                            timee = utils.get_args_raw(message).split(' ', 1)[1]
             except ValueError:
                 return await utils.answer(message, self.strings('no_args', message))
-            except UserAdminInvalidError:
-                return await utils.answer(message, self.strings('no_rights', message))
+
+            if timee:
+                n = ''
+                t = ''
+
+                for _ in timee:
+                    if _.isdigit():
+                        n += _
+                    else:
+                        t += _
+
+                text = f"<b>{n}"
+
+                if t == "m":
+                    n = int(n) * 60
+                    text += " мин.</b>"
+
+                elif t == "h":
+                    n = int(n) * 3600
+                    text += " час.</b>"
+
+                elif t == "d":
+                    n = int(n) * 86400
+                    text += " дн.</b>"
+
+                else:
+                    return await utils.answer(message, self.strings('no_args', message))
+
+                try:
+                    tm = ChatBannedRights(until_date=time.time() + int(n), send_messages=True)
+                    await message.client(EditBannedRequest(message.chat_id, user.id, tm))
+                    return await utils.answer(message, self.strings('muted', message).format(user.first_name) + text)
+                except UserAdminInvalidError:
+                    return await utils.answer(message, self.strings('no_rights', message))
+            else:
+                try:
+                    tm = ChatBannedRights(until_date=True, send_messages=True)
+                    await message.client(EditBannedRequest(message.chat_id, user.id, tm))
+                    return await message.edit('<b>{} теперь в муте.</b>'.format(user.first_name))
+                except UserAdminInvalidError:
+                    return await utils.answer(message, self.strings('no_rights', message))
         else:
             await utils.answer(message, self.strings('this_isn`t_a_chat', message))
 
@@ -751,7 +427,7 @@ class AdminToolsMod(loader.Module):
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                 else:
-                    args = utils.get_args(message)
+                    args = utils.get_args_raw(message)
                     if not args:
                         return await utils.answer(message, self.strings('unmute_none', message))
                     user = await message.client.get_entity(args if not args.isnumeric() else int(args))
@@ -782,6 +458,7 @@ class AdminToolsMod(loader.Module):
             user = await message.client.get_entity(reply.sender_id)
         await message.client(DeleteUserHistoryRequest(message.to_id, user.id))
         await message.client.send_message(message.to_id, self.strings('deleted', message).format(user.first_name))
+        await message.delete()
 
     async def deluserscmd(self, message):
         """Команда .delusers показывает список всех удалённых аккаунтов в чате.\nИспользование: .delusers <clean>."""

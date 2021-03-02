@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @dekftgmodules, @ftgmodulesbyfl1yd
+
 import logging
 import inspect
 import io
@@ -91,6 +95,7 @@ class HelpMod(loader.Module):
         await utils.answer(message, reply)
 
     async def restorecmd(self, m):
+        """Установить все модули из txt файла"""
         reply = await m.get_reply_message()
         if not reply:
             await m.edit("REPLY_TO_TXT")
@@ -115,16 +120,19 @@ class HelpMod(loader.Module):
             else:
                 already_loaded += 1
         self._db.set("friendly-telegram.modules.loader", "loaded_modules", modules)
-        await m.edit(f"Restored: {valid}\n" + (
-            "Please restart!\n<code>.restart</code>" if valid != 0 else "Nothing loaded"))
+        await m.edit(f"[BackupMan]\n\nЗагружено: {valid}\nЗагружены ранее: {already_loaded}\n\n" + (
+            "Необходима перезагрузка!\n<code>.restart</code>" if valid != 0 else "Ничего не загружено"))
 
     async def backupcmd(self, m):
+        """
+        Сделать бэкап модулей в txt файл
+        """
         modules = self._db.get("friendly-telegram.modules.loader", "loaded_modules", [])
         txt = io.BytesIO("\n".join(modules).encode())
-        txt.name = "Modules Backup-{}.txt".format(str((await m.client.get_me()).id))
-        await m.client.send_file(m.to_id, txt, caption=f"Modules backup completed\nSaved modules: {len(modules)}")
+        txt.name = "BackupMan-{}.txt".format(str((await m.client.get_me()).id))
+        await m.client.send_file(m.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
         await m.delete()
-        await m.client.send_file(m.to_id, txt, caption=f"Modules backup completed\nSaved modules: {len(modules)}")
+        await m.client.send_file(m.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
         await m.delete()
 
     async def modulecmd(self, message):

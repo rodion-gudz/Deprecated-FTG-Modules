@@ -1,4 +1,10 @@
-import logging, os
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
+# requires: lottie cairosvg pillow wand
+
+import os
 from random import choice, randint
 import io
 from telethon.tl.types import DocumentAttributeFilename
@@ -8,17 +14,15 @@ from PIL import Image as IM
 from .. import loader, utils
 
 
-# Author: https://t.me/GovnoCodules
-
 def register(cb):
-    cb(StickersDistortMod())
+    cb(DistortMod())
 
 
 logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class StickersDistortMod(loader.Module):
+class DistortMod(loader.Module):
     """Stickers or photo distort"""
     strings = {"name": "Distort"}
 

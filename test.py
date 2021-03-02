@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
+
+# Module author: Official Repo
+
+# requires: speedtest-cli>=2.1.0
+
+from .. import loader, utils
+from datetime import datetime
 import logging
 import time
-
 from io import BytesIO
 import speedtest
-from .. import loader, utils
-from time import sleep
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +42,7 @@ class TestMod(loader.Module):
                "uploading_logs": "<b>Uploading logs...</b>",
                "no_logs": "<b>You don't have any logs at verbosity {}.</b>",
                "logs_filename": "ftg-logs.txt",
-               "logs_caption": "Friendly-Telegram logs with verbosity {}",
+               "logs_caption": "friendly-telegram logs with verbosity {}",
                "logs_unsafe": ("<b>Warning: running this command may reveal personal or dangerous information. "
                                "You can write</b> <code>{}</code> <b>at the end to accept the risks</b>"),
                "logs_force": "FORCE_INSECURE",
@@ -47,18 +51,16 @@ class TestMod(loader.Module):
                "results": "<b>Speedtest Results:</b>",
                "results_download": "<b>Download:</b> <code>{}</code> <b>MiB/s</b>",
                "results_upload": "<b>Upload:</b> <code>{}</code> <b>MiB/s</b>",
-               "results_ping": "<b>Ping:</b> <code>{}</code> <b>ms</b>"
-               }
+               "results_ping": "<b>Ping:</b> <code>{}</code> <b>ms</b>"               }
 
     @loader.test(resp="Pong")
     @loader.unrestricted
     async def pingcmd(self, message):
-        """Does nothing"""
+        """Test your userbot ping"""
         start = datetime.now()
         await utils.answer(message, "<code>Ping checking...</code>")
         end = datetime.now()
         ms = (end - start).microseconds / 1000
-        sleep(0.5)
         await utils.answer(message, "<b>Ping:</b> <code>{}ms</code>".format(ms))
 
     @loader.test(func=dumptest)
@@ -110,9 +112,6 @@ class TestMod(loader.Module):
         except ValueError:
             await utils.answer(message, self.strings("suspend_invalid_time", message))
 
-    async def client_ready(self, client, db):
-        self.client = client
-
     async def speedtestcmd(self, message):
         """Tests your internet speed"""
         await utils.answer(message, self.strings("running", message))
@@ -137,3 +136,6 @@ class TestMod(loader.Module):
         speedtester.download(threads=None)
         speedtester.upload(threads=None)
         return speedtester.results.dict()
+
+    async def client_ready(self, client, db):
+        self.client = client
