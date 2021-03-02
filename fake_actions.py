@@ -142,6 +142,60 @@ class FakeMod(loader.Module):
             except BaseException:
                 return
 
+    async def recordvideocmd(self, event):
+        """Imitates recording video"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'record-video'):
+                    await sleep(int(activity_time[0]))
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'record-video'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
+
+    async def recordvoicecmd(self, event):
+        """Imitates recording voice"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'record-audio'):
+                    await sleep(int(activity_time[0]))
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'record-audio'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
+
+    async def recordroundcmd(self, event):
+        """Imitates recording voice"""
+        activity_time = utils.get_args(event)
+        if activity_time:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'record-round'):
+                    await sleep(int(activity_time[0]))
+            except BaseException:
+                return
+        else:
+            try:
+                await event.delete()
+                async with event.client.action(event.chat_id, 'record-round'):
+                    await sleep(randint(30, 60))
+            except BaseException:
+                return
+
     async def scrncmd(self, message):
         """Screenshot notification (Only PM)"""
         a = 1
