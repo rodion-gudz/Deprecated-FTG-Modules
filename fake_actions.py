@@ -41,7 +41,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'voice'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -59,7 +59,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'game'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -77,7 +77,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'video'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -95,7 +95,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'photo'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -113,7 +113,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'document'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -131,7 +131,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'location'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -149,7 +149,7 @@ class FakeMod(loader.Module):
             try:
                 await event.delete()
                 async with event.client.action(event.chat_id, 'contact'):
-                    await sleep(activity_time)
+                    await sleep(int(activity_time[0]))
             except BaseException:
                 return
         else:
@@ -159,6 +159,15 @@ class FakeMod(loader.Module):
                     await sleep(randint(30, 60))
             except BaseException:
                 return
+
+    async def cancelcmd(self, event):
+        """Cancel your action"""
+        try:
+            await event.delete()
+            async with event.client.action(event.chat_id, 'cancel'):
+                await sleep(randint(30, 60))
+        except BaseException:
+            return
 
     async def scrncmd(self, message):
         """Screenshot notification (Only PM)"""
