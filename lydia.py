@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+# Module author: Official Repo
+
+# requires: coffeehouse>=2.2.0
+
 from .. import loader, utils
 import logging
 import asyncio
@@ -11,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class LydiaMod(loader.Module):
+    """Talks to a robot instead of a human"""
     strings = {"name": "Lydia anti-PM",
                "enable_disable_error_group": "<b>The AI service cannot be"
                " enabled or disabled in this chat. Is this a group chat?</b>",
