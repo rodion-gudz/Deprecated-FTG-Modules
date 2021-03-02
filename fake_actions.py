@@ -160,15 +160,6 @@ class FakeMod(loader.Module):
             except BaseException:
                 return
 
-    async def cancelcmd(self, event):
-        """Cancel your action"""
-        try:
-            await event.delete()
-            async with event.client.action(event.chat_id, 'cancel'):
-                await sleep(randint(30, 60))
-        except BaseException:
-            return
-
     async def scrncmd(self, message):
         """Screenshot notification (Only PM)"""
         a = 1
