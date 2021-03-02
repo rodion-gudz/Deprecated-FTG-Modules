@@ -161,6 +161,7 @@ class FakeMod(loader.Module):
                 return
 
     async def scrncmd(self, message):
+        """Screenshot notification (Only PM)"""
         a = 1
         r = utils.get_args(message)
         if r and r[0].isdigit():
