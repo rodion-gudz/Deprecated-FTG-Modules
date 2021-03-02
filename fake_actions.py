@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Module author: @hftgmodulesbyfl1yd, @GovnoCodules
+# Module author: @ftgmodulesbyfl1yd, @GovnoCodules
 
 from random import choice, randint
 from .. import loader, utils
