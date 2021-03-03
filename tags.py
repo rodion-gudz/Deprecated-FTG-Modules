@@ -32,15 +32,12 @@ class TagMod(loader.Module):
         """Используй .tagall <текст (по желанию)>."""
         args = utils.get_args_raw(message)
         tag = args or "Hey"
-
+        await message.delete()
         tags = []
         async for user in message.client.iter_participants(message.to_id):
             tags.append(f"<a href='tg://user?id={user.id}'>\u2060</a>")
-
         chunkss = list(chunks(tags, 5))
         random.shuffle(chunkss)
-        await message.delete()
-
         for chunk in chunkss:
             await message.client.send_message(message.to_id, tag + '\u2060'.join(chunk))
 
