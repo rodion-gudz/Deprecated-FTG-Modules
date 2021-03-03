@@ -5,11 +5,13 @@ from telethon.errors.rpcerrorlist import YouBlockedUserError
 import logging
 import asyncio
 from asyncio import sleep
+
 logger = logging.getLogger(__name__)
 import io
 from base64 import b64encode, b64decode
 import logging
 import telethon
+
 
 @loader.tds
 class TyperMod(loader.Module):
@@ -222,6 +224,7 @@ class TyperMod(loader.Module):
             change = str.maketrans(RuKeys + EnKeys, EnKeys + RuKeys)
             text = str.translate(text, change)
             await message.edit(text)
+
 
 async def update_message(message, m, entities):
     try:

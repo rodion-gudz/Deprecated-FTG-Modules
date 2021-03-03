@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
 from .. import loader, utils
 import io
 import logging
