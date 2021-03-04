@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Module author: Official Repo
+# Module author: Official Repo, @dekftgmodules
 
 # requires: lyricsgenius ShazamAPI
 

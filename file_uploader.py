@@ -1,46 +1,29 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
+from .. import loader, utils
+import logging
 from requests import post
+import requests
 from telethon.tl.types import DocumentAttributeFilename
 from telethon.errors.rpcerrorlist import YouBlockedUserError
 from telethon import events
-from .. import loader, utils
 import io
 from io import BytesIO
 from PIL import Image
-import logging
-import requests
-import asyncio
-from requests import get, post, exceptions
-import os
-from telethon import functions, types
-from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
-import io
 
-DOGBIN_URL = "https://dogbin.f0x1d.com/"
-# Author: https://t.me/GovnoCodules
 
 logger = logging.getLogger(__name__)
 
-def sgen(agen, loop):
-    while True:
-        try:
-            yield utils.run_async(loop, agen.__anext__())
-        except StopAsyncIteration:
-            return
-
 
 @loader.tds
-class x0Mod(loader.Module):
+class FileUploaderMod(loader.Module):
+    """Uploader"""
     strings = {
-        "name": "File uploader",
-        "up_cfg_doc": "URL to upload the file to.",
-        "no_file": "<code>Provide a file to upload</code>",
-        "uploading": "<code>Uploading...</code>",
-        "uploaded": "<a href={}>Uploaded!</a>"
+        "name": "File Uploader"
     }
 
-    def __init__(self):
-        self.config = loader.ModuleConfig("UPLOAD_URL", "https://transfer.sh/{}",
-                                          lambda m: self.strings("up_cfg_doc", m))
     async def client_ready(self, client, db):
         self.client = client
 
@@ -49,7 +32,7 @@ class x0Mod(loader.Module):
         await message.edit("<b>Uploading...</b>")
         reply = await message.get_reply_message()
         if not reply:
-            await message.edit("<b>Reply to message</b>")
+            await message.edit("<b>Reply to message!</b>")
             return
         media = reply.media
         if not media:
@@ -61,13 +44,14 @@ class x0Mod(loader.Module):
         try:
             x0at = post('https://x0.at', files={'file': file})
         except ConnectionError as e:
-            await message.edit("ConnectionError")
+            await message.edit("<b>Error</b>")
             return
         url = x0at.text
-        output = f'{url}'
+        output = f'<a href="{url}">URL: </a><code>{url}</code>'
         await message.edit(output)
 
     async def telegraphcmd(self, message):
+        """.ph <reply photo or video>"""
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data = await check_media(reply_message)
@@ -78,7 +62,7 @@ class x0Mod(loader.Module):
             await message.edit("<b>Reply to photo or video/gif</b>")
             return
 
-        file = lol(await message.client.download_media(data, bytes))
+        file = await message.client.download_media(data, bytes)
         path = requests.post('https://te.legra.ph/upload', files={'file': ('file', file, None)}).json()
         try:
             link = 'https://te.legra.ph' + path[0]['src']
@@ -92,123 +76,23 @@ class x0Mod(loader.Module):
         async with event.client.conversation(chat) as conv:
 
             if not reply:
-                await event.edit("где реплай на медиа.")
+                await event.edit("<b>Reply to photo</b>")
                 return
             else:
                 pic = await check_mediaa(event, reply)
                 if not pic:
-                    await utils.answer(event, 'это не изображение, лол.')
+                    await utils.answer(event, '<b>Reply to photo</b>')
                     return
-            await event.edit("Uploading...")
+            await event.edit("<b>Uploading...</b>")
             try:
                 what = lol(pic)
                 response = conv.wait_event(events.NewMessage(incoming=True, from_users=985223903))
-                mm = await event.client.send_file(chat, what)
+                await event.client.send_file(chat, what)
                 response = await response
-                await mm.delete()
             except YouBlockedUserError:
                 await event.edit('<code>Разблокируй @imgurbot_bot</code>')
                 return
-            await event.edit(response.text)
-            await response.delete()
-            await event.client(functions.messages.DeleteHistoryRequest(
-                peer='ImgUploadBot',
-                max_id=0,
-                just_clear=False,
-                revoke=True
-            ))
-
-    async def hastecmd(self, message):
-        media = False
-        reply_to = False
-        user_msg = f"""{utils.get_args_raw(message)}"""
-        reply = await message.get_reply_message()
-        if reply:
-            if reply.media:
-                user_msg = reply.media
-                media = True
-                reply_to = True
-            else:
-                user_msg = f"""{reply.text}"""
-                reply_to = True
-        else:
-            pass
-        await message.edit('<code>Uploading...</code>')
-        async with message.client.conversation('@hastebin_bbot') as conv:
-            try:
-                response = conv.wait_event(events.NewMessage(incoming=True,
-                                                             from_users=1358418309))
-                if media:
-                    await message.client.send_file('@hastebin_bbot', user_msg)
-                else:
-                    await message.client.send_message('@hastebin_bbot', user_msg)
-                response = await response
-            except YouBlockedUserError:
-                await message.reply('<code>Разблокируй </code> @hastebin_bbot')
-                return
-            await message.delete()
-            if reply_to:
-                await message.client.send_message(message.to_id, response.message, reply_to=reply.id)
-            else:
-                await message.client.send_message(message.to_id, response.message)
-            await message.client(functions.messages.DeleteHistoryRequest(
-                peer='hastebin_bbot',
-                max_id=0,
-                just_clear=False,
-                revoke=True
-            ))
-
-
-    async def dogbincmd(self, message):
-        dogbin_final_url = ""
-        match = utils.get_args_raw(message)
-        reply_id = message.reply_to_msg_id
-
-        if not match and not reply_id:
-            await message.edit("`Elon Musk said I cannot paste void.`")
-            return
-
-        if match:
-            messageText = match
-        elif reply_id:
-            messageText = (await message.get_reply_message())
-            if messageText.media:
-                downloaded_file_name = await message.client.download_media(
-                    messageText,
-                    TEMP_DOWNLOAD_DIRECTORY,
-                )
-                m_list = None
-                with open(downloaded_file_name, "rb") as fd:
-                    m_list = fd.readlines()
-                messageText = ""
-                for m in m_list:
-                    messageText += m.decode("UTF-8") + "\r"
-                os.remove(downloaded_file_name)
-            else:
-                messageText = messageText.message
-
-        # Dogbin
-        await message.edit("Pasting text...")
-        resp = post(DOGBIN_URL + "documents", data=messageText.encode('utf-8'))
-
-        if resp.status_code == 200:
-            response = resp.json()
-            key = response['key']
-            dogbin_final_url = DOGBIN_URL + key
-
-            if response['isUrl']:
-                reply_text = (dogbin_final_url)
-            else:
-                reply_text = (dogbin_final_url)
-        else:
-            reply_text = ("`Failed to reach Dogbin`")
-
-        await message.edit(reply_text)
-        if BOTLOG:
-            await message.client.send_message(
-                BOTLOG_CHATID,
-                f"Paste query was executed successfully",
-            )
+            await event.edit("<b>Imgur link - </b>" + response.text)
 
 
 async def check_media(reply_message):

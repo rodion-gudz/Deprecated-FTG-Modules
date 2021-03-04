@@ -1,5 +1,3 @@
-from .. import loader, utils
-import random
 import asyncio
 import logging
 
@@ -9,36 +7,26 @@ from .. import loader, utils, security
 
 logger = logging.getLogger(__name__)
 
+
 @loader.tds
-class YesNoMod(loader.Module):
-    strings = {"name": "Random",
+class DiceMod(loader.Module):
+    """Dice"""
+    strings = {"name": "Dice",
                "yes_words_cfg_doc": "Yes words",
-               "no_words_cfg_doc": "No words"}
+               "no_words_cfg_doc": "No words"
+               }
 
     def __init__(self):
-        self.config = loader.ModuleConfig(
-            "YES_WORDS", ["Yes", "Yup", "Absolutely", "Non't"], lambda m: self.strings("yes_words_cfg_doc", m),
-            "NO_WORDS", ["No", "Nope", "Nah", "Yesn't"], lambda m: self.strings("no_words_cfg_doc", m))
-
-        self.configa = loader.ModuleConfig("POSSIBLE_VALUES", {"": [1, 2, 3, 4, 5, 6],
+        self.config = loader.ModuleConfig("POSSIBLE_VALUES", {"": [1, 2, 3, 4, 5, 6],
                                                               "🎲": [1, 2, 3, 4, 5, 6],
                                                               "🎯": [1, 2, 3, 4, 5, 6],
                                                               "🏀": [1, 2, 3, 4, 5]},
                                           "Mapping of emoji to possible values")
-
-
+        self.config = loader.ModuleConfig(
+            "YES_WORDS", ["Yes", "Yup", "Absolutely", "Non't"], lambda m: self.strings("yes_words_cfg_doc", m),
+            "NO_WORDS", ["No", "Nope", "Nah", "Yesn't"], lambda m: self.strings("no_words_cfg_doc", m))
 
     @loader.unrestricted
-    async def yesnocmd(self, message):
-        """Make a life choice"""
-        yes = self.config["YES_WORDS"]
-        no = self.config["NO_WORDS"]
-        if random.getrandbits(1):
-            response = random.choice(yes)
-        else:
-            response = random.choice(no)
-        await utils.answer(message, response)
-
     async def dicecmd(self, message):
         """Rolls a die (optionally with the specified value)
            .dice <emoji> <outcomes> <count>"""
@@ -48,10 +36,10 @@ class YesNoMod(loader.Module):
                 emoji = args[0]
             except IndexError:
                 emoji = "🎲"
-            possible = self.configa["POSSIBLE_VALUES"].get(emoji, None)
+            possible = self.config["POSSIBLE_VALUES"].get(emoji, None)
             if possible is None:
                 emoji = "🎲"
-                possible = self.configa["POSSIBLE_VALUES"][emoji]
+                possible = self.config["POSSIBLE_VALUES"][emoji]
             values = set()
             try:
                 for val in args[1].split(","):
@@ -87,3 +75,15 @@ class YesNoMod(loader.Module):
             except IndexError:
                 emoji = "🎲"
             await message.reply(file=InputMediaDice(emoji))
+
+    @loader.unrestricted
+    async def yesnocmd(self, message):
+        """Make a life choice"""
+        yes = self.config["YES_WORDS"]
+        no = self.config["NO_WORDS"]
+        if random.getrandbits(1):
+            response = random.choice(yes)
+        else:
+            response = random.choice(no)
+        await utils.answer(message, response)
+
