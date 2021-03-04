@@ -82,7 +82,7 @@ class InfoMod(loader.Module):
             except:
                 return await m.edit("<b>Err</b>")
         else:
-            return await m.edit("[CheckerAPI] А кого чекать?")
+            return await m.edit("<b>А кого чекать?</b>")
         await m.edit(self.strings['check'])
         r = requests.get('http://d4n13l3k00.ml/api/checkTgId?uid=' + user).json()
         await m.edit(self.strings['response'].format(r['data'], str(round(r['time'], 3)) + "ms"))
