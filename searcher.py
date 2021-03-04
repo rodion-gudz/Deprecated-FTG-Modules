@@ -2,16 +2,12 @@
 
 # Module author: Official Repo, @GovnoCodules
 
-# requires: search-engine-parser>=0.6.2 youtube_search
+# requires: search-engine-parser>=0.6.2
 
 from .. import loader, utils
 import json
 import io
 import requests
-from PIL import Image
-import random
-import string
-from youtube_search import YoutubeSearch
 import logging
 from search_engine_parser import GoogleSearch
 
@@ -20,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class SearchMod(loader.Module):
-    """Reverse image search via Yandex Images"""
+    """Searcher module"""
     strings = {"name": "Search",
                "search": "⚪⚪⚪\n⚪❓⚪\n⚪⚪⚪",
                "no_reply": "<b>Reply to image or sticker!</b>",
@@ -73,22 +69,6 @@ class SearchMod(loader.Module):
             msg += self.strings("result", message).format(utils.escape_html(result[0]), utils.escape_html(result[1]),
                                                           utils.escape_html(result[2]))
         await utils.answer(message, self.strings("results", message).format(utils.escape_html(text)) + msg)
-
-    async def ytscmd(self, message):
-        """Youtube Searcher"""
-        text = utils.get_args_raw(message)
-        if not text:
-            reply = await message.get_reply_message()
-            if not reply:
-                await message.delete()
-                return
-            text = reply.raw_text
-        results = YoutubeSearch(text, max_results=10).to_dict()
-        out = f'Найдено по запросу: {text}'
-        for r in results:
-            out += f'\n\n<a href="https://www.youtube.com/{r["link"]}">{r["title"]}</a>'
-
-        await message.edit(out)
 
 
 async def check_media(message, reply):
