@@ -1,56 +1,61 @@
-from .. import loader, utils  # pylint: disable=relative-beyond-top-level
-from telethon.tl.types import DocumentAttributeFilename
-import logging
+# -*- coding: utf-8 -*-
 
-from search_engine_parser import GoogleSearch
+# Module author: Official Repo, @GovnoCodules
+
+# requires: search-engine-parser>=0.6.2 youtube_search
+
+from .. import loader, utils
 import json
 import io
 import requests
-logger = logging.getLogger(__name__)
-import asyncurban
-from .. import loader, utils
-
+from PIL import Image
+import random
+import string
+from youtube_search import YoutubeSearch
 import logging
-import lyricsgenius
+from search_engine_parser import GoogleSearch
 
+logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class YTsearchMod(loader.Module):
-    strings = {
-        "name": "Searcher",
-        "search": "⚪⚪⚪\n⚪❓⚪\n⚪⚪⚪",
-        "no_reply": "<b>Reply to image or sticker!</b>",
-        "result": '<a href="{}"><b>🔴⚪🔴|See</b>\n<b>⚪🔴⚪|Search</b>\n<b>⚪🔴⚪|Results</b></a>',
-        "error": '<b>Something went wrong...</b>',
-        "no_term": "<b>I can't Google nothing</b>",
-        "no_results": "<b>Could not find anything about</b> <code>{}</code> <b>on Google</b>",
-        "results": "<b>These came back from a Google search for</b> <code>{}</code>:\n\n",
-        "provide_word": "<b>Provide a word(s) to define.</b>",
-        "def_error": "<b>Couldn't find definition for that.</b>",
-        "resulta": "<b>Text</b>: <code>{}</code>\n<b>Meaning</b>: <code>{}\n<b>Example</b>: <code>{}</code>",
-        "genius_api_token_doc": "The LyricsGenius API token from http://genius.com/api-clients",
-        "invalid_syntax": "<b>Please specify song and artist.</b>",
-        "song_not_found": "<b>Song not found</b>",
-        "missing_token": "<b>API Token missing</b>"
-    }
+class SearchMod(loader.Module):
+    """Reverse image search via Yandex Images"""
+    strings = {"name": "Search",
+               "search": "⚪⚪⚪\n⚪❓⚪\n⚪⚪⚪",
+               "no_reply": "<b>Reply to image or sticker!</b>",
+               "ya_result": '<a href="{}"><b>🔴⚪🔴|See</b>\n<b>⚪🔴⚪|Search</b>\n<b>⚪🔴⚪|Results</b></a>',
+               "error": '<b>Something went wrong...</b>',
+               "no_term": "<b>I can't Google nothing</b>",
+               "no_results": "<b>Could not find anything about</b> <code>{}</code> <b>on Google</b>",
+               "results": "<b>These came back from a Google search for</b> <code>{}</code>:\n\n",
+               "result": "<a href='{}'>{}</a>\n\n<code>{}</code>\n"
+               }
 
-    async def client_ready(self, client, db):
-        self.client = client
-
-    def __init__(self):
-        self.urban = asyncurban.UrbanDictionary()
-        self.config = loader.ModuleConfig("GENIUS_API_TOKEN", None, lambda m: self.strings("genius_api_token_doc", m))
-
-    def config_complete(self):
-        if self.config["GENIUS_API_TOKEN"]:
-            self.genius = lyricsgenius.Genius(self.config["GENIUS_API_TOKEN"])
+    @loader.owner
+    async def yarscmd(self, message):
+        """.yars <repy to image>"""
+        reply = await message.get_reply_message()
+        data = await check_media(message, reply)
+        if not data:
+            await utils.answer(message, self.strings("no_reply", message))
+            return
+        await utils.answer(message, self.strings("search", message))
+        searchUrl = 'https://yandex.ru/images/search'
+        files = {'upfile': ('blob', data, 'image/jpeg')}
+        params = {'rpt': 'imageview', 'format': 'json',
+                  'request': '{"blocks":[{"block":"b-page_type_search-by-image__link"}]}'}
+        response = requests.post(searchUrl, params=params, files=files)
+        if response.ok:
+            query_string = json.loads(response.content)['blocks'][0]['params']['url']
+            link = searchUrl + '?' + query_string
+            text = self.strings("ya_result", message).format(link)
+            await utils.answer(message, text)
         else:
-            self.genius = None
+            await utils.answer(message, self.strings("error", message))
 
-    @loader.unrestricted
-    @loader.ratelimit
     async def googlecmd(self, message):
+        """Shows Google search results."""
         text = utils.get_args_raw(message.message)
         if not text:
             text = (await message.get_reply_message()).message
@@ -69,61 +74,21 @@ class YTsearchMod(loader.Module):
                                                           utils.escape_html(result[2]))
         await utils.answer(message, self.strings("results", message).format(utils.escape_html(text)) + msg)
 
-    async def yarscmd(self, message):
-        reply = await message.get_reply_message()
-        data = await check_media(message, reply)
-        if not data:
-            await utils.answer(message, self.strings("no_reply", message))
-            return
-        await utils.answer(message, self.strings("search", message))
-        searchUrl = 'https://yandex.ru/images/search'
-        files = {'upfile': ('blob', data, 'image/jpeg')}
-        params = {'rpt': 'imageview', 'format': 'json',
-                  'request': '{"blocks":[{"block":"b-page_type_search-by-image__link"}]}'}
-        response = requests.post(searchUrl, params=params, files=files)
-        if response.ok:
-            query_string = json.loads(response.content)['blocks'][0]['params']['url']
-            link = searchUrl + '?' + query_string
-            text = self.strings("result", message).format(link)
-            await utils.answer(message, text)
-        else:
-            await utils.answer(message, self.strings("error", message))
+    async def ytscmd(self, message):
+        """Youtube Searcher"""
+        text = utils.get_args_raw(message)
+        if not text:
+            reply = await message.get_reply_message()
+            if not reply:
+                await message.delete()
+                return
+            text = reply.raw_text
+        results = YoutubeSearch(text, max_results=10).to_dict()
+        out = f'Найдено по запросу: {text}'
+        for r in results:
+            out += f'\n\n<a href="https://www.youtube.com/{r["link"]}">{r["title"]}</a>'
 
-    async def urbancmd(self, message):
-        args = utils.get_args_raw(message)
-
-        if not args:
-            return await utils.answer(message, self.strings("provide_word", message))
-
-        try:
-            definition = await self.urban.get_word(args)
-        except asyncurban.WordNotFoundError:
-            return await utils.answer(message, self.strings("def_error", message))
-        result = self.strings("resulta", message).format(definition.word, definition.definition, definition.example)
-        await utils.answer(message, result)
-
-    @loader.unrestricted
-    @loader.ratelimit
-    async def lyricscmd(self, message):
-        if self.genius is None:
-            await utils.answer(message, self.strings("missing_token", message))
-        args = utils.get_args_split_by(message, ",")
-        if len(args) != 2:
-            logger.debug(args)
-            await utils.answer(message, self.strings("invalid_syntax", message))
-            return
-        logger.debug("getting song lyrics for " + args[0] + ", " + args[1])
-        try:
-            song = await utils.run_sync(self.genius.search_song, args[0], args[1])
-        except TypeError:
-            # Song not found causes internal library error
-            song = None
-        if song is None:
-            await utils.answer(message, self.strings("song_not_found", message))
-            return
-        logger.debug(song)
-        logger.debug(song.lyrics)
-        await utils.answer(message, utils.escape_html(song.lyrics))
+        await message.edit(out)
 
 
 async def check_media(message, reply):
@@ -144,3 +109,4 @@ async def check_media(message, reply):
         data = await message.client.download_file(data, bytes)
         img = io.BytesIO(data)
         return img
+
