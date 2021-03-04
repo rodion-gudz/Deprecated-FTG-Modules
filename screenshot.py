@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
+# requires: pygments
+
 from .. import loader, utils
 from requests import get
 import io
