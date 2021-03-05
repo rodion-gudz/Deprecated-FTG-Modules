@@ -1,88 +1,82 @@
-from asyncio import sleep
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules, @ftgmodulesbyfl1yd
+
 from .. import loader, utils
 from requests import get
 import io
 from telethon.tl.types import MessageEntityUrl, MessageEntityTextUrl
 import os
-import os
 from asyncio import sleep
-import time
-import os
-from telethon import functions
 from telethon import events
-import asyncio
-from telethon.tl.types import DocumentAttributeFilename
 from telethon.errors.rpcerrorlist import YouBlockedUserError
-from requests import get
-import requests
-from .. import loader, utils
-import io
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import (DownloadError, ContentTooShortError,
-                              ExtractorError, GeoRestrictedError,
-                              MaxDownloadsReached, PostProcessingError,
-                              UnavailableVideoError, XAttrMetadataError)
-from asyncio import sleep
-from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER, GOOGLE_CHROME_BIN
-from userbot.events import register
-from telethon.tl.types import DocumentAttributeAudio
-from uniborg.util import progress, humanbytes, time_formatter
-# Author: https://t.me/ftgmodulesbyfl1yd
-
-def register(cb):
-    cb(ReplyDownloaderMod())
+from telethon import functions
 
 
-class ReplyDownloaderMod(loader.Module):
+@loader.tds
+class DownloaderMod(loader.Module):
+    """Downloader module"""
     strings = {'name': 'Downloader'}
 
     async def dlrcmd(self, message):
+        """Команда .dlr <реплай на файл> <название (по желанию)> скачивает
+        файл, либо сохраняет текст в файл на который был сделан реплай. """
         name = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if reply:
-            await message.edit('Downloading...')
+            await message.edit('Скачиваем...')
             if reply.text:
                 text = reply.text
-                fname = f'{name or str(message.id + reply.id)}.txt'
+                fname = f'{name or message.id + reply.id}.txt'
                 file = open(fname, 'w')
                 file.write(text)
                 file.close()
                 await message.edit(
-                    f'File saved as <code>{fname}</code>.\nGet this file <code>.ulr {fname}</code>.')
+                    f'Файл сохранён как: <code>{fname}</code>.\n\nВы можете '
+                    f'отправить его в этот чат с помощью команды <code>.ulf '
+                    f'{fname}</code>.')
             else:
                 ext = reply.file.ext
-                fname = f'{name or str(message.id + reply.id)}{ext}'
+                fname = f'{name or message.id + reply.id}{ext}'
                 await message.client.download_media(reply, fname)
                 await message.edit(
-                    f'File saved as <code>{fname}</code>.\nGet this file <code>.ulr {fname}</code>.')
+                    f'Этот файл сохранён как: <code>{fname}</code>.\n\nВы '
+                    f'можете отправить его в этот чат с помощью команды '
+                    f'<code>.ulf {fname}</code>.')
         else:
-            return await message.edit('Please reply to message')
+            return await message.edit('Нет реплая.')
 
-    async def ulrcmd(self, message):
+    async def ulfcmd(self, message):
+        """Команда .ulf <d>* <название файла> отправляет файл в чат.\n* -
+        удалить файл после отправки. """
         name = utils.get_args_raw(message)
         d = False
-        if ('d ' in name):
+        if 'd ' in name:
             d = True
         if name:
             try:
                 name = name.replace('d ', '')
-                await message.edit(f'Sending <code>{name}</code>...')
+                await message.edit(f'Отправляем <code>{name}</code>...')
                 if d == True:
                     await message.client.send_file(message.to_id, f'{name}')
-                    await message.edit(f'Sending <code>{name}</code>... \nDeleting <code>{name}</code>...')
+                    await message.edit(
+                        f'Отправляем <code>{name}</code>... Успешно!\nУдаляем '
+                        f'<code>{name}</code>...')
                     os.remove(name)
                     await message.edit(
-                        f'Sending <code>{name}</code>... \nDeleting <code>{name}</code>...')
+                        f'Отправляем <code>{name}</code>... Успешно!\nУдаляем '
+                        f'<code>{name}</code>... Успешно!')
                     await sleep(0.5)
                 else:
                     await message.client.send_file(message.to_id, name)
             except:
-                return await message.edit('File does not exist')
+                return await message.edit('Такой файл не существует.')
             await message.delete()
         else:
-            return await message.edit('No arguments')
+            return await message.edit('Нет аргументов.')
 
     async def dltiktokcmd(self, event):
+        """TikTok video downloader"""
         chat = '@ttsavebot'
         reply = await event.get_reply_message()
         async with event.client.conversation(chat) as conv:
@@ -91,9 +85,12 @@ class ReplyDownloaderMod(loader.Module):
                 text = await event.get_reply_message()
             await event.edit("<b>Downloading...</b>")
             try:
-                response = conv.wait_event(events.NewMessage(incoming=True, from_users=1087584961))
-                response2 = conv.wait_event(events.NewMessage(incoming=True, from_users=1087584961))
-                response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=1087584961))
+                response = conv.wait_event(
+                    events.NewMessage(incoming=True, from_users=1087584961))
+                response2 = conv.wait_event(
+                    events.NewMessage(incoming=True, from_users=1087584961))
+                response3 = conv.wait_event(
+                    events.NewMessage(incoming=True, from_users=1087584961))
                 mm = await event.client.send_message(chat, text)
                 response = await response
                 response2 = await response2
@@ -102,7 +99,8 @@ class ReplyDownloaderMod(loader.Module):
             except YouBlockedUserError:
                 await event.edit('<code>Разблокируй @ttsavebot</code>')
                 return
-            await event.client.send_file(event.to_id, response3.media, reply_to=reply)
+            await event.client.send_file(event.to_id, response3.media,
+                                         reply_to=reply)
             await event.delete()
             await event.client(functions.messages.DeleteHistoryRequest(
                 peer='ttsavebot',
@@ -111,167 +109,71 @@ class ReplyDownloaderMod(loader.Module):
                 revoke=True
             ))
 
-    async def dlfilecmd(self, message):
-        event = message
-        args = utils.get_args_raw(event)
-        reply = await event.get_reply_message()
-        if not args:
-            if not reply:
-                await event.edit("<b>Ссылки нету!</b>")
-                return
-            message = reply
-        else:
-            message = event
+    async def dlfilecmd(self, event):
+        """File downloader (small files)"""
+        await downloading(event)
 
-        if not message.entities:
+    async def dlbigfilecmd(self, event):
+        """File downloader (big files)"""
+        await downloading(event, True)
+
+
+async def downloading(event, big=False):
+    args = utils.get_args_raw(event)
+    reply = await event.get_reply_message()
+    if not args:
+        if not reply:
             await event.edit("<b>Ссылки нету!</b>")
             return
+        message = reply
+    else:
+        message = event
 
-        urls = []
-        for ent in message.entities:
-            if type(ent) in [MessageEntityUrl, MessageEntityTextUrl]:
-                url_ = True
-                if type(ent) == MessageEntityUrl:
-                    offset = ent.offset
-                    length = ent.length
-                    url = message.raw_text[offset:offset + length]
-                else:
-                    url = ent.url
-                if not url.startswith("http"):
-                    url = "http://" + url
-                urls.append(url)
+    if not message.entities:
+        await event.edit("<b>Ссылки нету!</b>")
+        return
 
-        if not urls:
-            await event.edit("<b>Ссылки нету!</b>")
-            return
-        for url in urls:
-            try:
-                await event.edit("Downloading...")
-                fname = url.split("/")[-1]
-                text = get(url, stream=False)
+    urls = []
+    for ent in message.entities:
+        if type(ent) in [MessageEntityUrl, MessageEntityTextUrl]:
+            url_ = True
+            if type(ent) == MessageEntityUrl:
+                offset = ent.offset
+                length = ent.length
+                url = message.raw_text[offset:offset + length]
+            else:
+                url = ent.url
+            if not url.startswith("http"):
+                url = "http://" + url
+            urls.append(url)
+
+    if not urls:
+        await event.edit("<b>Ссылки нету!</b>")
+        return
+    for url in urls:
+        try:
+            await event.edit("<b>Загрузка...</b>\n" + url)
+            fname = url.split("/")[-1]
+            text = get(url, stream=big)
+            if big:
+                f = open(fname, "wb")
+                for chunk in text.iter_content(1024):
+                    f.write(chunk)
+                f.close()
+                await event.edit("<b>Отправка...</b>\n" + url)
+                await event.client.send_file(event.to_id, open(fname, "rb"),
+                                             reply_to=reply)
+                os.remove(fname)
+            else:
                 file = io.BytesIO(text.content)
                 file.name = fname
                 file.seek(0)
-                await event.edit("<b>Sending...</b>\n" + url)
+                await event.edit("<b>Отправка...</b>\n" + url)
                 await event.client.send_file(event.to_id, file, reply_to=reply)
 
-            except Exception as e:
-                await event.reply("<b>Ошибка при загрузке!</b>\n" + url + "\n<code>" + str(e) + "</code>")
-
-        await event.delete()
-
-    async def dlvideocmd(self, event):
-        chat = '@SaveYoutubeBot'
-        reply = await event.get_reply_message()
-        async with event.client.conversation(chat) as conv:
-            text = utils.get_args_raw(event)
-            if reply:
-                text = await event.get_reply_message()
-            await event.edit("<b>Downloading...</b>")
-            try:
-                response = conv.wait_event(events.NewMessage(incoming=True, from_users=620565940))
-                response2 = conv.wait_event(events.MessageEdited(incoming=True, from_users=620565940))
-                await event.client.send_message(chat, text)
-                response = await response
-                await response.click(2)
-                response2 = await response2
-            except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @SaveYoutubeBot</code>')
-                return
-            await event.delete()
-            await event.client.send_file(event.to_id, response2.media, reply_to=reply)
-            await event.client(functions.messages.DeleteHistoryRequest(
-                peer='SaveYoutubeBot',
-                max_id=0,
-                just_clear=False,
-                revoke=True
-            ))
-
-
-    async def dlaudiocmd(self, message):
-        url = utils.get_args_raw(message)
-        await message.edit("Preparing to download...")
-
-        opts = {
-            'format':
-                'bestaudio',
-            'addmetadata':
-                True,
-            'key':
-                'FFmpegMetadata',
-            'writethumbnail':
-                True,
-            'prefer_ffmpeg':
-                True,
-            'geo_bypass':
-                True,
-            'nocheckcertificate':
-                True,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
-            }],
-            'outtmpl':
-                '%(id)s.mp3',
-            'quiet':
-                True,
-            'logtostderr':
-                False
-        }
-        video = False
-        song = True
-
-        try:
-            await message.edit("`Fetching data, please wait..`")
-            with YoutubeDL(opts) as rip:
-                rip_data = rip.extract_info(url)
-        except DownloadError as DE:
-            await message.edit(f"`{str(DE)}`")
-            return
-        except ContentTooShortError:
-            await message.edit("`The download content was too short.`")
-            return
-        except GeoRestrictedError:
-            await message.edit(
-                "`Video is not available from your geographic location due to geographic restrictions imposed by a website.`"
-            )
-            return
-        except MaxDownloadsReached:
-            await message.edit("`Max-downloads limit has been reached.`")
-            return
-        except PostProcessingError:
-            await message.edit("`There was an error during post processing.`")
-            return
-        except UnavailableVideoError:
-            await message.edit("`Media is not available in the requested format.`")
-            return
-        except XAttrMetadataError as XAME:
-            await message.edit(f"`{XAME.code}: {XAME.msg}\n{XAME.reason}`")
-            return
-        except ExtractorError:
-            await message.edit("`There was an error during info extraction.`")
-            return
         except Exception as e:
-            await message.edit(f"{str(type(e)): {str(e)}}")
-            return
-        c_time = time.time()
+            await event.reply(
+                "<b>Ошибка при загрузке!</b>\n" + url + "\n<code>" + str(
+                    e) + "</code>")
 
-        await message.edit(f"`Preparing to upload song:`\
-        \n**{rip_data['title']}**\
-        \nby *{rip_data['uploader']}*")
-        await message.client.send_file(
-            message.chat_id,
-            f"{rip_data['id']}.mp3",
-            supports_streaming=True,
-            attributes=[
-                DocumentAttributeAudio(duration=int(rip_data['duration']),
-                                        title=str(rip_data['title']),
-                                        performer=str(rip_data['uploader']))
-            ],
-            progress_callback=lambda d, t: asyncio.get_event_loop(
-            ).create_task(
-                progress(d, t, message, c_time, "Uploading..",
-                        f"{rip_data['title']}.mp3")))
-        os.remove(f"{rip_data['id']}.mp3")
-        await message.delete()
+    await event.delete()
