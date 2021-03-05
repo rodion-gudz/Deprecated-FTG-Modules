@@ -51,3 +51,6 @@ search-engine-parser ~= 0.6.2
 
 # Speedtest module
 speedtest-cli ~=2.1.0
+
+# Google Translate
+googletrans==4.0.0rc1
