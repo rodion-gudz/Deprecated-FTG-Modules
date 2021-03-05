@@ -131,6 +131,19 @@ class TextEditorMod(loader.Module):
             message = await update_message(message, m, entities)
             await asyncio.sleep(0.02)
 
+    async def revcmd(self, message):
+        """Используй .rev <текст или реплай>."""
+        if message.text:
+            text = utils.get_args_raw(message)
+            reply = await message.get_reply_message()
+
+            if not text and not reply:
+                return await message.edit("Нет текста или реплая.")
+
+            return await message.edit((text or reply.raw_text)[::-1])
+        else:
+            return await message.edit("Это не текст.")
+
 
 async def update_message(message, m, entities):
     try:
