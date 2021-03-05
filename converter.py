@@ -167,7 +167,7 @@ class ConverterMod(loader.Module):
             return
         else:
             try:
-                if reply.media.document.attributes[0].voice == True:
+                if reply.media.document.attributes[0].voice:
                     await message.edit("Это войс, а не аудиофайл!")
                     return
             except:

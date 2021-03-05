@@ -95,6 +95,30 @@ class DistortMod(loader.Module):
         await message.client.send_file(message.to_id, out, reply_to=reply_message.id)
         await message.delete()
 
+    async def jpegdcmd(self, message):
+        """JPEG style distort"""
+        if message.is_reply:
+            reply_message = await message.get_reply_message()
+            data = await check_media(reply_message)
+            if isinstance(data, bool):
+                await message.delete()
+                return
+        else:
+            await message.delete()
+            return
+
+        image = io.BytesIO()
+        await message.client.download_media(data, image)
+        image = Image.open(image)
+        fried_io = io.BytesIO()
+        fried_io.name = "image.jpeg"
+        image = image.convert("RGB")
+        image.save(fried_io, "JPEG", quality=0)
+        fried_io.seek(0)
+        await message.delete()
+        await message.client.send_file(message.chat_id, fried_io,
+                                       reply_to=reply_message.id)
+
 
 async def distort(file, rescale_rate):
     img = Image(file=file)
