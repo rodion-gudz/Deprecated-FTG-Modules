@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Module author: @dekftgmodules, @ftgmodulesbyfl1yd
+# Module author: Official Repo, @dekftgmodules, @ftgmodulesbyfl1yd
 
 import logging
 import inspect

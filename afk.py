@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: Official Repo
+
 import time
 from datetime import datetime
 from .. import loader, utils

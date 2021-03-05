@@ -1,60 +1,24 @@
-from .. import loader, utils
-from hashlib import md5, sha1, sha224, sha256, sha384, sha512, blake2b, blake2s
-import asyncio
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
 import logging
 from telethon.tl.types import DocumentAttributeFilename
 from .. import loader, utils
 
-def register(cb):
-    cb(HasherMod())
+logger = logging.getLogger(__name__)
 
 
-class HasherMod(loader.Module):
-    strings = {'name': 'File editor'}
+@loader.tds
+class filenameMod(loader.Module):
+    """filename changer"""
+    strings = {"name": "File Rename",
+               "wf": "<b>Reply to file?</b>",
+               "wn": "<b>What is the name?</b>",
+               "tnf": "<b>It's not a file!</b>"}
 
-    def __init__(self):
-        self.name = self.strings['name']
-        self._me = None
-        self._ratelimit = []
-
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
-        self.me = await client.get_me()
-
-    async def md5cmd(self, message):
-        """.md5 <(text or media) or (reply to text or media)>\nHashing to md5"""
-        await hashing(message, 0)
-
-    async def sha1cmd(self, message):
-        """.sha1 <(text or media) or (reply to text or media)\nHashing to sha1"""
-        await hashing(message, 1)
-
-    async def sha224cmd(self, message):
-        """.sha224 <(text or media) or (reply to text or media)\nHashing to sha224"""
-        await hashing(message, 2)
-
-    async def sha256cmd(self, message):
-        """.sha255 <(text or media) or (reply to text or media)\nHashing to sha256"""
-        await hashing(message, 3)
-
-    async def sha384cmd(self, message):
-        """.sha384 <(text or media) or (reply to text or media)\nHashing to sha384"""
-        await hashing(message, 4)
-
-    async def sha512cmd(self, message):
-        """.sha512 <(text or media) or (reply to text or media)\nHashing to sha512"""
-        await hashing(message, 5)
-
-    async def blake2bcmd(self, message):
-        """.blake2 <(text or media) or (reply to text or media)\nHashing to blake2"""
-        await hashing(message, 6)
-
-    async def blake2scmd(self, message):
-        """.blake2s <(text or media) or (reply to text or media)\nHashing to blake2s"""
-        await hashing(message, 7)
-
-    async def filenamecmd(self, message):
+    @loader.unrestricted
+    async def renamefilecmd(self, message):
         """.filename <filename> + reply.file"""
         reply = await message.get_reply_message()
         if not reply or not reply.file:
@@ -69,38 +33,10 @@ class HasherMod(loader.Module):
             fn = ""
         fs = reply.file.size
 
-        [await message.edit(f"<b>Downloading {fn}</b>") if fs > 500000 else ...]
+        await message.edit(f"<b>Downloading {fn}</b>") if fs > 500000 else ...
         file = await reply.download_media(bytes)
-        [await message.edit(f"<b>Uploading</b> <code>{name}</code>") if fs > 500000 else ...]
+        await message.edit(f"<b>Uploading</b> <code>{name}</code>") if fs > 500000 else ...
         await message.client.send_file(message.to_id, file, force_document=True, reply_to=reply,
                                        attributes=[DocumentAttributeFilename(file_name=name)])
         await message.delete()
-
-async def hashing(m, type):
-    types = [md5, sha1, sha224, sha256, sha384, sha512, blake2b, blake2s]
-    typez = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512", "blake2b", "blake2s"]
-
-    reply = await m.get_reply_message()
-    mtext = utils.get_args_raw(m)
-    if m.media:
-        await m.edit("<b>D o w n l o a d i n g . . .</b>")
-        data = await m.client.download_file(m, bytes)
-    elif mtext:
-        data = mtext.encode()
-    elif reply:
-        if reply.media:
-            await m.edit("<b>D o w n l o a d i n g . . .</b>")
-            data = await m.client.download_file(reply, bytes)
-        else:
-            data = reply.raw_text.encode()
-    else:
-        await m.edit(f"<b>What hashing to {typez[type]}?</b>")
-        return
-
-    await m.edit("<b>H a s h i n g . . .</b>")
-    try:
-        result = types[type](data)
-        await m.edit(typez[type].upper() + ": <code>" + str(result.hexdigest()).upper() + "</code>")
-    except:
-        await m.edit("<b>ERЯOR!</b>")
 
