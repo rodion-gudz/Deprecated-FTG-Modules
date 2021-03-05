@@ -12,6 +12,8 @@ from telethon.tl.types import ChatAdminRights, ChatBannedRights
 from telethon.tl.functions.channels import EditAdminRequest, EditBannedRequest, EditPhotoRequest, \
     DeleteUserHistoryRequest
 from telethon.tl.functions.messages import EditChatAdminRequest
+from telethon.tl.types import ChatBannedRights as cb
+from telethon.tl.functions.messages import EditChatDefaultBannedRightsRequest as br
 
 logger = logging.getLogger(__name__)
 
@@ -580,6 +582,48 @@ class AdminToolsMod(loader.Module):
         logger.debug(msgs)
         await message.client.delete_messages(message.to_id, msgs)
         await self.allmodules.log("delete", group=message.to_id, affected_uids=[msg.from_id])
+
+    async def muteallcmd(self, message):
+        """Включить/выключить мут чата."""
+        if utils.get_args_raw(message) == "clearall":
+            self.db.set("MuteChat", "mc", [])
+            return await message.edit("Отключено во всех чатах.")
+        if not message.is_private:
+            chat = await message.get_chat()
+            if not chat.admin_rights and not chat.creator:
+                return await message.edit("Я не админ здесь.")
+            else:
+                if not chat.admin_rights.ban_users:
+                    return await message.edit("У меня нет нужных прав.")
+            mc = self.db.get("MuteChat", "mc", [])
+            chatid = str(message.chat_id)
+            await message.client(br(message.chat_id, cb(until_date=0, send_messages=True)))
+            mc.append(chatid)
+            self.db.set("MuteChat", "mc", mc)
+            await message.edit("Все в муте, кроме админов.")
+        else:
+            return await message.edit("Это не чат!")
+
+    async def unmuteallcmd(self, message):
+        """Включить/выключить мут чата."""
+        if utils.get_args_raw(message) == "clearall":
+            self.db.set("MuteChat", "mc", [])
+            return await message.edit("Отключено во всех чатах.")
+        if not message.is_private:
+            chat = await message.get_chat()
+            if not chat.admin_rights and not chat.creator:
+                return await message.edit("Я не админ здесь.")
+            else:
+                if not chat.admin_rights.ban_users:
+                    return await message.edit("У меня нет нужных прав.")
+            mc = self.db.get("MuteChat", "mc", [])
+            chatid = str(message.chat_id)
+            await message.client(br(message.chat_id, cb(until_date=None, send_messages=None)))
+            mc.remove(chatid)
+            self.db.set("MuteChat", "mc", mc)
+            return await message.edit("Все могут сводобно общаться.")
+        else:
+            return await message.edit("Это не чат!")
 
 
 def resizepic(reply):

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from random import random
 
 from telethon.tl.types import InputMediaDice
 
@@ -9,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class DiceMod(loader.Module):
-    """Dice"""
-    strings = {"name": "Dice",
+class RandomMod(loader.Module):
+    """Random Module"""
+    strings = {"name": "Random",
                "yes_words_cfg_doc": "Yes words",
                "no_words_cfg_doc": "No words"
                }

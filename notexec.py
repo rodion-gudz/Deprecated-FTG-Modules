@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @GovnoCodules
+
 import traceback
 import sys
 import itertools
