@@ -227,7 +227,7 @@ async def get_info(user, message):
     try:
         username = "@" + uuser.username
     except Exception:
-        username = "@" + "У пользователя нет юзернейма."
+        username = "У пользователя нет юзернейма."
     user_bio = user.about or "У пользователя нет информации о себе."
     common_chat = user.common_chats_count
     is_bot = "Да" if uuser.bot else "Нет"
