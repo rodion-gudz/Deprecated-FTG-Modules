@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+# Module author: Official Repo
+
 import asyncio
 import logging
 from random import random

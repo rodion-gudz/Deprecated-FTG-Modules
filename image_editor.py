@@ -11,7 +11,7 @@ import re
 
 @loader.tds
 class ImageManagerMod(loader.Module):
-    "ImageManager - простая работа с фото через Pillow"
+    """ImageManager - простая работа с фото через Pillow"""
     strings = {"name": "ImageManager"}
 
     @loader.owner

@@ -29,7 +29,7 @@ _P = 'часть.'
 
 
 @loader.tds
-class ImageTools(loader.Module):
+class ImageToolsMod(loader.Module):
     """Image tools module"""
     strings = {"name": "Image Tools"}
 
