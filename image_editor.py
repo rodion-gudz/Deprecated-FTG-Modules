@@ -12,7 +12,7 @@ import re
 @loader.tds
 class ImageManagerMod(loader.Module):
     """ImageManager - простая работа с фото через Pillow"""
-    strings = {"name": "ImageManager"}
+    strings = {"name": "Image Manager"}
 
     @loader.owner
     async def delbgcmd(self, m):

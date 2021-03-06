@@ -10,9 +10,9 @@ from telethon.tl.functions.users import GetFullUserRequest
 
 
 @loader.tds
-class CuMod(loader.Module):
+class UserCopyMod(loader.Module):
     """Полное копирование юзера(ава, имя|фамилия, био)"""
-    strings = {'name': 'Cu'}
+    strings = {'name': 'User'}
 
     def __init__(self):
         self.name = self.strings['name']
@@ -24,8 +24,8 @@ class CuMod(loader.Module):
         self._client = client
         self.me = await client.get_me()
 
-    async def cucmd(self, message):
-        """.cu <s> <a> <reply/@username>
+    async def copycmd(self, message):
+        """.copy <s> <a> <reply/@username>
         <s> - Скрытый режим
         <a> - Удалить ваши аватарки
         Аргументы после юзера не указывайте, не скушает

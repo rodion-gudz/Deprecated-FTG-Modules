@@ -11,7 +11,7 @@ from telethon.tl.functions.channels import EditBannedRequest as eb
 @loader.tds
 class BanWordsMod(loader.Module):
     """Плохие слова."""
-    strings = {'name': 'BanWords'}
+    strings = {'name': 'Ban Words'}
 
     async def client_ready(self, client, db):
         self.db = db
