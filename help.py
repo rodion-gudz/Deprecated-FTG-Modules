@@ -22,7 +22,7 @@ class HelpMod(loader.Module):
                "all_header": "<b>Available Friendly-Telegram Modules:</b>",
                "mod_tmpl": "\n• <b>{}</b>",
                "first_cmd_tmpl": ": <code>{}",
-               "cmd_tmpl": ", {}",
+               "cmd_tmpl": "</code>, <code>{}",
                "joined": "<b>Joined to</b> <a href='https://t.me/friendlytgbot'>support channel</a>",
                "join": "<b>Join the</b> <a href='https://t.me/friendlytgbot'>support channel</a>"}
 
