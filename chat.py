@@ -268,8 +268,8 @@ class ChatMod(loader.Module):
         msg = f'<b>Общие чаты с {user.user.first_name}: {count}</b>\n'
         await message.edit(f'{msg} {m}')
 
-    async def dumpcmd(self, message):
-        """.dump <n> <m> <s>
+    async def chatdumpcmd(self, message):
+        """.chatdump <n> <m> <s>
             Дамп юзеров чата
             <n> - Получить только пользователей с открытыми номерами
             <m> - Отправить дамп в избранное
