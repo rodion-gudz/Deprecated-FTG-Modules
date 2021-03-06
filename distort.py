@@ -61,7 +61,8 @@ class DistortMod(loader.Module):
             reply_message = await message.get_reply_message()
             data, mime = await check_media(reply_message)
             if isinstance(data, bool):
-                await utils.answer(message, "<code>Reply to sticker or photo</code>")
+                await utils.answer(message, "<code>Reply to sticker or "
+                                            "photo</code>")
                 return
         else:
             await utils.answer(message, "<code>Reply to sticker or photo</code>")
