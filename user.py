@@ -13,8 +13,8 @@ from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRe
 
 
 @loader.tds
-class UserCopyMod(loader.Module):
-    """Полное копирование юзера(ава, имя|фамилия, био)"""
+class UserMod(loader.Module):
+    """User Tools"""
     strings = {'name': 'User'}
 
     def __init__(self):
