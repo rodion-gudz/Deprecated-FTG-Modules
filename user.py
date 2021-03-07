@@ -25,6 +25,8 @@ class UserMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
+        self.client = client
+        self.db = db
         self.me = await client.get_me()
 
     async def copycmd(self, message):
