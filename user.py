@@ -87,6 +87,7 @@ class UserMod(loader.Module):
         if not s: await message.edit("Аккаунт клонирован!")
 
     async def avacmd(self, message):
+        """Send all user avatars"""
         id = utils.get_args_raw(message)
         user = await message.get_reply_message()
         chat = message.input_chat
@@ -131,6 +132,7 @@ class UserMod(loader.Module):
         await message.delete()
 
     async def setavacmd(self, message):
+        """Set avatar"""
         reply = await check_mediaa(message)
         if not reply:
             try:
@@ -186,6 +188,7 @@ class UserMod(loader.Module):
             os.remove(photo)
 
     async def delavacmd(self, message):
+        """Delete main avatar"""
         ava = await message.client.get_profile_photos('me', limit=1)
         if len(ava) > 0:
             await message.edit("Удаляем аватарку...")
@@ -196,6 +199,7 @@ class UserMod(loader.Module):
                 "ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКИ!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
 
     async def delavascmd(self, message):
+        """Delete all user avatars"""
         ava = await message.client.get_profile_photos('me')
         if len(ava) > 0:
             await message.edit("Удаляем аватарки...")
@@ -207,6 +211,7 @@ class UserMod(loader.Module):
                 "ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКОК!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
 
     async def setnamecmd(self, message):
+        """Set name"""
         args = utils.get_args_raw(message).split('/')
         if len(args) == 1:
             firstname = args[0]
@@ -219,6 +224,7 @@ class UserMod(loader.Module):
         await message.edit('Имя изменено успешно!')
 
     async def setbiocmd(self, message):
+        """Set bio"""
         args = utils.get_args_raw(message)
         if not args:
             return await message.edit('Нет аргументов.')
@@ -226,6 +232,7 @@ class UserMod(loader.Module):
         await message.edit('Био изменено успешно!')
 
     async def setusercmd(self, message):
+        """Set username"""
         args = utils.get_args_raw(message)
         if not args:
             return await message.edit('Нет аргументов.')
