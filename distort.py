@@ -10,7 +10,7 @@ import io
 from telethon.tl.types import DocumentAttributeFilename
 import logging
 from wand.image import Image
-from PIL import Image as IM
+from PIL import Image
 from .. import loader, utils
 
 
@@ -84,9 +84,9 @@ class DistortMod(loader.Module):
         file = await message.client.download_media(data, bytes)
         file, img = io.BytesIO(file), io.BytesIO()
         img.name = 'img.png'
-        IM.open(file).save(img, 'PNG')
+        Image.open(file).save(img, 'PNG')
         media = await distort(io.BytesIO(img.getvalue()), rescale_rate)
-        out, im = io.BytesIO(), IM.open(media)
+        out, im = io.BytesIO(), Image.open(media)
         if force_file:
             mime = 'png'
         out.name = f'out.{mime}'
@@ -110,7 +110,7 @@ class DistortMod(loader.Module):
 
         image = io.BytesIO()
         await message.client.download_media(data, image)
-        image = IM.open(image)
+        image = Image.open(image)
         fried_io = io.BytesIO()
         fried_io.name = "image.jpeg"
         image = image.convert("RGB")
