@@ -110,7 +110,7 @@ class DistortMod(loader.Module):
 
         image = io.BytesIO()
         await message.client.download_media(data, image)
-        image = Image.open(image)
+        image = IM.open(image)
         fried_io = io.BytesIO()
         fried_io.name = "image.jpeg"
         image = image.convert("RGB")
