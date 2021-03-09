@@ -13,7 +13,6 @@ from wand.image import Image
 from PIL import Image
 from .. import loader, utils
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +42,8 @@ class DistortMod(loader.Module):
             f.close()
 
         for i in range(1, randint(6, 10)):
-            stick = choice([stick.replace(f'[{i}]', f'[{(i + i) * 3}]'), stick.replace(f'.{i}', f'.{i}{i}')])
+            stick = choice([stick.replace(f'[{i}]', f'[{(i + i) * 3}]'),
+                            stick.replace(f'.{i}', f'.{i}{i}')])
 
         with open("json.json", "w") as f:
             f.write(stick)
@@ -65,7 +65,8 @@ class DistortMod(loader.Module):
                                             "photo</code>")
                 return
         else:
-            await utils.answer(message, "<code>Reply to sticker or photo</code>")
+            await utils.answer(message,
+                               "<code>Reply to sticker or photo</code>")
             return
         rescale_rate = 70
         a = utils.get_args(message)
@@ -93,14 +94,15 @@ class DistortMod(loader.Module):
         im.save(out, mime.upper())
         out.seek(0)
         await message.edit("<b>Sending...</b>")
-        await message.client.send_file(message.to_id, out, reply_to=reply_message.id)
+        await message.client.send_file(message.to_id, out,
+                                       reply_to=reply_message.id)
         await message.delete()
 
     async def jpegdcmd(self, message):
         """JPEG style distort"""
         if message.is_reply:
             reply_message = await message.get_reply_message()
-            data = await check_media(reply_message)
+            data = await check_mediaa(reply_message)
             if isinstance(data, bool):
                 await message.delete()
                 return
@@ -141,7 +143,8 @@ async def check_media(reply_message):
             data = reply_message.photo
             mime = 'image/jpeg'
         elif reply_message.document:
-            if DocumentAttributeFilename(file_name='AnimatedSticker.tgs') in reply_message.media.document.attributes:
+            if DocumentAttributeFilename(
+                    file_name='AnimatedSticker.tgs') in reply_message.media.document.attributes:
                 return False, mime
             if reply_message.gif or reply_message.video or reply_message.audio or reply_message.voice:
                 return False, mime
@@ -159,3 +162,25 @@ async def check_media(reply_message):
     else:
         mime = mime.split('/')[1]
         return data, mime
+
+
+async def check_mediaa(reply_message):
+    if reply_message and reply_message.media:
+        if reply_message.photo:
+            data = reply_message.photo
+        elif reply_message.document:
+            if DocumentAttributeFilename(
+                    file_name='AnimatedSticker.tgs') in reply_message.media.document.attributes:
+                return False
+            if reply_message.gif or reply_message.video or reply_message.audio or reply_message.voice:
+                return False
+            data = reply_message.media.document
+        else:
+            return False
+    else:
+        return False
+
+    if not data or data is None:
+        return False
+    else:
+        return data
