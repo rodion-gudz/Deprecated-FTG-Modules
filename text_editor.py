@@ -115,7 +115,7 @@ class TextEditorMod(loader.Module):
         await utils.answer(message, utils.escape_html(text))
 
     @loader.ratelimit
-    async def typecmd(self, message):
+    async def typercmd(self, message):
         """.type <message>"""
         a = utils.get_args_raw(message)
         if not a:
