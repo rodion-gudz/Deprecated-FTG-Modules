@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class QuotesMod(loader.Module):
+class mQuotesMod(loader.Module):
     """Quotes a message using Mishase Quotes API"""
     strings = {
         "name": "Quotes",
