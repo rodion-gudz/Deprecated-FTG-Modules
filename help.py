@@ -103,9 +103,6 @@ class HelpMod(loader.Module):
         if not reply.file:
             await m.edit("REPLY_TO_TXT")
             return
-        if reply.file.ext != ".txt":
-            await m.edit("REPLY_TO_TXT")
-            return
         modules = self._db.get("friendly-telegram.modules.loader", "loaded_modules", [])
         txt = io.BytesIO()
         await reply.download_media(txt)
