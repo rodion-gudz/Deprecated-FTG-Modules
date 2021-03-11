@@ -9,9 +9,9 @@ from random import choice, randint
 import io
 from telethon.tl.types import DocumentAttributeFilename
 import logging
-from wand.image import Image
 from PIL import Image
 from .. import loader, utils
+from wand.image import Image
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 class DistortMod(loader.Module):
     """Stickers or photo distort"""
     strings = {"name": "Distort"}
+
+    async def client_ready(self, client, db):
+        self.client = client
 
     @loader.unrestricted
     async def tgscmd(self, message):
@@ -55,6 +58,7 @@ class DistortMod(loader.Module):
         os.remove("json.json")
         await message.delete()
 
+    @loader.sudo
     async def distortcmd(self, message):
         """Stickers or photo distort"""
         if message.is_reply:
