@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class QuotesMod(loader.Module):
     """Quotes a message using Mishase Quotes API"""
     strings = {
-        "name": "mQuotes",
+        "name": "Quotes",
         "silent_processing_cfg_doc": ("Process quote "
                                       "silently(mostly"
                                       " w/o editing)"),
