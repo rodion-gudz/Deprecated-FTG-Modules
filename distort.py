@@ -9,7 +9,7 @@ from random import choice, randint
 import io
 from telethon.tl.types import DocumentAttributeFilename
 import logging
-from PIL import Image
+from PIL import Image as IM
 from .. import loader, utils
 from wand.image import Image
 
@@ -60,17 +60,22 @@ class DistortMod(loader.Module):
 
     @loader.sudo
     async def distortcmd(self, message):
-        """Stickers or photo distort"""
+        """.distort <reply to photo>
+        .distort im
+        .distort 50
+        .distort 50 im
+        .distort im 50
+        im => кидает стикеры как фото
+        50 => (от 0 до дохуя) процент сжатия"""
         if message.is_reply:
             reply_message = await message.get_reply_message()
             data, mime = await check_media(reply_message)
             if isinstance(data, bool):
-                await utils.answer(message, "<code>Reply to sticker or "
-                                            "photo</code>")
+                await utils.answer(message,
+                                   "<code>Reply to image or stick!</code>")
                 return
         else:
-            await utils.answer(message,
-                               "<code>Reply to sticker or photo</code>")
+            await utils.answer(message, "<code>Reply to image or stick!</code>")
             return
         rescale_rate = 70
         a = utils.get_args(message)
@@ -89,9 +94,9 @@ class DistortMod(loader.Module):
         file = await message.client.download_media(data, bytes)
         file, img = io.BytesIO(file), io.BytesIO()
         img.name = 'img.png'
-        Image.open(file).save(img, 'PNG')
+        IM.open(file).save(img, 'PNG')
         media = await distort(io.BytesIO(img.getvalue()), rescale_rate)
-        out, im = io.BytesIO(), Image.open(media)
+        out, im = io.BytesIO(), IM.open(media)
         if force_file:
             mime = 'png'
         out.name = f'out.{mime}'
@@ -102,29 +107,30 @@ class DistortMod(loader.Module):
                                        reply_to=reply_message.id)
         await message.delete()
 
-    async def jpegdcmd(self, message):
-        """JPEG style distort"""
-        if message.is_reply:
-            reply_message = await message.get_reply_message()
-            data = await check_mediaa(reply_message)
-            if isinstance(data, bool):
-                await message.delete()
-                return
-        else:
+
+async def jpegdcmd(self, message):
+    """JPEG style distort"""
+    if message.is_reply:
+        reply_message = await message.get_reply_message()
+        data = await check_mediaa(reply_message)
+        if isinstance(data, bool):
             await message.delete()
             return
-
-        image = io.BytesIO()
-        await message.client.download_media(data, image)
-        image = Image.open(image)
-        fried_io = io.BytesIO()
-        fried_io.name = "image.jpeg"
-        image = image.convert("RGB")
-        image.save(fried_io, "JPEG", quality=0)
-        fried_io.seek(0)
+    else:
         await message.delete()
-        await message.client.send_file(message.chat_id, fried_io,
-                                       reply_to=reply_message.id)
+        return
+
+    image = io.BytesIO()
+    await message.client.download_media(data, image)
+    image = IM.open(image)
+    fried_io = io.BytesIO()
+    fried_io.name = "image.jpeg"
+    image = image.convert("RGB")
+    image.save(fried_io, "JPEG", quality=0)
+    fried_io.seek(0)
+    await message.delete()
+    await message.client.send_file(message.chat_id, fried_io,
+                                   reply_to=reply_message.id)
 
 
 async def distort(file, rescale_rate):
