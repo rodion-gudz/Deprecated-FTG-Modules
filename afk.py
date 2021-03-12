@@ -45,7 +45,7 @@ class AFKMod(loader.Module):
         if not isinstance(message, types.Message):
             return
         now = datetime.now().replace(microsecond=0)
-        gone = datetime.fromtimestamp(self._db.get(__name__, "gone")).replace(microsecond=0)
+        gone = int(datetime.fromtimestamp(self._db.get(__name__, "gone")).replace(microsecond=0))
         diff = now - gone
         if getattr(message.to_id, "user_id", None) == self._me.id:
             if self.get_afk():
