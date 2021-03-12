@@ -42,7 +42,7 @@ class AFKMod(loader.Module):
         await utils.answer(message, self.strings("back", message))
 
     async def watcher(self, message):
-        if not self.get_afk()
+        if not self.get_afk():
             return
         if not isinstance(message, types.Message):
             return
