@@ -43,8 +43,8 @@ class InfoMod(loader.Module):
         await message.client.send_message(message.chat_id, str(caption),
                                           file=await message.client.download_profile_photo(chat.full_chat.id,
                                                                                            "chatphoto.jpg"))
-
         await message.delete()
+        os.remove("chatphoto.jpg")
 
     async def userinfocmd(self, message):
         """Используй .userinfo <@ или реплай>; ничего"""
