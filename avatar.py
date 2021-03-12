@@ -53,6 +53,8 @@ class GetPPMod(loader.Module):
                 await message.edit("<code>No photo found with that id</code>")
                 return
         await message.delete()
+        for i in send_photos:
+          os.remove(i)
 
     async def setavacmd(self, message):
         reply = await check_mediaa(message)
