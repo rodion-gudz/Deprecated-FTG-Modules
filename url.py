@@ -19,7 +19,8 @@ class URlMod(loader.Module):
     """URL Module"""
     strings = {
         "name": "URL",
-        "some_rong": "<b>Ты делаешь что-то не так!\nНапиши</b> <code>.help gg.gg</code> <b>для информации.</b>",
+        "some_rong": "<b>Ты делаешь что-то не так!\nНапиши</b> <code>.help "
+                     "gg.gg</code> <b>для информации.</b>",
         "result": "<b>Here you go, help yourself.</b>\n<a href='{}'>{}</a>",
         "default": "How to use Google?"
     }
