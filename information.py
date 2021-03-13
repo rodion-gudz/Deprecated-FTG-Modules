@@ -84,7 +84,7 @@ class InfoMod(loader.Module):
         else:
             return await m.edit("<b>А кого чекать?</b>")
         await m.edit(self.strings['check'])
-        r = requests.get('http://d4n13l3k00.ml/api/checkTgId?uid=' + user).json()
+        r = requests.get('http://api.d4n13l3k00.ml/checkTgId?uid=' + user).json()
         await m.edit(self.strings['response'].format(r['data'], str(round(r['time'], 3)) + "ms"))
 
 
