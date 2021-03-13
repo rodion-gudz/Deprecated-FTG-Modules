@@ -3,10 +3,13 @@
 # Module author: @ftgmodulesbyfl1yd
 
 from .. import loader, utils
-from telethon.tl.functions.channels import GetFullChannelRequest, GetParticipantsRequest
+from telethon.tl.functions.channels import GetFullChannelRequest, \
+    GetParticipantsRequest
 from telethon.tl.functions.messages import GetHistoryRequest
-from telethon.tl.types import MessageActionChannelMigrateFrom, ChannelParticipantsAdmins, UserStatusOnline
-from telethon.errors import (ChannelInvalidError, ChannelPrivateError, ChannelPublicGroupNaError)
+from telethon.tl.types import MessageActionChannelMigrateFrom, \
+    ChannelParticipantsAdmins, UserStatusOnline
+from telethon.errors import (ChannelInvalidError, ChannelPrivateError,
+                             ChannelPublicGroupNaError)
 from datetime import datetime
 from telethon.tl.functions.photos import GetUserPhotosRequest
 from telethon.tl.functions.users import GetFullUserRequest
@@ -27,7 +30,8 @@ class InfoMod(loader.Module):
         args = utils.get_args_raw(message)
 
         try:
-            chat = await message.client.get_entity(args if not args.isdigit() else int(args))
+            chat = await message.client.get_entity(
+                args if not args.isdigit() else int(args))
         except:
             if not message.is_private:
                 chat = await message.client.get_entity(message.chat_id)
@@ -41,8 +45,9 @@ class InfoMod(loader.Module):
         caption = await get_chat_info(chat, message)
 
         await message.client.send_message(message.chat_id, str(caption),
-                                          file=await message.client.download_profile_photo(chat.full_chat.id,
-                                                                                           "chatphoto.jpg"))
+                                          file=await message.client.download_profile_photo(
+                                              chat.full_chat.id,
+                                              "chatphoto.jpg"))
         await message.delete()
         os.remove("chatphoto.jpg")
 
@@ -55,7 +60,8 @@ class InfoMod(loader.Module):
 
         try:
             if args:
-                user = await message.client.get_entity(args if not args.isgidit() else int(args))
+                user = await message.client.get_entity(
+                    args if not args.isgidit() else int(args))
             else:
                 user = await message.client.get_entity(reply.sender_id)
         except:
@@ -65,29 +71,40 @@ class InfoMod(loader.Module):
         photo, caption = await get_info(user, message)
 
         await message.client.send_file(message.chat_id, photo, caption=caption,
-                                       link_preview=False, reply_to=reply.id if reply else None)
+                                       link_preview=False,
+                                       reply_to=reply.id if reply else None)
         os.remove(photo)
         await message.delete()
 
-    async def checkidcmd(self, m):
-        """ Проверить id на слитый номер
-        Жуёт либо <reply> либо <uid>
+    async def checkcmd(self, m):
+        """ Проверить uid на номер
+        Отправляет данные в чат
+        Жуёт либо <reply>, либо <uid>
         """
-        reply = await m.get_reply_message()
-        if utils.get_args_raw(m):
-            user = utils.get_args_raw(m)
-        elif reply:
-            try:
-                user = str(reply.sender.id)
-            except:
-                return await m.edit("<b>Err</b>")
-        else:
-            return await m.edit("<b>А кого чекать?</b>")
-        await m.edit(self.strings['check'])
-        r = requests.get('http://api.d4n13l3k00.ml/checkTgId?uid=' + user).json()
-        await m.edit(self.strings['response'].format(r['data'], str(round(r['time'], 3)) + "ms"))
+        await check(m, self.strings['check'], self.strings['version'])
 
+    async def pcheckcmd(self, m):
+        """ Проверить номер на наличие в бд
+        Отправляет данные в чат
+        Жуёт либо <reply>, либо <phone>
+        """
+        await check(m, self.strings['check'], self.strings['version'], 'p')
 
+    async def scheckcmd(self, m):
+        """ Аналогично check
+        Отправляет данные в избранное
+        Жуёт либо <reply>, либо <uid>
+        """
+        await check(m, self.strings['check'], self.strings['version'],
+                    save=True)
+
+    async def spcheckcmd(self, m):
+        """ Аналогично pcheck
+        Отправляет данные в избранное
+        Жуёт либо <reply>, либо <phone>
+        """
+        await check(m, self.strings['check'], self.strings['version'], 'p',
+                    True)
 
 
 async def get_chat_info(chat, message):
@@ -95,27 +112,38 @@ async def get_chat_info(chat, message):
     chat_title = chat_obj_info.title
     try:
         msg_info = await message.client(
-            GetHistoryRequest(peer=chat_obj_info.id, offset_id=0, offset_date=datetime(2010, 1, 1),
-                              add_offset=-1, limit=1, max_id=0, min_id=0, hash=0))
+            GetHistoryRequest(peer=chat_obj_info.id, offset_id=0,
+                              offset_date=datetime(2010, 1, 1),
+                              add_offset=-1, limit=1, max_id=0, min_id=0,
+                              hash=0))
     except Exception:
         msg_info = None
 
-    first_msg_valid = True if msg_info and msg_info.messages and msg_info.messages[0].id == 1 else False
+    first_msg_valid = True if msg_info and msg_info.messages and \
+                              msg_info.messages[0].id == 1 else False
     creator_valid = True if first_msg_valid and msg_info.users else False
     creator_id = msg_info.users[0].id if creator_valid else None
-    creator_firstname = msg_info.users[0].first_name if creator_valid and msg_info.users[
-        0].first_name is not None else "Удалённый аккаунт"
-    creator_username = msg_info.users[0].username if creator_valid and msg_info.users[0].username is not None else None
+    creator_firstname = msg_info.users[0].first_name if creator_valid and \
+                                                        msg_info.users[
+                                                            0].first_name is not None else "Удалённый аккаунт"
+    creator_username = msg_info.users[0].username if creator_valid and \
+                                                     msg_info.users[
+                                                         0].username is not None else None
     created = msg_info.messages[0].date if first_msg_valid else None
-    former_title = msg_info.messages[0].action.title if first_msg_valid and type(
-        msg_info.messages[0].action) is MessageActionChannelMigrateFrom and msg_info.messages[
-                                                            0].action.title != chat_title else None
+    former_title = msg_info.messages[
+        0].action.title if first_msg_valid and type(
+        msg_info.messages[0].action) is MessageActionChannelMigrateFrom and \
+                           msg_info.messages[
+                               0].action.title != chat_title else None
     description = chat.full_chat.about
     members = chat.full_chat.participants_count if hasattr(chat.full_chat,
                                                            "participants_count") else chat_obj_info.participants_count
-    admins = chat.full_chat.admins_count if hasattr(chat.full_chat, "admins_count") else None
-    banned_users = chat.full_chat.kicked_count if hasattr(chat.full_chat, "kicked_count") else None
-    restrcited_users = chat.full_chat.banned_count if hasattr(chat.full_chat, "banned_count") else None
+    admins = chat.full_chat.admins_count if hasattr(chat.full_chat,
+                                                    "admins_count") else None
+    banned_users = chat.full_chat.kicked_count if hasattr(chat.full_chat,
+                                                          "kicked_count") else None
+    restrcited_users = chat.full_chat.banned_count if hasattr(chat.full_chat,
+                                                              "banned_count") else None
     users_online = 0
     async for i in message.client.iter_participants(message.chat_id):
         if isinstance(i.status, UserStatusOnline):
@@ -123,23 +151,31 @@ async def get_chat_info(chat, message):
     group_stickers = chat.full_chat.stickerset.title if hasattr(chat.full_chat,
                                                                 "stickerset") and chat.full_chat.stickerset else None
     messages_viewable = msg_info.count if msg_info else None
-    messages_sent = chat.full_chat.read_inbox_max_id if hasattr(chat.full_chat, "read_inbox_max_id") else None
-    messages_sent_alt = chat.full_chat.read_outbox_max_id if hasattr(chat.full_chat, "read_outbox_max_id") else None
-    username = chat_obj_info.username if hasattr(chat_obj_info, "username") else None
+    messages_sent = chat.full_chat.read_inbox_max_id if hasattr(chat.full_chat,
+                                                                "read_inbox_max_id") else None
+    messages_sent_alt = chat.full_chat.read_outbox_max_id if hasattr(
+        chat.full_chat, "read_outbox_max_id") else None
+    username = chat_obj_info.username if hasattr(chat_obj_info,
+                                                 "username") else None
     bots_list = chat.full_chat.bot_info
     bots = 0
-    slowmode = "Да" if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled else "Нет"
+    slowmode = "Да" if hasattr(chat_obj_info,
+                               "slowmode_enabled") and chat_obj_info.slowmode_enabled else "Нет"
     slowmode_time = chat.full_chat.slowmode_seconds if hasattr(chat_obj_info,
                                                                "slowmode_enabled") and chat_obj_info.slowmode_enabled else None
-    restricted = "Да" if hasattr(chat_obj_info, "restricted") and chat_obj_info.restricted else "Нет"
-    verified = "Да" if hasattr(chat_obj_info, "verified") and chat_obj_info.verified else "Нет"
+    restricted = "Да" if hasattr(chat_obj_info,
+                                 "restricted") and chat_obj_info.restricted else "Нет"
+    verified = "Да" if hasattr(chat_obj_info,
+                               "verified") and chat_obj_info.verified else "Нет"
     username = "@{}".format(username) if username else None
-    creator_username = "@{}".format(creator_username) if creator_username else None
+    creator_username = "@{}".format(
+        creator_username) if creator_username else None
 
     if admins is None:
         try:
             participants_admins = await message.client(
-                GetParticipantsRequest(channel=chat.full_chat.id, filter=ChannelParticipantsAdmins(),
+                GetParticipantsRequest(channel=chat.full_chat.id,
+                                       filter=ChannelParticipantsAdmins(),
                                        offset=0, limit=0, hash=0))
             admins = participants_admins.count if participants_admins else None
         except Exception:
@@ -189,7 +225,8 @@ async def get_chat_info(chat, message):
         caption += f"<b>Стикеры группы:</b> <a href=\"t.me/addstickers/{chat.full_chat.stickerset.short_name}\">{group_stickers}</a>\n"
     caption += "\n"
     caption += f"<b>Слоумод:</b> {slowmode}"
-    if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled:
+    if hasattr(chat_obj_info,
+               "slowmode_enabled") and chat_obj_info.slowmode_enabled:
         caption += f", {slowmode_time} секунд\n"
     else:
         caption += "\n"
@@ -214,7 +251,8 @@ async def get_info(user, message):
     uuser = user.user
 
     user_photos = await message.client(GetUserPhotosRequest(user_id=uuser.id,
-                                                           offset=42, max_id=0, limit=100))
+                                                            offset=42, max_id=0,
+                                                            limit=100))
     user_photos_count = "У пользователя нет аватарки."
     try:
         user_photos_count = user_photos.count
@@ -234,7 +272,9 @@ async def get_info(user, message):
     restricted = "Да" if uuser.restricted else "Нет"
     verified = "Да" if uuser.verified else "Нет"
 
-    photo = await message.client.download_profile_photo(user_id, str(user_id) + ".jpg", download_big=True)
+    photo = await message.client.download_profile_photo(user_id,
+                                                        str(user_id) + ".jpg",
+                                                        download_big=True)
 
     caption = (f"<b>ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ:</b>\n\n"
                f"<b>Имя:</b> {first_name}\n"
@@ -250,3 +290,32 @@ async def get_info(user, message):
                f"<b>Пермалинк:</b> <a href=\"tg://user?id={user_id}\">клик</a>")
 
     return photo, caption
+
+
+async def check(m, string, version, arg='u', save=False):
+    reply = await m.get_reply_message()
+    if utils.get_args_raw(m):
+        user = utils.get_args_raw(m)
+    elif reply:
+        try:
+            if arg == 'u':
+                user = str(reply.sender.id)
+            elif arg == 'p':
+                user = reply.contact.phone_number[1:]
+        except Exception as e:
+            await m.edit(f"]EYE_API[ <b>Err:</b> {e}")
+            return
+    else:
+        await m.edit("?EYE_API? А кого чекать?")
+        return
+    await m.edit(string)
+    url_arg = ("uid" if arg == 'u' else "phone")
+    resp = requests.get(
+        'http://api.murix.ru/eye?v=' + version + '&' + url_arg + '=' + user).json()[
+        'data']
+    if save:
+        await m.client.send_message("me",
+                                    f"[EYE_API] Ответ API: <code>{resp}</code>")
+        await m.edit(f"[EYE_API] Ответ API отправлен в избранное!")
+    else:
+        await m.edit(f"[EYE_API] Ответ API: <code>{resp}</code>")
