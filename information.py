@@ -22,7 +22,8 @@ class InfoMod(loader.Module):
     """Показывает информацию о чате или юзере"""
     strings = {'name': 'Information',
                'check': '<b>Делаем запрос к API...</b>',
-               'response': '<b>Ответ API:</b> <code>{}</code>\nВремя выполнения: <code>{}</code>'
+               'response': '<b>Ответ API:</b> <code>{}</code>\nВремя выполнения: <code>{}</code>',
+               'version': '1.1'
                }
 
     async def chatinfocmd(self, message):
