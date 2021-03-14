@@ -4,12 +4,16 @@
 
 # requires: pydub numpy requests
 
-from .. import loader, utils
+import io
+import math
+import os
+import requests
+
+import numpy as np
 from pydub import AudioSegment, effects
 from telethon import types
-import math, requests, io
-import numpy as np
-import os
+
+from .. import loader, utils
 
 
 @loader.tds
