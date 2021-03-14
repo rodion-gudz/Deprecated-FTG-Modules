@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Module author: @dekftgmodules
+# Module author: @dekftgmodules, @ftgmodulesbyfl1yd
 
 # requires: pydub numpy requests
 
