@@ -8,9 +8,8 @@ from telethon.tl.functions.channels import GetFullChannelRequest, \
 from telethon.tl.functions.messages import GetHistoryRequest
 from telethon.tl.types import MessageActionChannelMigrateFrom, \
     ChannelParticipantsAdmins, UserStatusOnline
-from telethon.errors import (ChannelInvalidError, ChannelPrivateError,
-                             ChannelPublicGroupNaError)
 from datetime import datetime
+from telethon.tl.functions.channels import GetAdminedPublicChannelsRequest
 from telethon.tl.functions.photos import GetUserPhotosRequest
 from telethon.tl.functions.users import GetFullUserRequest
 import os
@@ -106,6 +105,17 @@ class InfoMod(loader.Module):
         """
         await check(m, self.strings['check'], self.strings['version'], 'p',
                     True)
+
+    async def owncmd(self, message):
+        """Команда .own выводит список владений открытых чатов/каналов. """
+        await message.edit('<b>Считаем...</b>')
+        result = await message.client(GetAdminedPublicChannelsRequest())
+        msg = ""
+        count = 0
+        for obj in result.chats:
+            count += 1
+            msg += f'\n• <a href="tg://resolve?domain={obj.username}">{obj.title}</a> <b>|</b> <code>{obj.id}</code>'
+        await message.edit(f'<b>Мои владения: {count}</b>\n {msg}')
 
 
 async def get_chat_info(chat, message):

@@ -9,6 +9,7 @@ from pydub import AudioSegment, effects
 from telethon import types
 import math, requests, io
 import numpy as np
+import os
 
 
 @loader.tds
@@ -106,7 +107,8 @@ class AudioEditorMod(loader.Module):
             Замедлить аудио 0.5x"""
         audio = await get_audio(m, "Замедление")
         if not audio: return
-        s2 = audio.audio._spawn(audio.audio.raw_data, overrides={"frame_rate": int(audio.audio.frame_rate * 0.5)})
+        s2 = audio.audio._spawn(audio.audio.raw_data, overrides={
+            "frame_rate": int(audio.audio.frame_rate * 0.5)})
         out = s2.set_frame_rate(audio.audio.frame_rate)
         await go_out(m, audio, out, audio.pref, audio.pref, audio.duration * 2)
 
@@ -115,9 +117,11 @@ class AudioEditorMod(loader.Module):
         Ускорить аудио 1.5x"""
         audio = await get_audio(m, "Ускорение")
         if not audio: return
-        s2 = audio.audio._spawn(audio.audio.raw_data, overrides={"frame_rate": int(audio.audio.frame_rate * 1.5)})
+        s2 = audio.audio._spawn(audio.audio.raw_data, overrides={
+            "frame_rate": int(audio.audio.frame_rate * 1.5)})
         out = s2.set_frame_rate(audio.audio.frame_rate)
-        await go_out(m, audio, out, audio.pref, audio.pref, round(audio.duration / 2))
+        await go_out(m, audio, out, audio.pref, audio.pref,
+                     round(audio.duration / 2))
 
     async def rightscmd(self, m):
         """.rights <reply to audio>
@@ -153,10 +157,59 @@ class AudioEditorMod(loader.Module):
             +8)
         await go_out(m, audio, out, audio.pref, audio.pref)
 
+    async def cutcmd(self, event):
+        """Используй .cut <начало(сек):конец(сек)> <реплай на аудио/видео/гиф>."""
+        args = utils.get_args_raw(event).split(':')
+        reply = await event.get_reply_message()
+        if not reply or not reply.media:
+            return await event.edit('Нет реплая на медиа.')
+        if reply.media:
+            if args:
+                if len(args) == 2:
+                    try:
+                        await event.edit('Скачиваем...')
+                        smth = reply.file.ext
+                        await event.client.download_media(reply.media,
+                                                          f'uncutted{smth}')
+                        if not args[0]:
+                            await event.edit(
+                                f'Обрезаем с 0 сек. по {args[1]} сек....')
+                            os.system(
+                                f'ffmpeg -i uncutted{smth} -ss 0 -to {args[1]} -c copy cutted{smth} -y')
+                        elif not args[1]:
+                            end = reply.media.document.attributes[0].duration
+                            await event.edit(
+                                f'Обрезаем с {args[0]} сек. по {end} сек....')
+                            os.system(
+                                f'ffmpeg -i uncutted{smth} -ss {args[0]} -to {end} -c copy cutted{smth} -y')
+                        else:
+                            await event.edit(
+                                f'Обрезаем с {args[0]} сек. по {args[1]} сек....')
+                            os.system(
+                                f'ffmpeg -i uncutted{smth} -ss {args[0]} -to {args[1]} -c copy cutted{smth} -y')
+                        await event.edit('Отправляем...')
+                        await event.client.send_file(event.to_id,
+                                                     f'cutted{smth}',
+                                                     reply_to=reply.id)
+                        os.system('rm -rf uncutted* cutted*')
+                        await event.delete()
+                    except:
+                        await event.edit('Этот файл не поддерживается.')
+                        os.system('rm -rf uncutted* cutted*')
+                        return
+                else:
+                    return await event.edit('Неверно указаны аргументы.')
+            else:
+                return await event.edit('Нет аргументов')
+
 
 async def get_audio(m, pref):
     class audio_ae_class():
-        audio = None; duration = None; voice = None; pref = None; reply = None
+        audio = None;
+        duration = None;
+        voice = None;
+        pref = None;
+        reply = None
 
     reply = await m.get_reply_message()
     if reply and reply.file and reply.file.mime_type.split("/")[0] == "audio":
@@ -166,11 +219,13 @@ async def get_audio(m, pref):
         ae.voice = reply.document.attributes[0].voice
         ae.duration = reply.document.attributes[0].duration
         await m.edit(f"[{pref}] Скачиваю...")
-        ae.audio = AudioSegment.from_file(io.BytesIO(await reply.download_media(bytes)))
+        ae.audio = AudioSegment.from_file(
+            io.BytesIO(await reply.download_media(bytes)))
         await m.edit(f"[{pref}] Работаю...")
         return ae
     else:
-        await m.edit(f"[{pref}] reply to audio..."); return None
+        await m.edit(f"[{pref}] reply to audio...");
+        return None
 
 
 async def go_out(m, audio, out, pref, title, fs=None):
@@ -178,11 +233,14 @@ async def go_out(m, audio, out, pref, title, fs=None):
     o.name = "audio." + ("ogg" if audio.voice else "mp3")
     if audio.voice: out.split_to_mono()
     await m.edit(f"[{pref}] Экспортирую...")
-    out.export(o, format="ogg" if audio.voice else "mp3", bitrate="64k" if audio.voice else None,
+    out.export(o, format="ogg" if audio.voice else "mp3",
+               bitrate="64k" if audio.voice else None,
                codec="libopus" if audio.voice else None)
     o.seek(0)
     await m.edit(f"[{pref}] Отправляю...")
-    await m.client.send_file(m.to_id, o, reply_to=audio.reply.id, voice_note=audio.voice, attributes=[
-        types.DocumentAttributeAudio(duration=fs if fs else audio.duration, title=title,
-                                     performer="AudioEditor")] if not audio.voice else None)
+    await m.client.send_file(m.to_id, o, reply_to=audio.reply.id,
+                             voice_note=audio.voice, attributes=[
+            types.DocumentAttributeAudio(duration=fs if fs else audio.duration,
+                                         title=title,
+                                         performer="AudioEditor")] if not audio.voice else None)
     await m.delete()
