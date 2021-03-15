@@ -100,23 +100,3 @@ class SpamMod(loader.Module):
             return
         except:
             return await message.client.send_message(message.to_id, '.replayspam <кол-во:int> <текст>.')
-
-    async def reportspamcmd(self, message):
-        """Репорт пользователя за спам.
-        .reportspam <время:int> <кол-во:int> """
-        await message.delete()
-        args = utils.get_args_raw(message)
-        reply = await message.get_reply_message()
-        time = int(args.split(' ', 2)[0])
-        count = int(args.split(' ', 2)[1])
-        if reply:
-            user = await message.client.get_entity(reply.sender_id)
-            for _ in range(count):
-                await message.client(functions.messages.ReportSpamRequest(peer=user.id))
-                await sleep(time)
-        else:
-            user = await message.client.get_entity(
-                args.split(' ', 2)[12] if not args.split(' ', 2)[2].isnumeric() else int(args.split(' ', 2)[2]))
-            for _ in range(count):
-                await message.client(functions.messages.ReportSpamRequest(peer=user.id))
-                await sleep(time)
