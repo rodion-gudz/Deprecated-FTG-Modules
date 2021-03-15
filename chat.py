@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Module author: @ftgmodulesbyfl1yd, @dekftgmodules
+from asyncio import sleep
 
 from .. import loader, utils
 from os import remove
@@ -349,28 +350,18 @@ class ChatMod(loader.Module):
         f.close()
 
     async def reportcmd(self, message):
-        """Репорт пользователя
-        <s> - Reason: Spam
-        <p> - Reason: Pornography
-        <v> - Reason: Violence
-        """
+        """Репорт пользователя за спам."""
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
+        if args:
+            user = await message.client.get_entity(
+                args if not args.isnumeric() else int(args))
         if reply:
             user = await message.client.get_entity(reply.sender_id)
         else:
             return await message.edit("<b>Кого я должен зарепортить?</b>")
-        if args[0] == 's':
-            await message.client(functions.messages.ReportRequest
-                                 (peer=user.id, id=[42],
-                                  reason=types.InputReportReasonSpam()))
-        elif args[0] == 'p':
-            await message.client(functions.messages.ReportRequest
-                                 (peer=user.id, id=[42],
-                                  reason=types.InputReportReasonPornography()))
-        elif args[0] == 'v':
-            await message.client(functions.messages.ReportRequest
-                                 (peer=user.id, id=[42],
-                                  reason=types.InputReportReasonViolence()))
 
-        await message.edit("<b>Ты получил репорт!</b>")
+        await message.client(functions.messages.ReportSpamRequest(peer=user.id))
+        await message.edit("<b>Ты получил репорт за спам!</b>")
+        await sleep(1)
+        await message.delete()
