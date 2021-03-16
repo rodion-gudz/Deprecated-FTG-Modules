@@ -37,7 +37,7 @@ class GetPPMod(loader.Module):
                 except:
                     await message.edit("<code>This user has no photos</code>")
                     return
-        else:-
+        else:
             try:
                 id = int(id)
                 if id <= 0:
