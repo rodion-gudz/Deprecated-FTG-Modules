@@ -34,11 +34,10 @@ class GetPPMod(loader.Module):
                     else:
                         photo = await self.client.download_profile_photo(message.input_chat)
                     await self.client.send_file(message.chat_id, photo)
-                    os.remove(photo)
                 except:
                     await message.edit("<code>This user has no photos</code>")
                     return
-        else:
+        else:-
             try:
                 id = int(id)
                 if id <= 0:
@@ -54,8 +53,11 @@ class GetPPMod(loader.Module):
                 await message.edit("<code>No photo found with that id</code>")
                 return
         await message.delete()
-        for i in send_photos:
+        os.remove(photo)
+        os.remove(photos)
+        for i in photos:
           os.remove(i)
+         
 
     async def setavacmd(self, message):
         reply = await check_mediaa(message)
