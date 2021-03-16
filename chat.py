@@ -2,8 +2,6 @@
 
 # Module author: @ftgmodulesbyfl1yd, @dekftgmodules
 from asyncio import sleep
-
-from .. import loader, utils
 from os import remove
 from telethon.tl.functions.channels import LeaveChannelRequest, \
     InviteToChannelRequest
@@ -19,15 +17,17 @@ from telethon.tl.types import ChannelParticipantCreator, \
 from telethon.tl.functions.messages import AddChatUserRequest
 from telethon.tl.functions.messages import GetCommonChatsRequest
 from telethon.tl.functions.users import GetFullUserRequest
-from telethon import functions, types
+from telethon import functions
+import asyncio
+from telethon import errors
+from .. import loader, utils
 import io
-import time
 
 
 @loader.tds
 class ChatMod(loader.Module):
     """Чат модуль"""
-    strings = {'name': 'Chat Module'}
+    strings = {'name': 'Chat Tools'}
 
     async def useridcmd(self, message):
         """Команда .userid <@ или реплай> показывает ID выбранного пользователя."""
@@ -348,6 +348,50 @@ class ChatMod(loader.Module):
             else:
                 await message.delete()
         f.close()
+
+    async def adduserscmd(self, event):
+        """Add members\nЗадонать мне http://qiwi.com/n/LACIAMEMEFRAME"""
+        if len(event.text.split()) == 2:
+            idschannelgroup = event.text.split(" ", maxsplit=1)[1]
+            user = [i async for i in
+                    event.client.iter_participants(event.to_id.channel_id)]
+            await event.edit(
+                f"<b>{len(user)} пользователей будет приглашено из чата {event.to_id.channel_id} в чат/канал {idschannelgroup}</b>")
+            for u in user:
+                try:
+                    try:
+                        if u.bot == False:
+                            await event.client(
+                                functions.channels.InviteToChannelRequest(
+                                    idschannelgroup, [u.id]))
+                            await asyncio.sleep(1)
+                        else:
+                            pass
+                    except:
+                        pass
+                except errors.FloodWaitError as e:
+                    print('Flood for', e.seconds)
+        else:
+            await event.edit(f"<b>Куда приглашать будем?</b>")
+
+    async def kickallcmd(self, event):
+        """kick all members\nЗадонать мне http://qiwi.com/n/LACIAMEMEFRAME"""
+        user = [i async for i in
+                event.client.iter_participants(event.to_id.channel_id)]
+        await event.edit(
+            f"<b>{len(user)} пользователей будет кикнуто из чата {event.to_id.channel_id}</b>")
+        for u in user:
+            try:
+                try:
+                    if u.is_self != True:
+                        await event.client.kick_participant(event.chat_id, u.id)
+                        await asyncio.sleep(1)
+                    else:
+                        pass
+                except:
+                    pass
+            except errors.FloodWaitError as e:
+                print('Flood for', e.seconds)
 
     async def reportcmd(self, message):
         """Репорт пользователя за спам."""
