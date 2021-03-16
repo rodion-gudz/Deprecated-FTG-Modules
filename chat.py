@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Module author: @ftgmodulesbyfl1yd, @dekftgmodules
+# Module author: @ftgmodulesbyfl1yd, @dekftgmodules, @memeframe
+
 from asyncio import sleep
 from os import remove
 from telethon.tl.functions.channels import LeaveChannelRequest, \
@@ -350,7 +351,7 @@ class ChatMod(loader.Module):
         f.close()
 
     async def adduserscmd(self, event):
-        """Add members\nЗадонать мне http://qiwi.com/n/LACIAMEMEFRAME"""
+        """Add members"""
         if len(event.text.split()) == 2:
             idschannelgroup = event.text.split(" ", maxsplit=1)[1]
             user = [i async for i in
@@ -373,25 +374,6 @@ class ChatMod(loader.Module):
                     print('Flood for', e.seconds)
         else:
             await event.edit(f"<b>Куда приглашать будем?</b>")
-
-    async def kickallcmd(self, event):
-        """kick all members\nЗадонать мне http://qiwi.com/n/LACIAMEMEFRAME"""
-        user = [i async for i in
-                event.client.iter_participants(event.to_id.channel_id)]
-        await event.edit(
-            f"<b>{len(user)} пользователей будет кикнуто из чата {event.to_id.channel_id}</b>")
-        for u in user:
-            try:
-                try:
-                    if u.is_self != True:
-                        await event.client.kick_participant(event.chat_id, u.id)
-                        await asyncio.sleep(1)
-                    else:
-                        pass
-                except:
-                    pass
-            except errors.FloodWaitError as e:
-                print('Flood for', e.seconds)
 
     async def reportcmd(self, message):
         """Репорт пользователя за спам."""

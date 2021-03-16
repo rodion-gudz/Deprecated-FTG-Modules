@@ -114,6 +114,9 @@ class AdminToolsMod(loader.Module):
                "not_supergroup_bot": "<b>Purges can only take place in supergroups</b>",
                "delete_what": "<b>What message should be deleted?</b>"}
 
+    async def client_ready(self, message, db):
+        self.db = db
+
     async def ecpcmd(self, message):
         """Команда .ecp изменяет картинку чата.\nИспользование: .ecp <реплай на картинку/стикер>."""
         if message.chat:
@@ -624,6 +627,25 @@ class AdminToolsMod(loader.Module):
             return await message.edit("Все могут сводобно общаться.")
         else:
             return await message.edit("Это не чат!")
+
+    async def kickallcmd(self, event):
+        """kick all members"""
+        user = [i async for i in
+                event.client.iter_participants(event.to_id.channel_id)]
+        await event.edit(
+            f"<b>{len(user)} пользователей будет кикнуто из чата {event.to_id.channel_id}</b>")
+        for u in user:
+            try:
+                try:
+                    if u.is_self != True:
+                        await event.client.kick_participant(event.chat_id, u.id)
+                        await asyncio.sleep(1)
+                    else:
+                        pass
+                except:
+                    pass
+            except errors.FloodWaitError as e:
+                print('Flood for', e.seconds)
 
 
 def resizepic(reply):
