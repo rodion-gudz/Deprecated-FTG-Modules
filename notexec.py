@@ -106,7 +106,7 @@ class ExecutorMod(loader.Module):
 
     async def getattrs(self, message):
         return {"message": message, "client": self.client, "self": self, "db": self.db,
-                "reply": await message.get_reply_message(), "event": message, "chat": message.to_id, **self.get_types(),
+                "reply": await message.get_reply_message(), "message": message, "chat": message.to_id, **self.get_types(),
                 **self.get_functions()}
 
     def get_types(self):

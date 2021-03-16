@@ -23,11 +23,11 @@ class UserMod(loader.Module):
         self._ratelimit = []
 
     async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
         self.client = client
         self.db = db
         self.me = await client.get_me()
+        self.db.set(__name__, "first_copy", True)
+        self.db.set(__name__, "avatar_copy", 0)
 
     async def copycmd(self, message):
         """.copy <s> <a> <reply/@username>
@@ -38,6 +38,15 @@ class UserMod(loader.Module):
         .cu s @user/reply
         .cu a @user/reply
         .cu s a @user/reply"""
+        first_copy = self.db.get(__name__, "first_copy")
+        if first_copy:
+            us = await message.client(GetFullUserRequest(message.sender_id))
+            self.db.set(__name__, "about", us.about[:70])
+            self.db.set(__name__, "first", message.sender.first_name)
+            self.db.set(__name__, "last", message.sender.last_name)
+            self.db.set(__name__, "first_copy", False)
+            self.db.set(__name__, "avatar_count", 0)
+
         reply = await message.get_reply_message()
         user = None
         s = False
@@ -73,6 +82,7 @@ class UserMod(loader.Module):
         full = await message.client(GetFullUserRequest(user.id))
         if not s: await message.edit("Получаем аватарку... [35%]\n[###–––––––]")
         if full.profile_photo:
+            self.db.set(__name__, "avatar_count", self.db.get(__name__, "avatar_count") + 1)
             up = await message.client.upload_file(
                 await message.client.download_profile_photo(user, bytes))
             if not s: await message.edit(
@@ -80,13 +90,29 @@ class UserMod(loader.Module):
             await message.client(functions.photos.UploadProfilePhotoRequest(up))
         if not s: await message.edit("Получаем данные...  [99%]\n[#########–]")
         await message.client(UpdateProfileRequest(
-            user.first_name if user.first_name != None else "",
-            user.last_name if user.last_name != None else "",
-            full.about[:70] if full.about != None else ""
+            user.first_name if user.first_name is not None else "",
+            user.last_name if user.last_name is not None else "",
+            full.about[:70] if full.about is not None else ""
         ))
-        if not s: await message.edit("Аккаунт клонирован! [100%]\n[##########]")
-        if not s: await sleep(5)
         if not s: await message.edit("Аккаунт клонирован!")
+
+    async def restusercmd(self, message):
+        await message.edit("<b>Restoring account...</b>")
+        us = self.db.get(__name__, "about")
+        first = self.db.get(__name__, "first")
+        last = self.db.get(__name__, "last")
+        await message.client(UpdateProfileRequest(
+            first if first is not None else "",
+            last if last is not None else "",
+            us if us is not None else ""
+        ))
+        count = self.db.get(__name__, "avatar_count")
+        ava = await message.client.get_profile_photos('me', limit=count)
+        await message.client(functions.photos.DeletePhotosRequest(ava))
+        self.db.set(__name__, "first_copy", True)
+        await message.edit("<b>Account restored</b>")
+        await sleep(1)
+        await message.delete()
 
     async def avacmd(self, message):
         """Send all user avatars"""

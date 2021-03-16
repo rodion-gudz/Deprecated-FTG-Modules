@@ -53,24 +53,24 @@ class TranslatorMod(loader.Module):
 
     @loader.unrestricted
     @loader.ratelimit
-    async def translatecmd(self, event):
+    async def translatecmd(self, message):
         chat = '@YTranslateBot'
-        reply = await event.get_reply_message()
-        async with event.client.conversation(chat) as conv:
-            text = utils.get_args_raw(event)
+        reply = await message.get_reply_message()
+        async with message.client.conversation(chat) as conv:
+            text = utils.get_args_raw(message)
             if reply:
-                text = await event.get_reply_message()
+                text = await message.get_reply_message()
             try:
                 response = conv.wait_event(
                     events.NewMessage(incoming=True, from_users=104784211))
-                mm = await event.client.send_message(chat, text)
+                mm = await message.client.send_message(chat, text)
                 response = await response
                 await mm.delete()
             except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @YTranslateBot</code>')
+                await message.edit('<code>Разблокируй @YTranslateBot</code>')
                 return
-            await event.edit(str(response.text).split(": ", 1)[1])
-            await event.client(
+            await message.edit(str(response.text).split(": ", 1)[1])
+            await message.client(
                 functions.messages.DeleteHistoryRequest(peer='YTranslateBot',
                                                         max_id=0,
                                                         just_clear=False,

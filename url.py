@@ -98,26 +98,26 @@ class URlMod(loader.Module):
                                utils.escape_html(lmgtfy_url),
                                utils.escape_html(text)))
 
-    async def nullcmd(self, event):
+    async def nullcmd(self, message):
         """Сократить ссылку с помощью сервиса nullify"""
         chat = '@nullifybot'
-        reply = await event.get_reply_message()
-        async with event.client.conversation(chat) as conv:
+        reply = await message.get_reply_message()
+        async with message.client.conversation(chat) as conv:
             if not reply:
-                text = utils.get_args_raw(event)
+                text = utils.get_args_raw(message)
             else:
-                text = await event.get_reply_message()
+                text = await message.get_reply_message()
             try:
                 response = conv.wait_event(
                     events.NewMessage(incoming=True, from_users=1481485420))
-                mm = await event.client.send_message(chat, text)
+                mm = await message.client.send_message(chat, text)
                 response = await response
                 await mm.delete()
             except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @nullifybot</code>')
+                await message.edit('<code>Разблокируй @nullifybot</code>')
                 return
-            await event.edit(response.text.replace("🔗 Твоя ссылка: ", ""))
-            await event.client(functions.messages.DeleteHistoryRequest(
+            await message.edit(response.text.replace("🔗 Твоя ссылка: ", ""))
+            await message.client(functions.messages.DeleteHistoryRequest(
                 peer='nullifybot',
                 max_id=0,
                 just_clear=False,

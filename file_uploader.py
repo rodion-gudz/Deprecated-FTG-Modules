@@ -70,29 +70,29 @@ class FileUploaderMod(loader.Module):
             link = path["error"]
         await message.edit("<b>" + link + "</b>")
 
-    async def imgurcmd(self, event):
+    async def imgurcmd(self, message):
         chat = '@ImgUploadBot'
-        reply = await event.get_reply_message()
-        async with event.client.conversation(chat) as conv:
+        reply = await message.get_reply_message()
+        async with message.client.conversation(chat) as conv:
 
             if not reply:
-                await event.edit("<b>Reply to photo</b>")
+                await message.edit("<b>Reply to photo</b>")
                 return
             else:
-                pic = await check_mediaa(event, reply)
+                pic = await check_mediaa(message, reply)
                 if not pic:
-                    await utils.answer(event, '<b>Reply to photo</b>')
+                    await utils.answer(message, '<b>Reply to photo</b>')
                     return
-            await event.edit("<b>Uploading...</b>")
+            await message.edit("<b>Uploading...</b>")
             try:
                 what = lol(pic)
                 response = conv.wait_event(events.NewMessage(incoming=True, from_users=985223903))
-                await event.client.send_file(chat, what)
+                await message.client.send_file(chat, what)
                 response = await response
             except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @imgurbot_bot</code>')
+                await message.edit('<code>Разблокируй @imgurbot_bot</code>')
                 return
-            await event.edit("<b>Imgur link - </b>" + response.text)
+            await message.edit("<b>Imgur link - </b>" + response.text)
 
 
 async def check_media(reply_message):

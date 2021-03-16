@@ -75,15 +75,15 @@ class DownloaderMod(loader.Module):
         else:
             return await message.edit('Нет аргументов.')
 
-    async def dltiktokcmd(self, event):
+    async def dltiktokcmd(self, message):
         """TikTok video downloader"""
         chat = '@ttsavebot'
-        reply = await event.get_reply_message()
-        async with event.client.conversation(chat) as conv:
-            text = utils.get_args_raw(event)
+        reply = await message.get_reply_message()
+        async with message.client.conversation(chat) as conv:
+            text = utils.get_args_raw(message)
             if reply:
-                text = await event.get_reply_message()
-            await event.edit("<b>Downloading...</b>")
+                text = await message.get_reply_message()
+            await message.edit("<b>Downloading...</b>")
             try:
                 response = conv.wait_event(
                     events.NewMessage(incoming=True, from_users=1087584961))
@@ -91,46 +91,46 @@ class DownloaderMod(loader.Module):
                     events.NewMessage(incoming=True, from_users=1087584961))
                 response3 = conv.wait_event(
                     events.NewMessage(incoming=True, from_users=1087584961))
-                mm = await event.client.send_message(chat, text)
+                mm = await message.client.send_message(chat, text)
                 response = await response
                 response2 = await response2
                 response3 = await response3
                 await mm.delete()
             except YouBlockedUserError:
-                await event.edit('<code>Разблокируй @ttsavebot</code>')
+                await message.edit('<code>Разблокируй @ttsavebot</code>')
                 return
-            await event.client.send_file(event.to_id, response3.media,
+            await message.client.send_file(message.to_id, response3.media,
                                          reply_to=reply)
-            await event.delete()
-            await event.client(functions.messages.DeleteHistoryRequest(
+            await message.delete()
+            await message.client(functions.messages.DeleteHistoryRequest(
                 peer='ttsavebot',
                 max_id=0,
                 just_clear=False,
                 revoke=True
             ))
 
-    async def dlfilecmd(self, event):
+    async def dlfilecmd(self, message):
         """File downloader (small files)"""
-        await downloading(event)
+        await downloading(message)
 
-    async def dlbigfilecmd(self, event):
+    async def dlbigfilecmd(self, message):
         """File downloader (big files)"""
-        await downloading(event, True)
+        await downloading(message, True)
 
 
-async def downloading(event, big=False):
-    args = utils.get_args_raw(event)
-    reply = await event.get_reply_message()
+async def downloading(message, big=False):
+    args = utils.get_args_raw(message)
+    reply = await message.get_reply_message()
     if not args:
         if not reply:
-            await event.edit("<b>Ссылки нету!</b>")
+            await message.edit("<b>Ссылки нету!</b>")
             return
         message = reply
     else:
-        message = event
+        message = message
 
     if not message.entities:
-        await event.edit("<b>Ссылки нету!</b>")
+        await message.edit("<b>Ссылки нету!</b>")
         return
 
     urls = []
@@ -148,11 +148,11 @@ async def downloading(event, big=False):
             urls.append(url)
 
     if not urls:
-        await event.edit("<b>Ссылки нету!</b>")
+        await message.edit("<b>Ссылки нету!</b>")
         return
     for url in urls:
         try:
-            await event.edit("<b>Загрузка...</b>\n" + url)
+            await message.edit("<b>Загрузка...</b>\n" + url)
             fname = url.split("/")[-1]
             text = get(url, stream=big)
             if big:
@@ -160,20 +160,20 @@ async def downloading(event, big=False):
                 for chunk in text.iter_content(1024):
                     f.write(chunk)
                 f.close()
-                await event.edit("<b>Отправка...</b>\n" + url)
-                await event.client.send_file(event.to_id, open(fname, "rb"),
+                await message.edit("<b>Отправка...</b>\n" + url)
+                await message.client.send_file(message.to_id, open(fname, "rb"),
                                              reply_to=reply)
                 os.remove(fname)
             else:
                 file = io.BytesIO(text.content)
                 file.name = fname
                 file.seek(0)
-                await event.edit("<b>Отправка...</b>\n" + url)
-                await event.client.send_file(event.to_id, file, reply_to=reply)
+                await message.edit("<b>Отправка...</b>\n" + url)
+                await message.client.send_file(message.to_id, file, reply_to=reply)
 
         except Exception as e:
-            await event.reply(
+            await message.reply(
                 "<b>Ошибка при загрузке!</b>\n" + url + "\n<code>" + str(
                     e) + "</code>")
 
-    await event.delete()
+    await message.delete()

@@ -105,7 +105,7 @@ class TestMod(loader.Module):
     async def suspendcmd(self, message):
         """.suspend <time>
            Suspends the bot for N seconds"""
-        # Blocks asyncio event loop, preventing ANYTHING happening (except multithread ops,
+        # Blocks asyncio message loop, preventing ANYTHING happening (except multithread ops,
         # but they will be blocked on return).
         try:
             time.sleep(int(utils.get_args_raw(message)))

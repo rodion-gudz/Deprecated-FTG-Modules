@@ -161,50 +161,50 @@ class AudioEditorMod(loader.Module):
             +8)
         await go_out(m, audio, out, audio.pref, audio.pref)
 
-    async def cutcmd(self, event):
+    async def cutcmd(self, message):
         """Используй .cut <начало(сек):конец(сек)> <реплай на аудио/видео/гиф>."""
-        args = utils.get_args_raw(event).split(':')
-        reply = await event.get_reply_message()
+        args = utils.get_args_raw(message).split(':')
+        reply = await message.get_reply_message()
         if not reply or not reply.media:
-            return await event.edit('Нет реплая на медиа.')
+            return await message.edit('Нет реплая на медиа.')
         if reply.media:
             if args:
                 if len(args) == 2:
                     try:
-                        await event.edit('Скачиваем...')
+                        await message.edit('Скачиваем...')
                         smth = reply.file.ext
-                        await event.client.download_media(reply.media,
+                        await message.client.download_media(reply.media,
                                                           f'uncutted{smth}')
                         if not args[0]:
-                            await event.edit(
+                            await message.edit(
                                 f'Обрезаем с 0 сек. по {args[1]} сек....')
                             os.system(
                                 f'ffmpeg -i uncutted{smth} -ss 0 -to {args[1]} -c copy cutted{smth} -y')
                         elif not args[1]:
                             end = reply.media.document.attributes[0].duration
-                            await event.edit(
+                            await message.edit(
                                 f'Обрезаем с {args[0]} сек. по {end} сек....')
                             os.system(
                                 f'ffmpeg -i uncutted{smth} -ss {args[0]} -to {end} -c copy cutted{smth} -y')
                         else:
-                            await event.edit(
+                            await message.edit(
                                 f'Обрезаем с {args[0]} сек. по {args[1]} сек....')
                             os.system(
                                 f'ffmpeg -i uncutted{smth} -ss {args[0]} -to {args[1]} -c copy cutted{smth} -y')
-                        await event.edit('Отправляем...')
-                        await event.client.send_file(event.to_id,
+                        await message.edit('Отправляем...')
+                        await message.client.send_file(message.to_id,
                                                      f'cutted{smth}',
                                                      reply_to=reply.id)
                         os.system('rm -rf uncutted* cutted*')
-                        await event.delete()
+                        await message.delete()
                     except:
-                        await event.edit('Этот файл не поддерживается.')
+                        await message.edit('Этот файл не поддерживается.')
                         os.system('rm -rf uncutted* cutted*')
                         return
                 else:
-                    return await event.edit('Неверно указаны аргументы.')
+                    return await message.edit('Неверно указаны аргументы.')
             else:
-                return await event.edit('Нет аргументов')
+                return await message.edit('Нет аргументов')
 
 
 async def get_audio(m, pref):

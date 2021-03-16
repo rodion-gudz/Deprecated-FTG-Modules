@@ -151,8 +151,8 @@ class DemotivatorMod(loader.Module):
 
 
 async def cmds(message, type):
-    event, is_reply = await check_media(message)
-    if not event:
+    message, is_reply = await check_media(message)
+    if not message:
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not reply:
@@ -194,19 +194,19 @@ async def cmds(message, type):
         await message.edit("<b>Reply to photo with text</b>")
         return
     await message.edit("Demotivating...")
-    bytes_image = await event.download_media(bytes)
+    bytes_image = await message.download_media(bytes)
     demotivator = await demotion(font_bytes, bytes_image, text, type)
     await message.edit("Sending...")
     if is_reply:
         await message.delete()
-        return await event.reply(file=demotivator)
+        return await message.reply(file=demotivator)
     else:
-        return await event.edit(file=demotivator, text="")
+        return await message.edit(file=demotivator, text="")
 
 
 async def cmdrands(message, type):
-    event, is_reply = await check_media(message)
-    if not event:
+    message, is_reply = await check_media(message)
+    if not message:
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not reply:
@@ -248,14 +248,14 @@ async def cmdrands(message, type):
         await message.edit("<b>Reply to photo with text</b>")
         return
     await message.edit("Demotivating...")
-    bytes_image = await event.download_media(bytes)
+    bytes_image = await message.download_media(bytes)
     demotivator = await demotion(font_bytes, bytes_image, text, type)
     await message.edit("Sending...")
     if is_reply:
         await message.delete()
-        return await event.reply(file=demotivator)
+        return await message.reply(file=demotivator)
     else:
-        return await event.edit(file=demotivator, text="")
+        return await message.edit(file=demotivator, text="")
 
 
 async def check_media(message):
