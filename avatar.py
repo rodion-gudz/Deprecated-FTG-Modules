@@ -50,12 +50,12 @@ class GetPPMod(loader.Module):
             if int(id) <= (len(photos)):
                 send_photos = await self.client.download_media(photos[id - 1])
                 await self.client.send_file(message.chat_id, send_photos)
+                for i in photos:
+                  os.remove(i)
             else:
                 await message.edit("<code>No photo found with that id</code>")
                 return
         await message.delete()
-        os.remove(photo)
-        os.remove(photos)
         for i in send_photos:
           os.remove(i)
          
