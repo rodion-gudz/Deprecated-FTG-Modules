@@ -33,7 +33,8 @@ class GetPPMod(loader.Module):
         if id.strip() == "":
             if len(photos) > 0:
                 await self.client.send_file(message.chat_id, photos)
-                os.remove(photos)
+                for i in photos:
+                    os.remove(i)
             else:
                 try:
                     if u is True:
