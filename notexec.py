@@ -43,6 +43,12 @@ class ExecutorMod(loader.Module):
                "done": "<b>Done</b>"
                }
 
+    def __init__(self):
+        self.config = loader.ModuleConfig("FLOOD_WAIT_PROTECT", 2,
+                                          lambda m: self.strings(
+                                              "flood_wait_protect_cfg_doc", m))
+        self.activecmds = {}
+
     async def notexeccmd(self, message):
         """Gets the note specified"""
         args = utils.get_args(message)
