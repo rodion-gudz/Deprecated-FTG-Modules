@@ -113,7 +113,6 @@ class HelpMod(loader.Module):
         txt.seek(0)
         valid = 0
         already_loaded = 0
-        inclink = 0
         for i in txt.read().decode('utf-8').split("\n"):
             if i not in modules:
                 valid += 1
