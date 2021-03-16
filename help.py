@@ -32,8 +32,7 @@ class HelpMod(loader.Module):
         self._ratelimit = []
 
     async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+        self.client = client
         self.me = await client.get_me()
         self.db = db
         self.is_bot = await client.is_bot()
@@ -94,16 +93,20 @@ class HelpMod(loader.Module):
                     reply += "</code>"
         await utils.answer(message, reply)
 
-    async def restorecmd(self, m):
+    async def clearmodulescmd(self, message):
+        """Delete all installed modules"""
+        self.db.set("friendly-telegram.modules.loader", "loaded_modules", [])
+
+    async def restorecmd(self, message):
         """Установить все модули из txt файла"""
-        reply = await m.get_reply_message()
+        reply = await message.get_reply_message()
         if not reply:
-            await m.edit("REPLY_TO_TXT")
+            await message.edit("REPLY_TO_TXT")
             return
         if not reply.file:
-            await m.edit("REPLY_TO_TXT")
+            await message.edit("REPLY_TO_TXT")
             return
-        modules = self._db.get("friendly-telegram.modules.loader", "loaded_modules", [])
+        modules = self.db.get("friendly-telegram.modules.loader", "loaded_modules", [])
         txt = io.BytesIO()
         await reply.download_media(txt)
         txt.seek(0)
@@ -116,21 +119,21 @@ class HelpMod(loader.Module):
                 modules.append(i)
             else:
                 already_loaded += 1
-        self._db.set("friendly-telegram.modules.loader", "loaded_modules", modules)
-        await m.edit(f"[BackupMan]\n\nЗагружено: {valid}\nЗагружены ранее: {already_loaded}\n\n" + (
+        self.db.set("friendly-telegram.modules.loader", "loaded_modules", modules)
+        await message.edit(f"[BackupMan]\n\nЗагружено: {valid}\nЗагружены ранее: {already_loaded}\n\n" + (
             "Необходима перезагрузка!\n<code>.restart</code>" if valid != 0 else "Ничего не загружено"))
 
-    async def backupcmd(self, m):
+    async def backupcmd(self, message):
         """
         Сделать бэкап модулей в txt файл
         """
-        modules = self._db.get("friendly-telegram.modules.loader", "loaded_modules", [])
+        modules = self.db.get("friendly-telegram.modules.loader", "loaded_modules", [])
         txt = io.BytesIO("\n".join(modules).encode())
-        txt.name = "BackupMan-{}.txt".format(str((await m.client.get_me()).id))
-        await m.client.send_file(m.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
-        await m.delete()
-        await m.client.send_file(m.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
-        await m.delete()
+        txt.name = "BackupMan-{}.txt".format(str((await message.client.get_me()).id))
+        await message.client.send_file(message.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
+        await message.delete()
+        await message.client.send_file(message.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
+        await message.delete()
 
     async def modulecmd(self, message):
         """Вывести ссылку на модуль"""
