@@ -96,6 +96,7 @@ class HelpMod(loader.Module):
     async def clearmodulescmd(self, message):
         """Delete all installed modules"""
         self.db.set("friendly-telegram.modules.loader", "loaded_modules", [])
+        await message.edit("<b>All modules deleted</b>\n<b>Please</b> <code>.restart</code>")
 
     async def restorecmd(self, message):
         """Установить все модули из txt файла"""
