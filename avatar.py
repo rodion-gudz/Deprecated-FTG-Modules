@@ -1,11 +1,17 @@
+# -*- coding: utf-8 -*-
+
+# Module author: @ftgmodulesbyfl1yd, @dekftgmodules
 
 import logging
 import os
 from .. import loader, utils
 from telethon import functions
+
 logger = logging.getLogger(__name__)
 from telethon.errors.rpcerrorlist import UsernameOccupiedError
-from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRequest
+from telethon.tl.functions.account import UpdateProfileRequest, \
+    UpdateUsernameRequest
+
 
 class GetPPMod(loader.Module):
     strings = {"name": "Profile"}
@@ -27,12 +33,15 @@ class GetPPMod(loader.Module):
         if id.strip() == "":
             if len(photos) > 0:
                 await self.client.send_file(message.chat_id, photos)
+                os.remove(photos)
             else:
                 try:
                     if u is True:
-                        photo = await self.client.download_profile_photo(user.sender)
+                        photo = await self.client.download_profile_photo(
+                            user.sender)
                     else:
-                        photo = await self.client.download_profile_photo(message.input_chat)
+                        photo = await self.client.download_profile_photo(
+                            message.input_chat)
                     await self.client.send_file(message.chat_id, photo)
                     os.remove(photo)
                 except:
@@ -42,23 +51,21 @@ class GetPPMod(loader.Module):
             try:
                 id = int(id)
                 if id <= 0:
-                    await message.edit("<code>ID number you entered is invalid</code>")
+                    await message.edit(
+                        "<code>ID number you entered is invalid</code>")
                     return
             except:
-                 await message.edit("<code>ID number you entered is invalid</code>")
-                 return
+                await message.edit(
+                    "<code>ID number you entered is invalid</code>")
+                return
             if int(id) <= (len(photos)):
                 send_photos = await self.client.download_media(photos[id - 1])
                 await self.client.send_file(message.chat_id, send_photos)
-                for i in photos:
-                  os.remove(i)
+                os.remove(send_photos)
             else:
                 await message.edit("<code>No photo found with that id</code>")
                 return
         await message.delete()
-        for i in send_photos:
-          os.remove(i)
-         
 
     async def setavacmd(self, message):
         reply = await check_mediaa(message)
@@ -68,20 +75,27 @@ class GetPPMod(loader.Module):
                 if reply:
                     await message.edit("Скачиваем...")
                     if reply.video:
-                        await message.client.download_media(reply.media, "ava.mp4")
+                        await message.client.download_media(reply.media,
+                                                            "ava.mp4")
                         await message.edit("Конвертируем...")
-                        os.system("ffmpeg -i ava.mp4 -c copy -an gifavaa.mp4 -y")
-                        os.system("ffmpeg -i gifavaa.mp4 -vf scale=360:360 gifava.mp4 -y")
+                        os.system(
+                            "ffmpeg -i ava.mp4 -c copy -an gifavaa.mp4 -y")
+                        os.system(
+                            "ffmpeg -i gifavaa.mp4 -vf scale=360:360 gifava.mp4 -y")
                     else:
-                        await message.client.download_media(reply.media, "tgs.tgs")
+                        await message.client.download_media(reply.media,
+                                                            "tgs.tgs")
                         await message.edit("Конвертируем...")
-                        os.system("lottie_convert.py tgs.tgs tgs.gif; mv tgs.gif gifava.mp4")
+                        os.system(
+                            "lottie_convert.py tgs.tgs tgs.gif; mv tgs.gif gifava.mp4")
                 else:
-                    return await message.edit("Нет реплая на гиф/анимированный стикер/видеосообщение.")
+                    return await message.edit(
+                        "Нет реплая на гиф/анимированный стикер/видеосообщение.")
                 await message.edit("Устанавливаем аву...")
                 await message.client(
-                    functions.photos.UploadProfilePhotoRequest(video=await message.client.upload_file("gifava.mp4"),
-                                                               video_start_ts=0.0))
+                    functions.photos.UploadProfilePhotoRequest(
+                        video=await message.client.upload_file("gifava.mp4"),
+                        video_start_ts=0.0))
                 await message.edit("Ава установлена.")
                 os.system("rm -rf ava.mp4 gifava.mp4 gifavaa.mp4 tgs*")
             except:
@@ -115,16 +129,19 @@ class GetPPMod(loader.Module):
             await message.client(functions.photos.DeletePhotosRequest(ava))
             await message.edit("Текущая аватарка удалена")
         else:
-            await message.edit("ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКИ!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
+            await message.edit(
+                "ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКИ!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
 
     async def delavascmd(self, message):
         ava = await message.client.get_profile_photos('me')
         if len(ava) > 0:
             await message.edit("Удаляем аватарки...")
-            await message.client(functions.photos.DeletePhotosRequest(await message.client.get_profile_photos('me')))
+            await message.client(functions.photos.DeletePhotosRequest(
+                await message.client.get_profile_photos('me')))
             await message.edit("Аватарки удалены")
         else:
-            await message.edit("ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКОК!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
+            await message.edit(
+                "ТЫ ЕБЛАН У ТЯ НЕТ АВАТАРКОК!!! КАКОЙ НАХУЙ УДАЛЯТЬ")
 
     async def setnamecmd(self, message):
         args = utils.get_args_raw(message).split('/')
@@ -134,7 +151,8 @@ class GetPPMod(loader.Module):
         elif len(args) == 2:
             firstname = args[0]
             lastname = args[1]
-        await message.client(UpdateProfileRequest(first_name=firstname, last_name=lastname))
+        await message.client(
+            UpdateProfileRequest(first_name=firstname, last_name=lastname))
         await message.edit('Имя изменено успешно!')
 
     async def setbiocmd(self, message):
@@ -153,6 +171,7 @@ class GetPPMod(loader.Module):
             await message.edit('Юзернейм изменен успешно!')
         except UsernameOccupiedError:
             await message.edit('Такой юзернейм уже занят!')
+
 
 async def check_mediaa(message):
     reply = await message.get_reply_message()

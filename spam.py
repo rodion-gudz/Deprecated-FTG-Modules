@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Module author: @ftgmodulesbyfl1yd
-from telethon.tl import functions
 
+from telethon.tl import functions
 from .. import loader, utils
 import logging
 from asyncio import sleep, gather
