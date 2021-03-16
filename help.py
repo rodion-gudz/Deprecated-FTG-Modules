@@ -130,9 +130,9 @@ class HelpMod(loader.Module):
         modules = self.db.get("friendly-telegram.modules.loader", "loaded_modules", [])
         txt = io.BytesIO("\n".join(modules).encode())
         txt.name = "BackupMan-{}.txt".format(str((await message.client.get_me()).id))
-        await message.client.send_file(message.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
+        await message.client.send_file(message.to_id, txt, caption=f"Modules backup:\nNumber: {len(modules)}")
         await message.delete()
-        await message.client.send_file(message.to_id, txt, caption=f"[BackupMan] Бэкап модулей\nМодулей: {len(modules)}")
+        await message.client.send_file(message.to_id, txt, caption=f"Modules backup:\nNumber: {len(modules)}")
         await message.delete()
 
     async def modulecmd(self, message):
