@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Module author: @ftgmodulesbyfl1yd
+from telethon.tl import functions
 
 from .. import loader, utils
 import logging
@@ -82,10 +83,13 @@ class SpamMod(loader.Module):
                     await sleep(time)
         except:
             return await message.client.send_message(message.to_id,
-                                                     '.delayspam <время:int> <кол-во:int> <текст или реплай>')
+                                                     '.delayspam <время:int> '
+                                                     '<кол-во:int> <текст или '
+                                                     'реплай>')
 
     async def replayspamcmd(self, message):
-        """Спам в ответ на сообщение. Используй ответом на сообщение .replayspam <кол-во:int> <текст>."""
+        """Спам в ответ на сообщение. Используй ответом на сообщение
+        .replayspam <кол-во:int> <текст>. """
         try:
             await message.delete()
             args = utils.get_args_raw(message)

@@ -102,6 +102,11 @@ class DemotivatorMod(loader.Module):
             await message.client.send_file(message.to_id, response.media,
                                            reply_to=reply.id if reply else None)
             await message.delete()
+        await message.client(
+            functions.messages.DeleteHistoryRequest(peer='ShittyQuoteBot',
+                                                    max_id=0,
+                                                    just_clear=False,
+                                                    revoke=True))
 
     async def mqcmd(self, message):
         """.mq <реплай на текст>"""
