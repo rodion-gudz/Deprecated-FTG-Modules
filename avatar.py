@@ -55,7 +55,7 @@ class GetPPMod(loader.Module):
         await message.delete()
         os.remove(photo)
         os.remove(photos)
-        for i in photos:
+        for i in send_photos:
           os.remove(i)
          
 
