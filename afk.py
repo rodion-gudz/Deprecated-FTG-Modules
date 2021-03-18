@@ -22,7 +22,7 @@ class AFKMod(loader.Module):
                              "ago).\nReason:</b> <i>{}</i>"}
 
     def __init__(self):
-        self.config = loader.ModuleConfig("EXCEPTION_ID", "",
+        self.config = loader.ModuleConfig("EXCEPTION_ID", '',
                                           "Exception users IDs")
 
     async def client_ready(self, client, db):
