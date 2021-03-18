@@ -22,7 +22,7 @@ class AFKMod(loader.Module):
                              "ago).\nReason:</b> <i>{}</i>"}
 
     def __init__(self):
-        self.config = loader.ModuleConfig("ExceptionID", None,
+        self.config = loader.ModuleConfig("EXCEPTION_ID", None,
                                           "Exception users IDs")
 
     async def client_ready(self, client, db):
@@ -50,8 +50,6 @@ class AFKMod(loader.Module):
     async def watcher(self, message):
         if not self.get_afk():
             return
-        if message.sender_id in self.config["ExceptionID"]:
-            return
         if not isinstance(message, types.Message):
             return
         now = datetime.now().replace(microsecond=0)
@@ -67,6 +65,8 @@ class AFKMod(loader.Module):
             else:
                 return
         elif message.mentioned:
+            if message.sender_id in self.config["EXCEPTION_ID"]:
+                return
             if self.get_afk():
                 afk_state = self.get_afk()
                 ret = self.strings("afk_reason", message).format(diff,
