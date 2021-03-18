@@ -120,8 +120,9 @@ class HelpMod(loader.Module):
             else:
                 already_loaded += 1
         self.db.set("friendly-telegram.modules.loader", "loaded_modules", modules)
-        await message.edit(f"<b>Loaded: {valid}\nAlready loaded: {already_loaded}\n\n" + (
-            "Please </b>\n<code>.restart</code>" if valid != 0 else "Ничего не загружено"))
+        await message.edit(f"<b>Loaded: {valid}\nAlready loaded: {already_loaded}\n" + (
+            "Restarting...</b>" if valid != 0 else "Ничего не загружено"))
+        await self.allmodules.commands["restart"](await message.reply("Placeholder"))
 
     async def backupcmd(self, message):
         """
