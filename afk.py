@@ -20,7 +20,10 @@ class AFKMod(loader.Module):
                "afk": "<b>I'm AFK right now (since {} ago).</b>",
                "afk_reason": "<b>I'm AFK right now (since {} "
                              "ago).\nReason:</b> <i>{}</i>"}
-
+    def __init__(self):
+            self.config = loader.ModuleConfig(
+                "Exceptions ID", [])
+                
     async def client_ready(self, client, db):
         self._db = db
         self._me = await client.get_me()
