@@ -50,7 +50,7 @@ class AFKMod(loader.Module):
     async def watcher(self, message):
         if not self.get_afk():
             return
-        if message.sender_id in self.config("Exceptions ID"):
+        if message.sender_id in self.config("ExceptionID"):
             return
         if not isinstance(message, types.Message):
             return
