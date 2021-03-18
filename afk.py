@@ -21,8 +21,7 @@ class AFKMod(loader.Module):
                "afk_reason": "<b>I'm AFK right now (since {} "
                              "ago).\nReason:</b> <i>{}</i>"}
     def __init__(self):
-            self.config = loader.ModuleConfig(
-                "Exceptions ID", None, 'Users exceptions IDs')
+      self.config = loader.ModuleConfig("Exceptions ID", None, 'Users exceptions IDs')
                 
     async def client_ready(self, client, db):
         self._db = db
