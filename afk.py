@@ -21,10 +21,6 @@ class AFKMod(loader.Module):
                "afk_reason": "<b>I'm AFK right now (since {} "
                              "ago).\nReason:</b> <i>{}</i>"}
 
-    def __init__(self):
-        self.config = loader.ModuleConfig("EXCEPTION_ID", '',
-                                          "Exception users IDs")
-
     async def client_ready(self, client, db):
         self._db = db
         self._me = await client.get_me()
@@ -36,8 +32,7 @@ class AFKMod(loader.Module):
         else:
             self._db.set(__name__, "afk", True)
         self._db.set(__name__, "gone", time.time())
-        await self.allmodules.log("afk",
-                                  data=utils.get_args_raw(message) or None)
+        await self.allmodules.log("afk", data=utils.get_args_raw(message) or None)
         await utils.answer(message, self.strings("gone", message))
 
     async def unafkcmd(self, message):
@@ -53,24 +48,19 @@ class AFKMod(loader.Module):
         if not isinstance(message, types.Message):
             return
         now = datetime.now().replace(microsecond=0)
-        gone = datetime.fromtimestamp(self._db.get(__name__, "gone")).replace(
-            microsecond=0)
+        gone = datetime.fromtimestamp(self._db.get(__name__, "gone")).replace(microsecond=0)
         diff = now - gone
         if getattr(message.to_id, "user_id", None) == self._me.id:
             if self.get_afk():
                 afk_state = self.get_afk()
-                ret = self.strings("afk_reason", message).format(diff,
-                                                                 afk_state)
+                ret = self.strings("afk_reason", message).format(diff, afk_state)
                 await utils.answer(message, ret)
             else:
                 return
         elif message.mentioned:
-            if message.sender_id in self.config["EXCEPTION_ID"]:
-                return
             if self.get_afk():
                 afk_state = self.get_afk()
-                ret = self.strings("afk_reason", message).format(diff,
-                                                                 afk_state)
+                ret = self.strings("afk_reason", message).format(diff, afk_state)
                 await utils.answer(message, ret, reply_to=message)
             else:
                 return
