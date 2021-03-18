@@ -24,23 +24,23 @@ class ConverterMod(loader.Module):
         self.client = client
 
     @loader.sudo
-    async def wtpcmd(self, message):
-        """WEBP to PNG"""
+    async def tojpgcmd(self, message):
+        """to JPG"""
         reply_message = await message.get_reply_message()
         image = io.BytesIO()
         await self.client.download_media(reply_message.media.document, image)
         image = Image.open(image)
         image_stream = io.BytesIO()
-        image_stream.name = "png.png"
-        image.save(image_stream, "PNG")
+        image_stream.name = "png.jpg"
+        image.save(image_stream, "JPG")
         image_stream.seek(0)
         await self.client.delete_messages(message.to_id, message.id)
         await self.client.send_file(message.to_id, image_stream,
                                     force_document=True)
 
     @loader.sudo
-    async def ptwcmd(self, message):
-        """PNG to WEBP"""
+    async def towebpcmd(self, message):
+        """to WEBP"""
         reply_message = await message.get_reply_message()
         image = io.BytesIO()
         await self.client.download_media(reply_message.media, image)
@@ -54,8 +54,8 @@ class ConverterMod(loader.Module):
                                     force_document=False)
 
     @loader.sudo
-    async def jtpcmd(self, message):
-        """JPG to PNG"""
+    async def topngcmd(self, message):
+        """to PNG"""
         reply_message = await message.get_reply_message()
         image = io.BytesIO()
         await self.client.download_media(reply_message.media, image)
