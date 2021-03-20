@@ -76,7 +76,7 @@ class DemotivatorMod(loader.Module):
         if not text and not reply:
             await message.edit("<b>Нет текста или реплая.</b>")
             return
-        await message.edit("<b>Минуточку...</b>")
+        await message.edit("<b>Demotivating...</b>")
         async with message.client.conversation(chat) as conv:
             if text:
                 try:
@@ -126,7 +126,7 @@ class DemotivatorMod(loader.Module):
         if sender == 1087968824:
             sender = message.chat.id
         pfp = await message.client.download_profile_photo(sender, bytes)
-        await message.edit("<i>И сказал этот гений...</i>")
+        await message.edit("<b>Demotivating...</b>")
         if not pfp:
             pfp = b'BM:\x00\x00\x00\x00\x00\x00\x006\x00\x00\x00(\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x18\x00\x00\x00\x00\x00\x04\x00\x00\x00\xc4\x0e\x00\x00\xc4\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\x00'
         text = "\n".join(wrap(reply.raw_text, 30))
@@ -175,7 +175,7 @@ class DemotivatorMod(loader.Module):
             return await message.edit(
                 "<b>бот принимает текст длинной до 500 символов</b>")
 
-        await message.edit("<b>демотивирую...</b>")
+        await message.edit("<b>Demotivating...</b>")
         async with self.client.conversation(CHAT, timeout=160) as conv:
             try:
                 response = conv.wait_event(
@@ -307,10 +307,10 @@ async def cmdrands(message, type):
     if not text:
         await message.edit("<b>Reply to photo with text</b>")
         return
-    await message.edit("Demotivating...")
+    await message.edit("<b>Demotivating...</b>")
     bytes_image = await event.download_media(bytes)
     demotivator = await demotion(font_bytes, bytes_image, text, type)
-    await message.edit("Sending...")
+    await message.edit("<b>Sending...</b>")
     if is_reply:
         await message.delete()
         return await event.reply(file=demotivator)
