@@ -27,7 +27,8 @@ class TranslatorMod(loader.Module):
         if not args and not reply:
             return await message.edit("Нет аргументов или реплая.")
         if args == "langs":
-            return await message.edit("<code>" + '\n'.join(str(langs).split(', ')) + "</code>")
+            return await message.edit(
+                "<code>" + '\n'.join(str(langs).split(', ')) + "</code>")
         if reply:
             try:
                 trslreply = True
@@ -35,8 +36,10 @@ class TranslatorMod(loader.Module):
                 if len(lang) >= 2:
                     trslreply = False
                 dest = langs[lang[0]]
-                r = tr(args.split(' ', 1)[1] if trslreply is False else text, dest=dest)
-            except: r = tr(reply.text)
+                r = tr(args.split(' ', 1)[1] if trslreply is False else text,
+                       dest=dest)
+            except:
+                r = tr(reply.text)
         else:
             try:
                 try:
@@ -48,7 +51,8 @@ class TranslatorMod(loader.Module):
                     dest = langs[lang[0]]
                     text = args.split(' ', 1)[1]
                     r = tr(text, dest=dest)
-            except KeyError: r = tr(args)
+            except KeyError:
+                r = tr(args)
         return await message.edit(f"<b>[{r.src} ➜ {r.dest}]</b>\n{r.text}")
 
     @loader.unrestricted

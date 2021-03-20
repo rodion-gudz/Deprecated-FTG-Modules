@@ -2,18 +2,26 @@
 
 # Module author: @ftgmodulesbyfl1yd
 
-import io, time
-from .. import loader, utils, security
+import asyncio
+import io
 import logging
-from PIL import Image
+import time
+
 import telethon
-from telethon.errors import ChatAdminRequiredError, UserAdminInvalidError, PhotoCropSizeSmallError
-from telethon.tl.types import ChatAdminRights, ChatBannedRights
-from telethon.tl.functions.channels import EditAdminRequest, EditBannedRequest, EditPhotoRequest, \
+from PIL import Image
+from telethon import errors
+from telethon.errors import ChatAdminRequiredError, UserAdminInvalidError, \
+    PhotoCropSizeSmallError
+from telethon.tl.functions.channels import EditAdminRequest, EditBannedRequest, \
+    EditPhotoRequest, \
     DeleteUserHistoryRequest
 from telethon.tl.functions.messages import EditChatAdminRequest
+from telethon.tl.functions.messages import \
+    EditChatDefaultBannedRightsRequest as br
+from telethon.tl.types import ChatAdminRights, ChatBannedRights
 from telethon.tl.types import ChatBannedRights as cb
-from telethon.tl.functions.messages import EditChatDefaultBannedRightsRequest as br
+
+from .. import loader, utils
 
 logger = logging.getLogger(__name__)
 
