@@ -21,6 +21,10 @@ class AFKMod(loader.Module):
                "afk_reason": "<b>I'm AFK right now (since {} "
                              "ago).\nReason:</b> <i>{}</i>"}
 
+    def __init__(self):
+        self.config = loader.ModuleConfig(
+            "EXCEPTION_ID", [""], "Exceptions users IDs")
+
     async def client_ready(self, client, db):
         self._db = db
         self._me = await client.get_me()
@@ -44,6 +48,8 @@ class AFKMod(loader.Module):
 
     async def watcher(self, message):
         if not self.get_afk():
+            return
+        if str(message.sender_id) in self.config["EXCEPTION_ID"]:
             return
         if not isinstance(message, types.Message):
             return
