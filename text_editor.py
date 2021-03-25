@@ -56,7 +56,7 @@ class TextEditorMod(loader.Module):
             change = str.maketrans(RuKeys + EnKeys, EnKeys + RuKeys)
             text = str.translate(text, change)
 
-            if message.from_id != reply.from_id:
+            if message.sender_id != reply.sender_id:
                 await message.edit(text)
             else:
                 await message.delete()
