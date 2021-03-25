@@ -26,7 +26,7 @@ class LyricsMod(loader.Module):
     tag = "<b>[Shazam]</b> "
 
     def __init__(self):
-        self.config = loader.ModuleConfig("GENIUS_API_TOKEN", None, lambda m: self.strings["genius_api_token_doc"])
+        self.config = loader.ModuleConfig("GENIUS_API_TOKEN", None, lambda message: self.strings["genius_api_token_doc"])
 
     def config_complete(self):
         if self.config["GENIUS_API_TOKEN"]:
@@ -58,30 +58,30 @@ class LyricsMod(loader.Module):
         logger.debug(song.lyrics)
         await utils.answer(message, utils.escape_html(song.lyrics))
 
-    async def shazamcmd(self, m):
+    async def shazamcmd(self, message):
         """.shazam <reply to audio> - распознать трек"""
-        s = await get_audio_shazam(m)
+        s = await get_audio_shazam(message)
         if not s: return
         try:
             shazam = Shazam(s.track.read())
             recog = shazam.recognizeSong()
             track = next(recog)[1]['track']
-            await m.client.send_file(m.to_id, file=track['images']['background'],
+            await message.client.send_file(message.to_id, file=track['images']['background'],
                                      caption=self.tag + "Распознанный трек: " + track['share']['subject'],
                                      reply_to=s.reply.id)
-            await m.delete()
+            await message.delete()
         except:
-            await m.edit(self.tag + "Не удалось распознать...")
+            await message.edit(self.tag + "Не удалось распознать...")
 
 
-async def get_audio_shazam(m):
+async def get_audio_shazam(message):
     class rct(): track = io.BytesIO(); reply = None
-    reply = await m.get_reply_message()
+    reply = await message.get_reply_message()
     if reply and reply.file and reply.file.mime_type.split("/")[0] == "audio":
         ae = rct()
-        await utils.answer(m, "<b>Скачиваю...</b>")
+        await utils.answer(message, "<b>Скачиваю...</b>")
         ae.track = io.BytesIO(await reply.download_media(bytes))
         ae.reply = reply
-        await m.edit("<b>Распознаю...</b>")
+        await message.edit("<b>Распознаю...</b>")
         return ae
-    else: await utils.answer(m, "<b>reply to audio...</b>"); return None
+    else: await utils.answer(message, "<b>reply to audio...</b>"); return None

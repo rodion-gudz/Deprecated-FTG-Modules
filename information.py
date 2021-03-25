@@ -76,34 +76,34 @@ class InfoMod(loader.Module):
         os.remove(photo)
         await message.delete()
 
-    async def checkcmd(self, m):
+    async def checkcmd(self, message):
         """ Проверить uid на номер
         Отправляет данные в чат
         Жуёт либо <reply>, либо <uid>
         """
-        await check(m, self.strings['check'], self.strings['version'])
+        await check(message, self.strings['check'], self.strings['version'])
 
-    async def pcheckcmd(self, m):
+    async def pcheckcmd(self, message):
         """ Проверить номер на наличие в бд
         Отправляет данные в чат
         Жуёт либо <reply>, либо <phone>
         """
-        await check(m, self.strings['check'], self.strings['version'], 'p')
+        await check(message, self.strings['check'], self.strings['version'], 'p')
 
-    async def scheckcmd(self, m):
+    async def scheckcmd(self, message):
         """ Аналогично check
         Отправляет данные в избранное
         Жуёт либо <reply>, либо <uid>
         """
-        await check(m, self.strings['check'], self.strings['version'],
+        await check(message, self.strings['check'], self.strings['version'],
                     save=True)
 
-    async def spcheckcmd(self, m):
+    async def spcheckcmd(self, message):
         """ Аналогично pcheck
         Отправляет данные в избранное
         Жуёт либо <reply>, либо <phone>
         """
-        await check(m, self.strings['check'], self.strings['version'], 'p',
+        await check(message, self.strings['check'], self.strings['version'], 'p',
                     True)
 
     async def owncmd(self, message):
@@ -303,10 +303,10 @@ async def get_info(user, message):
     return photo, caption
 
 
-async def check(m, string, version, arg='u', save=False):
-    reply = await m.get_reply_message()
-    if utils.get_args_raw(m):
-        user = utils.get_args_raw(m)
+async def check(message, string, version, arg='u', save=False):
+    reply = await message.get_reply_message()
+    if utils.get_args_raw(message):
+        user = utils.get_args_raw(message)
     elif reply:
         try:
             if arg == 'u':
@@ -314,19 +314,19 @@ async def check(m, string, version, arg='u', save=False):
             elif arg == 'p':
                 user = reply.contact.phone_number[1:]
         except Exception as e:
-            await m.edit(f"]EYE_API[ <b>Err:</b> {e}")
+            await message.edit(f"]EYE_API[ <b>Err:</b> {e}")
             return
     else:
-        await m.edit("?EYE_API? А кого чекать?")
+        await message.edit("?EYE_API? А кого чекать?")
         return
-    await m.edit(string)
+    await message.edit(string)
     url_arg = ("uid" if arg == 'u' else "phone")
     resp = requests.get(
         'http://api.murix.ru/eye?v=' + version + '&' + url_arg + '=' + user).json()[
         'data']
     if save:
-        await m.client.send_message("me",
+        await message.client.send_message("me",
                                     f"[EYE_API] Ответ API: <code>{resp}</code>")
-        await m.edit(f"[EYE_API] Ответ API отправлен в избранное!")
+        await message.edit(f"[EYE_API] Ответ API отправлен в избранное!")
     else:
-        await m.edit(f"[EYE_API] Ответ API: <code>{resp}</code>")
+        await message.edit(f"[EYE_API] Ответ API: <code>{resp}</code>")
