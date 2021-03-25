@@ -10,8 +10,7 @@ filter
 stickers
 antimention
 tags
-antiraid		
-help			
+antiraid
 test
 audio_editor		
 image_editor		
