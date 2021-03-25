@@ -1,4 +1,3 @@
-spam
 admin_tools
 afk
 filter
