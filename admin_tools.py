@@ -76,7 +76,6 @@ def register(cb):
 class AdminToolsMod(loader.Module):
     """Администрирование чата"""
     strings = {'name': 'Admin Tools',
-               'no_reply': '<b>Нет реплая на картинку/стикер.</b>',
                'not_pic': '<b>Это не картинка/стикер</b>',
                'wait': '<b>Минуточку...</b>',
                'pic_so_small': '<b>Картинка слишком маленькая, попробуйте другую.</b>',
@@ -132,25 +131,25 @@ class AdminToolsMod(loader.Module):
                 reply = await message.get_reply_message()
                 chat = await message.get_chat()
                 if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 if reply:
                     pic = await check_media(message, reply)
                     if not pic:
-                        return await utils.answer(message, self.strings('not_pic', message))
+                        return await utils.answer(message, self.strings['not_pic'])
                 else:
-                    return await utils.answer(message, self.strings('no_reply', message))
-                await utils.answer(message, self.strings('wait', message))
+                    return await utils.answer(message, self.strings['no_reply'])
+                await utils.answer(message, self.strings['wait'])
                 what = resizepic(pic)
                 if what:
                     try:
                         await message.client(EditPhotoRequest(message.chat_id, await message.client.upload_file(what)))
                     except PhotoCropSizeSmallError:
-                        return await utils.answer(message, self.strings('pic_so_small', message))
-                await utils.answer(message, self.strings('pic_changed', message))
+                        return await utils.answer(message, self.strings['pic_so_small'])
+                await utils.answer(message, self.strings['pic_changed'])
             except ChatAdminRequiredError:
-                return await utils.answer(message, self.strings('no_rights', message))
+                return await utils.answer(message, self.strings['no_rights'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def promotecmd(self, message):
         """Команда .promote повышает пользователя в правах администратора.\nИспользование: .promote <@ или реплай>
@@ -163,7 +162,7 @@ class AdminToolsMod(loader.Module):
                 chat = await message.get_chat()
                 adm_rights = chat.admin_rights
                 if not adm_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 if reply:
                     args = utils.get_args_raw(message)
                     if args:
@@ -186,13 +185,13 @@ class AdminToolsMod(loader.Module):
                                                                                                     pin_messages=adm_rights.pin_messages),
                                                           rank))
                 except ChatAdminRequiredError:
-                    return await utils.answer(message, self.strings('no_rights', message))
+                    return await utils.answer(message, self.strings['no_rights'])
                 else:
-                    return await utils.answer(message, self.strings('promoted', message).format(user.first_name, rank))
+                    return await utils.answer(message, self.strings['promoted'].format(user.first_name, rank))
             except ValueError:
-                return await utils.answer(message, self.strings('no_args', message))
+                return await utils.answer(message, self.strings['no_args'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def demotecmd(self, message):
         """Команда .demote понижает пользователя в правах администратора.\nИспользование: .demote <@ или реплай>."""
@@ -201,13 +200,13 @@ class AdminToolsMod(loader.Module):
                 reply = await message.get_reply_message()
                 chat = await message.get_chat()
                 if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                 else:
                     args = utils.get_args_raw(message)
                     if not args:
-                        return await utils.answer(message, self.strings('demote_none', message))
+                        return await utils.answer(message, self.strings['demote_none'])
                     user = await message.client.get_entity(args if not args.isnumeric() else int(args))
                 try:
                     if message.is_channel:
@@ -215,40 +214,40 @@ class AdminToolsMod(loader.Module):
                     else:
                         await message.client(EditChatAdminRequest(message.chat_id, user.id, False))
                 except ChatAdminRequiredError:
-                    return await utils.answer(message, self.strings('no_rights', message))
+                    return await utils.answer(message, self.strings['no_rights'])
                 else:
-                    return await utils.answer(message, self.strings('demoted', message).format(user.first_name))
+                    return await utils.answer(message, self.strings['demoted'].format(user.first_name))
             except ValueError:
-                return await utils.answer(message, self.strings('no_args'))
+                return await utils.answer(message, self.strings['no_args'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def pincmd(self, message):
         """Команда .pin закрепляет сообщение в чате.\nИспользование: .pin <реплай>."""
         if not message.is_private:
             reply = await message.get_reply_message()
             if not reply:
-                return await utils.answer(message, self.strings('pin_none', message))
-            await utils.answer(message, self.strings('pinning', message))
+                return await utils.answer(message, self.strings['pin_none'])
+            await utils.answer(message, self.strings['pinning'])
             try:
                 await message.client.pin_message(message.chat, message=reply.id, notify=False)
             except ChatAdminRequiredError:
-                return await utils.answer(message, self.strings('no_rights', message))
-            await utils.answer(message, self.strings('pinned', message))
+                return await utils.answer(message, self.strings['no_rights'])
+            await utils.answer(message, self.strings['pinned'])
         else:
-            await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def unpincmd(self, message):
         """Команда .unpin открепляет закрепленное сообщение в чате.\nИспользование: .unpin."""
         if not message.is_private:
-            await utils.answer(message, self.strings('unpinning', message))
+            await utils.answer(message, self.strings['unpinning'])
             try:
                 await message.client.pin_message(message.chat, message=None, notify=None)
             except ChatAdminRequiredError:
-                return await utils.answer(message, self.strings('no_rights', message))
-            await utils.answer(message, self.strings('unpinned', message))
+                return await utils.answer(message, self.strings['no_rights'])
+            await utils.answer(message, self.strings['unpinned'])
         else:
-            await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def kickcmd(self, message):
         """Команда .kick кикает пользователя.\nИспользование: .kick <@ или реплай>."""
@@ -259,10 +258,10 @@ class AdminToolsMod(loader.Module):
                 reply = await message.get_reply_message()
                 chat = await message.get_chat()
                 if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 else:
                     if chat.admin_rights.ban_users == False:
-                        return await utils.answer(message, self.strings('no_rights', message))
+                        return await utils.answer(message, self.strings['no_rights'])
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                     args = utils.get_args_raw(message)
@@ -277,22 +276,22 @@ class AdminToolsMod(loader.Module):
                             reason = False
                         elif len(args) >= 2:
                             reason = utils.get_args_raw(message).split(' ', 1)[1]
-                await utils.answer(message, self.strings('kicking', message))
+                await utils.answer(message, self.strings['kicking'])
                 try:
                     await message.client.kick_participant(message.chat_id, user.id)
                 except UserAdminInvalidError:
-                    return await utils.answer(message, self.strings('no_rights', message))
+                    return await utils.answer(message, self.strings['no_rights'])
                 if reason == False:
-                    return await utils.answer(message, self.strings('kicked', message).format(user.first_name))
+                    return await utils.answer(message, self.strings['kicked'].format(user.first_name))
                 if reason:
                     return await utils.answer(message,
-                                              self.strings('kicked_for_reason', message).format(user.first_name,
+                                              self.strings['kicked_for_reason'].format(user.first_name,
                                                                                                 reason))
-                return await utils.answer(message, self.strings('kicked', message).format(user.first_name))
+                return await utils.answer(message, self.strings['kicked'].format(user.first_name))
             except ValueError:
-                return await utils.answer(message, self.strings('no_args', message))
+                return await utils.answer(message, self.strings['no_args'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def bancmd(self, message):
         """Команда .ban даёт бан пользователю.\nИспользование: .ban <@ или реплай>."""
@@ -303,10 +302,10 @@ class AdminToolsMod(loader.Module):
                 reply = await message.get_reply_message()
                 chat = await message.get_chat()
                 if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 else:
                     if chat.admin_rights.ban_users == False:
-                        return await utils.answer(message, self.strings('no_rights', message))
+                        return await utils.answer(message, self.strings['no_rights'])
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                     args = utils.get_args_raw(message)
@@ -322,22 +321,22 @@ class AdminToolsMod(loader.Module):
                         elif len(args) >= 2:
                             reason = utils.get_args_raw(message).split(' ', 1)[1]
                 try:
-                    await utils.answer(message, self.strings('banning', message))
+                    await utils.answer(message, self.strings['banning'])
                     await message.client(EditBannedRequest(message.chat_id, user.id,
                                                            ChatBannedRights(until_date=None, view_messages=True)))
                 except UserAdminInvalidError:
-                    return await utils.answer(message, self.strings('no_rights', message))
+                    return await utils.answer(message, self.strings['no_rights'])
                 if reason == False:
-                    return await utils.answer(message, self.strings('banned', message).format(user.first_name))
+                    return await utils.answer(message, self.strings['banned'].format(user.first_name))
                 if reason:
                     return await utils.answer(message,
-                                              self.strings('banned_for_reason', message).format(user.first_name,
+                                              self.strings['banned_for_reason'].format(user.first_name,
                                                                                                 reason))
-                return await utils.answer(message, self.strings('banned', message).format(user.first_name))
+                return await utils.answer(message, self.strings['banned'].format(user.first_name))
             except ValueError:
-                return await utils.answer(message, self.strings('no_args', message))
+                return await utils.answer(message, self.strings['no_args'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def unbancmd(self, message):
         """Команда .unban для разбана пользователя.\nИспользование: .unban <@ или реплай>."""
@@ -346,24 +345,24 @@ class AdminToolsMod(loader.Module):
                 reply = await message.get_reply_message()
                 chat = await message.get_chat()
                 if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 else:
                     if chat.admin_rights.ban_users == False:
-                        return await utils.answer(message, self.strings('no_rights', message))
+                        return await utils.answer(message, self.strings['no_rights'])
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                 else:
                     args = utils.get_args_raw(message)
                     if not args:
-                        return await utils.answer(message, self.strings('unban_none', message))
+                        return await utils.answer(message, self.strings['unban_none'])
                     user = await message.client.get_entity(args if not args.isnumeric() else int(args))
                 await message.client(
                     EditBannedRequest(message.chat_id, user.id, ChatBannedRights(until_date=None, view_messages=False)))
-                return await utils.answer(message, self.strings('unbanned', message).format(user.first_name))
+                return await utils.answer(message, self.strings['unbanned'].format(user.first_name))
             except ValueError:
-                return await utils.answer(message, self.strings('no_args', message))
+                return await utils.answer(message, self.strings['no_args'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def mutecmd(self, message):
         """Команда .mute даёт мут пользователю.\nИспользование: .mute <@ или реплай> <время (1m, 1h, 1d)>; ничего."""
@@ -388,7 +387,7 @@ class AdminToolsMod(loader.Module):
                         elif len(args) >= 2:
                             timee = utils.get_args_raw(message).split(' ', 1)[1]
             except ValueError:
-                return await utils.answer(message, self.strings('no_args', message))
+                return await utils.answer(message, self.strings['no_args'])
 
             if timee:
                 n = ''
@@ -415,23 +414,23 @@ class AdminToolsMod(loader.Module):
                     text += " дн.</b>"
 
                 else:
-                    return await utils.answer(message, self.strings('no_args', message))
+                    return await utils.answer(message, self.strings['no_args'])
 
                 try:
                     tm = ChatBannedRights(until_date=time.time() + int(n), send_messages=True)
                     await message.client(EditBannedRequest(message.chat_id, user.id, tm))
-                    return await utils.answer(message, self.strings('muted', message).format(user.first_name) + text)
+                    return await utils.answer(message, self.strings['muted'].format(user.first_name) + text)
                 except UserAdminInvalidError:
-                    return await utils.answer(message, self.strings('no_rights', message))
+                    return await utils.answer(message, self.strings['no_rights'])
             else:
                 try:
                     tm = ChatBannedRights(until_date=True, send_messages=True)
                     await message.client(EditBannedRequest(message.chat_id, user.id, tm))
                     return await message.edit('<b>{} теперь в муте.</b>'.format(user.first_name))
                 except UserAdminInvalidError:
-                    return await utils.answer(message, self.strings('no_rights', message))
+                    return await utils.answer(message, self.strings['no_rights'])
         else:
-            await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def unmutecmd(self, message):
         """Команда .unmute для размута пользователя.\nИспользование: .unmute <@ или реплай>."""
@@ -440,23 +439,23 @@ class AdminToolsMod(loader.Module):
                 reply = await message.get_reply_message()
                 chat = await message.get_chat()
                 if not chat.admin_rights and not chat.creator:
-                    return await utils.answer(message, self.strings('not_admin', message))
+                    return await utils.answer(message, self.strings['not_admin'])
                 else:
                     if chat.admin_rights.ban_users == False:
-                        return await utils.answer(message, self.strings('no_rights', message))
+                        return await utils.answer(message, self.strings['no_rights'])
                 if reply:
                     user = await message.client.get_entity(reply.sender_id)
                 else:
                     args = utils.get_args_raw(message)
                     if not args:
-                        return await utils.answer(message, self.strings('unmute_none', message))
+                        return await utils.answer(message, self.strings['unmute_none'])
                     user = await message.client.get_entity(args if not args.isnumeric() else int(args))
                 await message.client(EditBannedRequest(message.chat_id, user.id, UNMUTE_RIGHTS))
-                return await utils.answer(message, self.strings('unmuted', message).format(user.first_name))
+                return await utils.answer(message, self.strings['unmuted'].format(user.first_name))
             except ValueError:
-                return await utils.answer(message, self.strings('no_args', message))
+                return await utils.answer(message, self.strings['no_args'])
         else:
-            return await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            return await utils.answer(message, self.strings['this_isn`t_a_chat'])
 
     async def delallmsgscmd(self, message):
         """Команда .delallmsgs удаляет все сообщения от пользователя.\nИспользование: .delallmsgs <@ или реплай>."""
@@ -470,26 +469,26 @@ class AdminToolsMod(loader.Module):
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not args and not reply:
-            return await utils.answer(message, self.strings('no_args_or_reply', message))
-        await utils.answer(message, self.strings('deleting', message))
+            return await utils.answer(message, self.strings['no_args_or_reply'])
+        await utils.answer(message, self.strings['deleting'])
         if args:
             user = await message.client.get_entity(args)
         if reply:
             user = await message.client.get_entity(reply.sender_id)
         await message.client(DeleteUserHistoryRequest(message.to_id, user.id))
-        await message.client.send_message(message.to_id, self.strings('deleted', message).format(user.first_name))
+        await message.client.send_message(message.to_id, self.strings['deleted'].format(user.first_name))
         await message.delete()
 
     async def deluserscmd(self, message):
         """Команда .delusers показывает список всех удалённых аккаунтов в чате.\nИспользование: .delusers <clean>."""
         if not message.is_group:
-            await utils.answer(message, self.strings('this_isn`t_a_chat', message))
+            await utils.answer(message, self.strings['this_isn`t_a_chat'])
             return
         con = utils.get_args_raw(message)
         del_u = 0
         del_status = '<b>Нет удалённых аккаунтов, чат очищен.</b>'
         if con != "clean":
-            await utils.answer(message, self.strings('del_u_search', message))
+            await utils.answer(message, self.strings['del_u_search'])
             async for user in message.client.iter_participants(message.chat_id):
                 if user.deleted:
                     del_u += 1
@@ -500,11 +499,11 @@ class AdminToolsMod(loader.Module):
             return await message.edit(del_status)
         chat = await message.get_chat()
         if not chat.admin_rights and not chat.creator:
-            return await utils.answer(message, self.strings('not_admin', message))
+            return await utils.answer(message, self.strings['not_admin'])
         else:
             if chat.admin_rights.ban_users == False:
-                return await utils.answer(message, self.strings('no_rights', message))
-        await utils.answer(message, self.strings('del_u_kicking', message))
+                return await utils.answer(message, self.strings['no_rights'])
+        await utils.answer(message, self.strings['del_u_kicking'])
         del_u = 0
         del_a = 0
         async for user in message.client.iter_participants(message.chat_id):
@@ -534,7 +533,7 @@ class AdminToolsMod(loader.Module):
     async def purgecmd(self, message):
         """Purge from the replied message"""
         if not message.is_reply:
-            await utils.answer(message, self.strings("from_where", message))
+            await utils.answer(message, self.strings["from_where"])
             return
 
         from_users = set()
@@ -551,7 +550,7 @@ class AdminToolsMod(loader.Module):
         from_ids = set()
         if await message.client.is_bot():
             if not message.is_channel:
-                await utils.answer(message, self.strings("not_supergroup_bot", message))
+                await utils.answer(message, self.strings["not_supergroup_bot"])
                 return
             for msg in range(message.reply_to_msg_id, message.id + 1):
                 msgs.append(msg)
@@ -584,7 +583,7 @@ class AdminToolsMod(loader.Module):
         msgs = [message.id]
         if not message.is_reply:
             if await message.client.is_bot():
-                await utils.answer(message, self.strings("delete_what", message))
+                await utils.answer(message, self.strings["delete_what"])
                 return
             msg = await message.client.iter_messages(message.to_id, 1, max_id=message.id).__anext__()
         else:

@@ -46,14 +46,14 @@ class HelpMod(loader.Module):
                 if mod.strings("name", message).lower() == args.lower():
                     module = mod
             if module is None:
-                await utils.answer(message, self.strings("bad_module", message))
+                await utils.answer(message, self.strings["bad_module"])
                 return
             # Translate the format specification and the module separately
             try:
                 name = module.strings("name", message)
             except KeyError:
                 name = getattr(module, "name", "ERROR")
-            reply = self.strings("single_mod_header", message).format(utils.escape_html(name),
+            reply = self.strings["single_mod_header"].format(utils.escape_html(name),
                                                                       utils.escape_html((self.db.get(main.__name__,
                                                                                                      "command_prefix",
                                                                                                      False) or ".")[0]))
@@ -64,13 +64,13 @@ class HelpMod(loader.Module):
             commands = {name: func for name, func in module.commands.items()
                         if await self.allmodules.check_security(message, func)}
             for name, fun in commands.items():
-                reply += self.strings("single_cmd", message).format(name)
+                reply += self.strings["single_cmd"].format(name)
                 if fun.__doc__:
                     reply += utils.escape_html("\n".join("  " + t for t in inspect.getdoc(fun).split("\n")))
                 else:
-                    reply += self.strings("undoc_cmd", message)
+                    reply += self.strings["undoc_cmd"]
         else:
-            reply = self.strings("all_header", message).format(utils.escape_html((self.db.get(main.__name__,
+            reply = self.strings["all_header"].format(utils.escape_html((self.db.get(main.__name__,
                                                                                               "command_prefix",
                                                                                               False) or ".")[0]))
             for mod in self.allmodules.modules:
@@ -80,16 +80,16 @@ class HelpMod(loader.Module):
                     name = getattr(mod, "name", "ERROR")
                 if name != "Logger" and name != "Raphielgang Configuration Placeholder" \
                         and name != "Uniborg configuration placeholder":
-                    reply += self.strings("mod_tmpl", message).format(name)
+                    reply += self.strings["mod_tmpl"].format(name)
                     first = True
                     commands = [name for name, func in mod.commands.items()
                                 if await self.allmodules.check_security(message, func)]
                     for cmd in commands:
                         if first:
-                            reply += self.strings("first_cmd_tmpl", message).format(cmd)
+                            reply += self.strings["first_cmd_tmpl"].format(cmd)
                             first = False
                         else:
-                            reply += self.strings("cmd_tmpl", message).format(cmd)
+                            reply += self.strings["cmd_tmpl"].format(cmd)
                     reply += "</code>"
         await utils.answer(message, reply)
 

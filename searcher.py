@@ -34,9 +34,9 @@ class SearchMod(loader.Module):
         reply = await message.get_reply_message()
         data = await check_media(message, reply)
         if not data:
-            await utils.answer(message, self.strings("no_reply", message))
+            await utils.answer(message, self.strings["no_reply", message))
             return
-        await utils.answer(message, self.strings("search", message))
+        await utils.answer(message, self.strings["search", message))
         searchUrl = 'https://yandex.ru/images/search'
         files = {'upfile': ('blob', data, 'image/jpeg')}
         params = {'rpt': 'imageview', 'format': 'json',
@@ -45,10 +45,10 @@ class SearchMod(loader.Module):
         if response.ok:
             query_string = json.loads(response.content)['blocks'][0]['params']['url']
             link = searchUrl + '?' + query_string
-            text = self.strings("ya_result", message).format(link)
+            text = self.strings["ya_result", message).format(link)
             await utils.answer(message, text)
         else:
-            await utils.answer(message, self.strings("error", message))
+            await utils.answer(message, self.strings["error", message))
 
     async def googlecmd(self, message):
         """Shows Google search results."""
@@ -56,19 +56,19 @@ class SearchMod(loader.Module):
         if not text:
             text = (await message.get_reply_message()).message
         if not text:
-            await utils.answer(message, self.strings("no_term", message))
+            await utils.answer(message, self.strings["no_term", message))
             return
         gsearch = GoogleSearch()
         gresults = await gsearch.async_search(text, 1)
         if not gresults:
-            await utils.answer(message, self.strings("no_results", message).format(text))
+            await utils.answer(message, self.strings["no_results", message).format(text))
             return
         msg = ""
         results = zip(gresults["titles"], gresults["links"], gresults["descriptions"])
         for result in results:
-            msg += self.strings("result", message).format(utils.escape_html(result[0]), utils.escape_html(result[1]),
+            msg += self.strings["result", message).format(utils.escape_html(result[0]), utils.escape_html(result[1]),
                                                           utils.escape_html(result[2]))
-        await utils.answer(message, self.strings("results", message).format(utils.escape_html(text)) + msg)
+        await utils.answer(message, self.strings["results", message).format(utils.escape_html(text)) + msg)
 
 
 async def check_media(message, reply):
