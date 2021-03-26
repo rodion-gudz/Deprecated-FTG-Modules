@@ -18,3 +18,4 @@ random
 screenshot
 terminal
 notes
+terminal
