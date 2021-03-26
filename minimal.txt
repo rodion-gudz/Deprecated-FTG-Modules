@@ -16,3 +16,4 @@ welcome
 distort
 random
 screenshot
+terminal
