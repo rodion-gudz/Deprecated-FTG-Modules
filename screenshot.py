@@ -27,7 +27,7 @@ class WebShotMod(loader.Module):
         self.client = client
 
     def __init__(self):
-        self.name = self.strings('name']
+        self.name = self.strings('name')
 
     @loader.sudo
     async def webshotcmd(self, message):

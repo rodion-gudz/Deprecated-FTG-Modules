@@ -90,29 +90,29 @@ class mQuotesMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig("SILENT_PROCESSING", False,
-                                          lambda: self.strings("silent_processing_cfg_doc"],
+                                          lambda: self.strings("silent_processing_cfg_doc"),
                                           "QUOTE_MESSAGES_LIMIT", 15,
-                                          lambda: self.strings("quote_limit_cfg_doc"],
+                                          lambda: self.strings("quote_limit_cfg_doc"),
                                           "MAX_WIDTH", 384,
-                                          lambda: self.strings("max_width_cfg_doc"],
+                                          lambda: self.strings("max_width_cfg_doc"),
                                           "SCALE_FACTOR", 5,
-                                          lambda: self.strings("scale_factor_cfg_doc"],
+                                          lambda: self.strings("scale_factor_cfg_doc"),
                                           "SQUARE_AVATAR", False,
-                                          lambda: self.strings("square_avatar_cfg_doc"],
+                                          lambda: self.strings("square_avatar_cfg_doc"),
                                           "TEXT_COLOR", "white",
-                                          lambda: self.strings("text_color_cfg_doc"],
+                                          lambda: self.strings("text_color_cfg_doc"),
                                           "REPLY_LINE_COLOR", "white",
-                                          lambda: self.strings("reply_line_color_cfg_doc"],
+                                          lambda: self.strings("reply_line_color_cfg_doc"),
                                           "REPLY_THUMB_BORDER_RADIUS", 2,
-                                          lambda: self.strings("reply_thumb_radius_cfg_doc"],
+                                          lambda: self.strings("reply_thumb_radius_cfg_doc"),
                                           "ADMINTITLE_COLOR", "#969ba0",
-                                          lambda: self.strings("admintitle_color_cfg_doc"],
+                                          lambda: self.strings("admintitle_color_cfg_doc"),
                                           "MESSAGE_BORDER_RADIUS", 10,
-                                          lambda: self.strings("message_radius_cfg_doc"],
+                                          lambda: self.strings("message_radius_cfg_doc"),
                                           "PICTURE_BORDER_RADIUS", 8,
-                                          lambda: self.strings("picture_radius_cfg_doc"],
+                                          lambda: self.strings("picture_radius_cfg_doc"),
                                           "BACKGROUND_COLOR", "#162330",
-                                          lambda: self.strings("background_color_cfg_doc"])
+                                          lambda: self.strings("background_color_cfg_doc"))
 
     async def client_ready(self, client, db):
         self.client = client

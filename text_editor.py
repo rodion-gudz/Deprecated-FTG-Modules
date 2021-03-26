@@ -26,11 +26,11 @@ class TextEditorMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig("TYPE_CHAR", "▒",
-                                          lambda m: self.strings("type_char_cfg_doc", message),
+                                          lambda m: self.strings("type_char_cfg_doc"),
                                           "DELAY_TYPER", 0.04,
-                                          lambda m: self.strings("delay_typer_cfg_doc", message),
+                                          lambda m: self.strings("delay_typer_cfg_doc"),
                                           "DELAY_TEXT", 0.02,
-                                          lambda m: self.strings("delay_text_cfg_doc", message))
+                                          lambda m: self.strings("delay_text_cfg_doc"))
 
     async def switchcmd(self, message):
         """Если ты допустил ошибку и набрал текст не сменив раскладку
@@ -82,7 +82,7 @@ class TextEditorMod(loader.Module):
             try:
                 await message.edit(f"<code>{code}</code>")
             except:
-                await message.edit(self.strings("msg_is_emp"])
+                await message.edit(self.strings("msg_is_emp", message))
 
     async def mtfcmd(self, message):
         """.mtf <reply to text>"""
@@ -116,7 +116,7 @@ class TextEditorMod(loader.Module):
         """.type <message>"""
         a = utils.get_args_raw(message)
         if not a:
-            await utils.answer(message, self.strings("no_message"])
+            await utils.answer(message, self.strings("no_message", message))
             return
         m = ""
         entities = message.entities or []

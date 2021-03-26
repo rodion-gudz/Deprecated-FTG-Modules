@@ -23,8 +23,8 @@ class RandomMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig(
-            "YES_WORDS", ["Yes", "Yup", "Absolutely", "Non't"], lambda m: self.strings("yes_words_cfg_doc"],
-            "NO_WORDS", ["No", "Nope", "Nah", "Yesn't"], lambda m: self.strings("no_words_cfg_doc"],
+            "YES_WORDS", ["Yes", "Yup", "Absolutely", "Non't"], lambda m: self.strings("yes_words_cfg_doc"),
+            "NO_WORDS", ["No", "Nope", "Nah", "Yesn't"], lambda m: self.strings("no_words_cfg_doc"),
             "POSSIBLE_VALUES", {"": [1, 2, 3, 4, 5, 6],
                                 "🎲": [1, 2, 3, 4, 5, 6],
                                 "🎯": [1, 2, 3, 4, 5, 6],

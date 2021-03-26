@@ -34,7 +34,7 @@ class URlMod(loader.Module):
         if not m_text:
             reply = await message.get_reply_message()
             if not reply:
-                await utils.answer(message, self.strings("some_rong"])
+                await utils.answer(message, self.strings("some_rong", message))
                 return
             long_url = reply.raw_text
         else:
@@ -72,7 +72,7 @@ class URlMod(loader.Module):
         if not m_text:
             reply = await message.get_reply_message()
             if not reply:
-                await utils.answer(message, self.strings("some_rong"])
+                await utils.answer(message, self.strings("some_rong", message))
                 return
             long_url = reply.raw_text
         else:
@@ -90,11 +90,11 @@ class URlMod(loader.Module):
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
-                text = self.strings("default"]
+                text = self.strings("default", message)
         query_encoded = urllib.parse.quote_plus(text)
         lmgtfy_url = "http://lmgtfy.com/?s=g&iie=1&q={}".format(query_encoded)
         await utils.answer(message,
-                           self.strings("result"].format(
+                           self.strings("result", message).format(
                                utils.escape_html(lmgtfy_url),
                                utils.escape_html(text)))
 
