@@ -81,21 +81,21 @@ class InfoMod(loader.Module):
         Отправляет данные в чат
         Жуёт либо <reply>, либо <uid>
         """
-        await check(message, self.strings('check'], self.strings('version'])
+        await check(message, self.strings('check', message), self.strings('version', message))
 
     async def pcheckcmd(self, message):
         """ Проверить номер на наличие в бд
         Отправляет данные в чат
         Жуёт либо <reply>, либо <phone>
         """
-        await check(message, self.strings('check'], self.strings('version'], 'p')
+        await check(message, self.strings('check', message), self.strings('version', message), 'p')
 
     async def scheckcmd(self, message):
         """ Аналогично check
         Отправляет данные в избранное
         Жуёт либо <reply>, либо <uid>
         """
-        await check(message, self.strings('check'], self.strings('version'],
+        await check(message, self.strings('check', message), self.strings('version', message),
                     save=True)
 
     async def spcheckcmd(self, message):
@@ -103,7 +103,7 @@ class InfoMod(loader.Module):
         Отправляет данные в избранное
         Жуёт либо <reply>, либо <phone>
         """
-        await check(message, self.strings('check'], self.strings('version'], 'p',
+        await check(message, self.strings('check', message), self.strings('version', message), 'p',
                     True)
 
     async def owncmd(self, message):
