@@ -77,7 +77,7 @@ class TestMod(loader.Module):
            Dumps logs. Loglevels below WARNING may contain personal info."""
         args = utils.get_args(message)
         if not len(args) == 1 and not len(args) == 2:
-            await utils.answer(message, self.strings["set_loglevel"])
+            await utils.answer(message, self.strings("set_loglevel", message))
             return
         try:
             lvl = int(args[0])
@@ -85,20 +85,20 @@ class TestMod(loader.Module):
             # It's not an int. Maybe it's a loglevel
             lvl = getattr(logging, args[0].upper(), None)
         if not isinstance(lvl, int):
-            await utils.answer(message, self.strings["bad_loglevel"])
+            await utils.answer(message, self.strings("bad_loglevel", message))
             return
-        if not (lvl >= logging.WARNING or (len(args) == 2 and args[1] == self.strings["logs_force"])):
+        if not (lvl >= logging.WARNING or (len(args) == 2 and args[1] == self.strings("logs_force"))):
             await utils.answer(message,
-                               self.strings["logs_unsafe"].format(utils.escape_html(self.strings["logs_force"])))
+                               self.strings("logs_unsafe", message).format(utils.escape_html(self.strings("logs_force", message))))
             return
         [handler] = logging.getLogger().handlers
         logs = ("\n".join(handler.dumps(lvl))).encode("utf-16")
         if not len(logs) > 0:
-            await utils.answer(message, self.strings["no_logs"].format(lvl))
+            await utils.answer(message, self.strings("no_logs", message).format(lvl))
             return
         logs = BytesIO(logs)
-        logs.name = self.strings["logs_filename"]
-        await utils.answer(message, logs, caption=self.strings["logs_caption"].format(lvl))
+        logs.name = self.strings("logs_filename", message)
+        await utils.answer(message, logs, caption=self.strings("logs_caption", message).format(lvl))
 
     @loader.owner
     async def suspendcmd(self, message):
@@ -109,11 +109,11 @@ class TestMod(loader.Module):
         try:
             time.sleep(int(utils.get_args_raw(message)))
         except ValueError:
-            await utils.answer(message, self.strings["suspend_invalid_time"])
+            await utils.answer(message, self.strings("suspend_invalid_time", message))
 
     async def speedtestcmd(self, message):
         """Tests your internet speed"""
-        await utils.answer(message, self.strings["running"])
+        await utils.answer(message, self.strings("running", message))
         args = utils.get_args(message)
         servers = []
         for server in args:
@@ -122,10 +122,10 @@ class TestMod(loader.Module):
             except ValueError:
                 logger.warning("server failed")
         results = await utils.run_sync(self.speedtest, servers)
-        ret = self.strings["results"] + "\n\n"
-        ret += self.strings["results_download"].format(round(results["download"] / 2 ** 20, 2)) + "\n"
-        ret += self.strings["results_upload"].format(round(results["upload"] / 2 ** 20, 2)) + "\n"
-        ret += self.strings["results_ping"].format(round(results["ping"], 2)) + "\n"
+        ret = self.strings("results") + "\n\n"
+        ret += self.strings("results_download", message).format(round(results["download"] / 2 ** 20, 2)) + "\n"
+        ret += self.strings("results_upload", message).format(round(results["upload"] / 2 ** 20, 2)) + "\n"
+        ret += self.strings("results_ping", message).format(round(results["ping"], 2)) + "\n"
         await utils.answer(message, ret)
 
     def speedtest(self, servers):

@@ -22,11 +22,11 @@ class filenameMod(loader.Module):
         """.filename <filename> + reply.file"""
         reply = await message.get_reply_message()
         if not reply or not reply.file:
-            await message.edit(self.strings["wf"])
+            await message.edit(self.strings("wf"])
             return
         name = utils.get_args_raw(message)
         if not name:
-            await message.edit(self.strings["wn"])
+            await message.edit(self.strings("wn"])
             return
         fn = reply.file.name
         if not fn:

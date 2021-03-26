@@ -37,14 +37,14 @@ class AFKMod(loader.Module):
             self._db.set(__name__, "afk", True)
         self._db.set(__name__, "gone", time.time())
         await self.allmodules.log("afk", data=utils.get_args_raw(message) or None)
-        await utils.answer(message, self.strings["gone"])
+        await utils.answer(message, self.strings("gone, message", message))
 
     async def unafkcmd(self, message):
         """Remove the AFK status"""
         self._db.set(__name__, "afk", False)
         self._db.set(__name__, "gone", None)
         await self.allmodules.log("unafk")
-        await utils.answer(message, self.strings["back"])
+        await utils.answer(message, self.strings("back", message))
 
     async def watcher(self, message):
         if not self.get_afk():
@@ -59,14 +59,14 @@ class AFKMod(loader.Module):
         if getattr(message.to_id, "user_id", None) == self._me.id:
             if self.get_afk():
                 afk_state = self.get_afk()
-                ret = self.strings["afk_reason"].format(diff, afk_state)
+                ret = self.strings("afk_reason", message).format(diff, afk_state)
                 await utils.answer(message, ret)
             else:
                 return
         elif message.mentioned:
             if self.get_afk():
                 afk_state = self.get_afk()
-                ret = self.strings["afk_reason"].format(diff, afk_state)
+                ret = self.strings("afk_reason", message).format(diff, afk_state)
                 await utils.answer(message, ret, reply_to=message)
             else:
                 return

@@ -45,14 +45,14 @@ class ExecutorMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig("FLOOD_WAIT_PROTECT", 2,
-                                          lambda m: self.strings["flood_wait_protect_cfg_doc"])
+                                          lambda m: self.strings("flood_wait_protect_cfg_doc"))
         self.activecmds = {}
 
     async def notexeccmd(self, message):
         """Gets the note specified"""
         args = utils.get_args(message)
         if not args:
-            await utils.answer(message, self.strings["what_note"])
+            await utils.answer(message, self.strings("what_note", message))
             return
 
         asset_id = self._db.get("friendly-telegram.modules.notes", "notes", {}).get(args[0], None)
@@ -66,7 +66,7 @@ class ExecutorMod(loader.Module):
             else:
                 asset = None
         if asset is None:
-            await utils.answer(message, self.strings["no_note"])
+            await utils.answer(message, self.strings("no_note", message))
             return
 
         cmd = await self._db.fetch_asset(asset_id)
@@ -76,7 +76,7 @@ class ExecutorMod(loader.Module):
         except Exception:
             exc = sys.exc_info()
             exc = "".join(traceback.format_exception(exc[0], exc[1], exc[2].tb_next.tb_next.tb_next))
-            await utils.answer(message, self.strings["execute_fail"]
+            await utils.answer(message, self.strings("execute_fail", message)
                                .format(utils.escape_html(exc)))
             return
 
@@ -84,7 +84,7 @@ class ExecutorMod(loader.Module):
         """Gets the note specified"""
         args = utils.get_args(message)
         if not args:
-            await utils.answer(message, self.strings["what_note"])
+            await utils.answer(message, self.strings("what_note", message))
             return
 
         asset_id = self.db.get("friendly-telegram.modules.notes", "notes", {}).get(args[0], None)
@@ -98,7 +98,7 @@ class ExecutorMod(loader.Module):
             else:
                 asset = None
         if asset is None:
-            await utils.answer(message, self.strings["no_note"])
+            await utils.answer(message, self.strings("no_note", message))
             return
 
         cmd = await self.db.fetch_asset(asset_id)
@@ -160,35 +160,35 @@ class ExecutorMod(loader.Module):
     async def noterminatecmd(self, message):
         """Use in reply to send SIGTERM to a process"""
         if not message.is_reply:
-            await utils.answer(message, self.strings["what_to_kill"])
+            await utils.answer(message, self.strings("what_to_kill", message))
             return
         if hash_msg(await message.get_reply_message()) in self.activecmds:
             try:
                 self.activecmds[hash_msg(await message.get_reply_message())].terminate()
             except Exception:
                 logger.exception("Killing process failed")
-                await utils.answer(message, self.strings["kill_fail"])
+                await utils.answer(message, self.strings("kill_fail", message))
             else:
-                await utils.answer(message, self.strings["killed"])
+                await utils.answer(message, self.strings("killed", message))
         else:
-            await utils.answer(message, self.strings["no_cmd"])
+            await utils.answer(message, self.strings("no_cmd", message))
 
     @loader.owner
     async def nokillcmd(self, message):
         """Use in reply to send SIGKILL to a process"""
         if not message.is_reply:
-            await utils.answer(message, self.strings["what_to_kill"])
+            await utils.answer(message, self.strings("what_to_kill", message))
             return
         if hash_msg(await message.get_reply_message()) in self.activecmds:
             try:
                 self.activecmds[hash_msg(await message.get_reply_message())].kill()
             except Exception:
                 logger.exception("Killing process failed")
-                await utils.answer(message, self.strings["kill_fail"])
+                await utils.answer(message, self.strings("kill_fail", message))
             else:
-                await utils.answer(message, self.strings["killed"])
+                await utils.answer(message, self.strings("killed", message))
         else:
-            await utils.answer(message, self.strings["no_cmd"])
+            await utils.answer(message, self.strings("no_cmd", message))
 
 
 def hash_msg(message):
@@ -240,15 +240,15 @@ class MessageEditor:
         await self.redraw()
 
     async def redraw(self):
-        text = ""  # self.strings["running", self.request_message).format(utils.escape_html(self.command))
+        text = ""  # self.strings("running", self.request_message).format(utils.escape_html(self.command))
         # if self.rc is not None:
-        #  text += self.strings["finished", self.request_message).format(utils.escape_html(str(self.rc)))
-        text += self.strings["stdout"]
+        #  text += self.strings("finished", self.request_message).format(utils.escape_html(str(self.rc)))
+        text += self.strings("stdout")
         text += utils.escape_html(self.stdout[max(len(self.stdout) - 2048, 0):])
         if len(self.stderr) > 0:
-            text += self.strings["stderr"]
+            text += self.strings("stderr")
             text += utils.escape_html(self.stderr[max(len(self.stderr) - 1024, 0):])
-        text += self.strings["end"]
+        text += self.strings("end")
         try:
             self.message = await utils.answer(self.message, text)
         except telethon.errors.rpcerrorlist.MessageNotModifiedError:
@@ -293,14 +293,14 @@ class SudoMessageEditor(MessageEditor):
         if len(lines) > 1 and re.fullmatch(self.WRONG_PASS,
                                            lines[-2]) and lastlines[0] == self.PASS_REQ and self.state == 1:
             logger.debug("switching state to 0")
-            await self.authmsg.edit(self.strings["auth_failed"])
+            await self.authmsg.edit(self.strings("auth_failed"))
             self.state = 0
             handled = True
             await asyncio.sleep(2)
             await self.authmsg.delete()
         if lastlines[0] == self.PASS_REQ and self.state == 0:
             logger.debug("Success to find sudo log!")
-            text = self.strings["auth_needed"].format((await self.message[0].client.get_me()).id)
+            text = self.strings("auth_needed").format((await self.message[0].client.get_me()).id)
             try:
                 await utils.answer(self.message, text)
             except telethon.errors.rpcerrorlist.MessageNotModifiedError as e:
@@ -309,7 +309,7 @@ class SudoMessageEditor(MessageEditor):
             command = "<code>" + utils.escape_html(self.command) + "</code>"
             user = utils.escape_html(lastlines[1][:-1])
             self.authmsg = await self.message[0].client.send_message("me",
-                                                                     self.strings["auth_msg"].format(command, user))
+                                                                     self.strings("auth_msg").format(command, user))
             logger.debug("sent message to self")
             self.message[0].client.remove_event_handler(self.on_message_edited)
             self.message[0].client.add_event_handler(self.on_message_edited,
@@ -319,7 +319,7 @@ class SudoMessageEditor(MessageEditor):
         if len(lines) > 1 and (re.fullmatch(self.TOO_MANY_TRIES, lastline)
                                and (self.state == 1 or self.state == 3 or self.state == 4)):
             logger.debug("password wrong lots of times")
-            await utils.answer(self.message, self.strings["auth_locked"])
+            await utils.answer(self.message, self.strings("auth_locked"))
             await self.authmsg.delete()
             self.state = 2
             handled = True
@@ -349,9 +349,8 @@ class SudoMessageEditor(MessageEditor):
         if hash_msg(message) == hash_msg(self.authmsg):
             # The user has provided interactive authentication. Send password to stdin for sudo.
             try:
-                self.authmsg = await utils.answer(message, self.strings["auth_ongoing"])
+                self.authmsg = await utils.answer(message, self.strings("auth_ongoing"))
             except telethon.errors.rpcerrorlist.MessageNotModifiedError:
-                # Try to clear personal info if the edit fails
                 await message.delete()
             self.state = 1
             self.process.stdin.write(message.message.message.split("\n", 1)[0].encode("utf-8") + b"\n")
@@ -371,7 +370,7 @@ class RawMessageEditor(SudoMessageEditor):
         else:
             text = "<code>" + utils.escape_html(self.stderr[max(len(self.stderr) - 4095, 0):]) + "</code>"
         if self.rc is not None and self.show_done:
-            text += "\n" + self.strings["done"]
+            text += "\n" + self.strings("done")
         logger.debug(text)
         try:
             await utils.answer(self.message, text)
