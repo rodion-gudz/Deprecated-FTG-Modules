@@ -27,7 +27,7 @@ class HelpMod(loader.Module):
                "join": "<b>Join the</b> <a href='https://t.me/friendlytgbot'>support channel</a>"}
 
     def __init__(self):
-        self.name = self.strings('name')
+        self.name = self.strings['name']
         self._me = None
         self._ratelimit = []
 
